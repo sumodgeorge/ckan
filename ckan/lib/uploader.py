@@ -6,7 +6,9 @@ import datetime
 import logging
 import magic
 import mimetypes
-from six.moves.urllib.parse import urlparse
+from typing import Dict, Optional, Union
+
+from six.moves.urllib.parse import urlparse  # type: ignore
 
 from werkzeug.datastructures import FileStorage as FlaskFileStorage
 
@@ -14,7 +16,8 @@ import ckan.lib.munge as munge
 import ckan.logic as logic
 import ckan.plugins as plugins
 from ckan.common import config
-from typing import Dict, Optional, Union
+
+from ckan.types import PUploader, PResourceUploader
 
 ALLOWED_UPLOAD_TYPES = (cgi.FieldStorage, FlaskFileStorage)
 MB = 1 << 20
@@ -47,7 +50,7 @@ def _get_underlying_file(wrapper):
     return wrapper.file
 
 
-def get_uploader(upload_to: str, old_filename: Optional[str]=None) -> UploadProtocol:
+def get_uploader(upload_to: str, old_filename: Optional[str]=None) -> PUploader:
     '''Query IUploader plugins and return an uploader instance for general
     files.'''
     upload = None
@@ -61,7 +64,7 @@ def get_uploader(upload_to: str, old_filename: Optional[str]=None) -> UploadProt
     return upload
 
 
-def get_resource_uploader(data_dict: Dict) -> ResourceUploadProtocol:
+def get_resource_uploader(data_dict: Dict) -> PResourceUploader:
     '''Query IUploader plugins and return a resource uploader instance.'''
     upload = None
     for plugin in plugins.PluginImplementations(plugins.IUploader):

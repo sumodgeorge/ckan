@@ -18,7 +18,7 @@ try:
     _()
 except:
     def _(*args, **kwargs):
-        return txt
+        return args[0]
 
 __all__ = ['PackageRelationship', 'package_relationship_table',
            ]

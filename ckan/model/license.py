@@ -19,7 +19,7 @@ TLicense = TypeVar('TLicense', bound='DefaultLicense')
 log = __import__('logging').getLogger(__name__)
 
 
-class License(object, Generic[TLicense]):
+class License(Generic[TLicense]):
     """Domain object for a license."""
     def __init__(self, data: TLicense) -> None:
         # convert old keys if necessary

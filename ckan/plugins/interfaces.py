@@ -8,14 +8,17 @@ from inspect import isclass
 from typing import Any, Callable, Dict, Iterable, List, Optional, TYPE_CHECKING, Tuple, Type, Union
 
 from pyutilib.component.core import Interface as _pca_Interface
-import click
+
 from flask.blueprints import Blueprint
 from flask.wrappers import Response
-from ckan.common import CKANConfig
-from ckan.config.middleware.flask_app import CKANFlask
+
+
 from ckan.types import Action, AuthFunction, PFeed, PUploader, PResourceUploader, Schema
 
 if TYPE_CHECKING:
+    import click
+    from ckan.common import CKANConfig
+    from ckan.config.middleware.flask_app import CKANFlask
     import ckan.model as model
 
 __all__ = [
@@ -90,7 +93,7 @@ class IMiddleware(Interface):
     one for the Pylons stack and one for the Flask stack (eventually
     there will be only the Flask stack).
     '''
-    def make_middleware(self, app: CKANFlask, config: CKANConfig) -> CKANFlask:
+    def make_middleware(self, app: 'CKANFlask', config: 'CKANConfig') -> 'CKANFlask':
         u'''Return an app configured with this middleware
 
         When called on the Flask stack, this method will get the actual Flask
@@ -112,7 +115,7 @@ class IMiddleware(Interface):
         '''
         return app
 
-    def make_error_log_middleware(self, app: CKANFlask, config: CKANConfig) -> CKANFlask:
+    def make_error_log_middleware(self, app: 'CKANFlask', config: 'CKANConfig') -> 'CKANFlask':
         u'''Return an app configured with this error log middleware
 
         Note that both on the Flask and Pylons middleware stacks, this
@@ -856,7 +859,7 @@ class IConfigurable(Interface):
 
     See also :py:class:`IConfigurer`.
     '''
-    def configure(self, config: CKANConfig) -> None:
+    def configure(self, config: 'CKANConfig') -> None:
         u'''
         Called during CKAN's initialization.
 
@@ -882,7 +885,7 @@ class IConfigurer(Interface):
     See also :py:class:`IConfigurable`.
     '''
 
-    def update_config(self, config: CKANConfig) -> None:
+    def update_config(self, config: 'CKANConfig') -> None:
         u'''
         Called by load_environment at the earliest point that config is
         available to plugins. The config should be updated in place.
@@ -1767,7 +1770,7 @@ class IUploader(Interface):
     upload resources and group images.
     '''
 
-    def get_uploader(self, upload_to: str, old_filename: str) -> PUploader:
+    def get_uploader(self, upload_to: str, old_filename: Optional[str]) -> PUploader:
         u'''Return an uploader object to upload general files that must
         implement the following methods:
 
@@ -1811,7 +1814,7 @@ class IUploader(Interface):
 
         '''
 
-    def get_resource_uploader(self) -> PResourceUploader:
+    def get_resource_uploader(self, resource: Dict[str, Any]) -> PResourceUploader:
         u'''Return an uploader object used to upload resource files that must
         implement the following methods:
 
@@ -2049,7 +2052,7 @@ class IClick(Interface):
     u'''
     Allow extensions to define click commands.
     '''
-    def get_commands(self) -> List[click.Command]:
+    def get_commands(self) -> List['click.Command']:
         u'''
         Return a list of command functions objects
         to be registered by the click.add_command.

@@ -15,7 +15,7 @@ import ckan.authz
 import ckan.plugins.toolkit as toolkit
 from ckan.model.user import User
 from ckan.model.package import Package
-from typing import Any, Dict, Iterable, List, Optional, TYPE_CHECKING, Tuple, TypeVar, Union, overload
+from typing import Any, Dict, List, Optional, TYPE_CHECKING, TypeVar
 
 if TYPE_CHECKING:
     from ckan.config.middleware.flask_app import CKANFlask
@@ -27,15 +27,15 @@ GroupPlugin = TypeVar('GroupPlugin')
 OrganizationPlugin = TypeVar('OrganizationPlugin')
 
 # Mapping from package-type strings to IDatasetForm instances
-_package_plugins: Dict[str, plugins.IDatasetForm] = {}
+_package_plugins: Dict[str, 'plugins.IDatasetForm'] = {}
 # The fallback behaviour
-_default_package_plugin: Optional[plugins.IDatasetForm] = None
+_default_package_plugin: Optional['plugins.IDatasetForm'] = None
 
 # Mapping from group-type strings to IGroupForm instances
-_group_plugins: Dict[str, plugins.IGroupForm] = {}
+_group_plugins: Dict[str, 'plugins.IGroupForm'] = {}
 # The fallback behaviour
-_default_group_plugin: Optional[plugins.IGroupForm] = None
-_default_organization_plugin: Optional[plugins.IGroupForm] = None
+_default_group_plugin: Optional['plugins.IGroupForm'] = None
+_default_organization_plugin: Optional['plugins.IGroupForm'] = None
 # Mapping from group-type strings to controllers
 _group_controllers: Dict[str, str] = {}
 
@@ -58,7 +58,7 @@ def reset_group_plugins() -> None:
     _group_controllers = {}
 
 
-def lookup_package_plugin(package_type: Optional[str]=None) -> Optional[plugins.IDatasetForm]:
+def lookup_package_plugin(package_type: Optional[str]=None) -> Optional['plugins.IDatasetForm']:
     """
     Returns the plugin controller associoated with the given package type.
 
@@ -72,7 +72,7 @@ def lookup_package_plugin(package_type: Optional[str]=None) -> Optional[plugins.
 
 
 
-def lookup_group_plugin(group_type: Optional[str]=None) -> Optional[plugins.IGroupForm]:
+def lookup_group_plugin(group_type: Optional[str]=None) -> Optional['plugins.IGroupForm']:
     """
     Returns the form plugin associated with the given group type.
 
@@ -178,7 +178,7 @@ def register_package_blueprints(app: 'CKANFlask') -> None:
 def set_default_package_plugin() -> None:
     global _default_package_plugin
     if _default_package_plugin is None:
-        _default_package_plugin = DefaultDatasetForm()
+        _default_package_plugin = DefaultDatasetForm()  # type: ignore
 
 
 def register_group_plugins() -> None:
@@ -289,9 +289,9 @@ def set_default_group_plugin() -> None:
     global _group_controllers
     # Setup the fallback behaviour if one hasn't been defined.
     if _default_group_plugin is None:
-        _default_group_plugin = DefaultGroupForm()
+        _default_group_plugin = DefaultGroupForm()  # type: ignore
     if _default_organization_plugin is None:
-        _default_organization_plugin = DefaultOrganizationForm()
+        _default_organization_plugin = DefaultOrganizationForm()  # type: ignore
     if 'group' not in _group_controllers:
         _group_controllers['group'] = 'group'
     if 'organization' not in _group_controllers:
@@ -587,7 +587,7 @@ class DefaultOrganizationForm(DefaultGroupForm):
         return 'organization/activity_stream.html'
 
 
-class DefaultTranslation(object):
+class DefaultTranslation(plugins.ITranslation):
     name: str
 
     def i18n_directory(self) -> str:
@@ -624,7 +624,7 @@ class DefaultTranslation(object):
         return 'ckanext-{name}'.format(name=self.name)
 
 
-class DefaultPermissionLabels(object):
+class DefaultPermissionLabels(plugins.IPermissionLabels):
     u'''
     Default permissions for package_search/package_show:
     - everyone can read public datasets "public"

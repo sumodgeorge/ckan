@@ -150,7 +150,7 @@ def is_sysadmin(username: str) -> bool:
     return bool(user and user.sysadmin)
 
 
-def _get_user(username: Optional[str]) -> Optional[model.User]:
+def _get_user(username: Optional[str]) -> Optional['model.User']:
     '''
     Try to get the user from g, if possible.
     If not fallback to using the DB
