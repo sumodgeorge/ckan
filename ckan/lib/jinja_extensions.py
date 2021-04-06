@@ -18,7 +18,7 @@ from six.moves import xrange
 import ckan.lib.base as base
 import ckan.lib.helpers as h
 from ckan.common import config
-from typing import Any, Dict, Optional
+from typing import Any, Dict, Optional, Union
 from markupsafe import Markup
 
 
@@ -47,7 +47,7 @@ def get_jinja_env_options() -> Dict:
 
 ### Filters
 
-def empty_and_escape(value: Optional[str]) -> Markup:
+def empty_and_escape(value: Optional[str]) -> Union[str, Markup]:
     ''' returns '' for a None value else escapes the content useful for form
     elements. '''
     if value is None:
@@ -64,12 +64,12 @@ def regularise_html(html: Optional[str]) -> Optional[str]:
     if html is None:
         return
     html = re.sub('\n', ' ', html)
-    matches = re.findall('(<[^>]*>|%[^%]\([^)]*\)\w|[^<%]+|%)', html)
+    matches = re.findall(r'(<[^>]*>|%[^%]\([^)]*\)\w|[^<%]+|%)', html)
     for i in xrange(len(matches)):
         match = matches[i]
         if match.startswith('<') or match.startswith('%'):
             continue
-        matches[i] = re.sub('\s{2,}', ' ', match)
+        matches[i] = re.sub(r'\s{2,}', ' ', match)
     html = ''.join(matches)
     return html
 
@@ -86,9 +86,9 @@ class CkanInternationalizationExtension(ext.InternationalizationExtension):
         if args:
             for arg in args:
                 if isinstance(arg, nodes.Const):
-                    value = arg.value
+                    value = arg.value   # type: ignore
                     if isinstance(value, text_type):
-                        arg.value = regularise_html(value)
+                        arg.value = regularise_html(value)   # type: ignore
         return node
 
 
@@ -112,14 +112,16 @@ class CkanExtend(ext.Extension):
         node = nodes.Extends(lineno)
         template_path = parser.filename
         # find where in the search path this template is from
+        searchpath = None
         current_path = None
+
         if not hasattr(self, 'searchpath'):
             return node
         for searchpath in self.searchpath:
             if template_path.startswith(searchpath):
                 current_path = searchpath
                 break
-
+        assert searchpath and current_path
         # get filename from full path
         filename = template_path[len(searchpath) + 1:]
 
@@ -137,7 +139,7 @@ class CkanExtend(ext.Extension):
         # format is *<search path parent directory>*<template name>
         magic_filename = '*' + current_path + '*' + filename
         # set template
-        node.template = nodes.Const(magic_filename)
+        node.template = nodes.Const(magic_filename)   # type: ignore
         return node
 
 

@@ -12,7 +12,7 @@ import polib
 import re
 
 import six
-from typing import List, Tuple
+from typing import Any, Callable, List, Tuple
 
 if six.PY2:
     import paste.script.command  # type: ignore
@@ -55,12 +55,14 @@ def replacement_fields(s: str) -> list:
 
 
 if six.PY2:
-    class CheckPoFiles(paste.script.command.Command):
+    class CheckPoFiles(paste.script.command.Command):  # type: ignore
 
         usage = "[FILE] ..."
         group_name = 'ckan'
         summary = 'Check po files for common mistakes'
-        parser = paste.script.command.Command.standard_parser(verbose=True)
+        parser = paste.script.command.Command.standard_parser(   # type: ignore
+            verbose=True
+        )
 
         def command(self):
             check_po_files(self.args)
@@ -80,7 +82,7 @@ def check_po_files(paths: List[str]) -> None:
 def check_po_file(path: str) -> List[Tuple[str, str]]:
     errors = []
 
-    def check_translation(validator, msgid, msgstr):
+    def check_translation(validator: Callable[[str], Any], msgid: str, msgstr: str):
         if not validator(msgid) == validator(msgstr):
             errors.append((msgid, msgstr))
 
@@ -89,13 +91,13 @@ def check_po_file(path: str) -> List[Tuple[str, str]]:
         if entry.msgid_plural and entry.msgstr_plural:
             for function in (simple_conv_specs, mapping_keys,
                              replacement_fields):
-                for key, msgstr in six.iteritems(entry.msgstr_plural):
+                for key, msgstr in six.iteritems(entry.msgstr_plural):  # type: ignore
                     if key == '0':
                         check_translation(function, entry.msgid,
-                                          entry.msgstr_plural[key])
+                                          entry.msgstr_plural[key])  # type: ignore
                     else:
                         check_translation(function, entry.msgid_plural,
-                                          entry.msgstr_plural[key])
+                                          entry.msgstr_plural[key])  # type: ignore
         elif entry.msgstr:
             for function in (simple_conv_specs, mapping_keys,
                              replacement_fields):

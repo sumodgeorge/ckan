@@ -122,7 +122,7 @@ def render_jinja2(template_name: str, extra_vars: Dict) -> str:
     return template.render(**extra_vars)
 
 
-def render(template_name: str, extra_vars: Optional[Dict[str, Any]]=None, *pargs, **kwargs):
+def render(template_name: str, extra_vars: Optional[Dict[str, Any]]=None, *pargs, **kwargs) -> str:
     '''Render a template and return the output.
 
     This is CKAN's main template rendering function.

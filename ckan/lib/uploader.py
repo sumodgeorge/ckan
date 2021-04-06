@@ -6,7 +6,7 @@ import datetime
 import logging
 import magic
 import mimetypes
-from typing import Dict, Optional, Union
+from typing import Dict, IO, Optional, Union
 
 from six.moves.urllib.parse import urlparse  # type: ignore
 
@@ -29,7 +29,7 @@ _max_resource_size = None
 _max_image_size = None
 
 
-def _copy_file(input_file, output_file, max_size):
+def _copy_file(input_file: IO, output_file: IO, max_size: int) -> None:
     input_file.seek(0)
     current_size = 0
     while True:
@@ -44,7 +44,7 @@ def _copy_file(input_file, output_file, max_size):
             raise logic.ValidationError({'upload': ['File upload too large']})
 
 
-def _get_underlying_file(wrapper):
+def _get_underlying_file(wrapper: Union[FlaskFileStorage, cgi.FieldStorage]):
     if isinstance(wrapper, FlaskFileStorage):
         return wrapper.stream
     return wrapper.file
@@ -77,19 +77,19 @@ def get_resource_uploader(data_dict: Dict) -> PResourceUploader:
     return upload
 
 
-def get_storage_path() -> Union[str, bool]:
+def get_storage_path() -> str:
     '''Function to cache storage path'''
     global _storage_path
 
     # None means it has not been set. False means not in config.
     if _storage_path is None:
-        storage_path = config.get('ckan.storage_path')
+        storage_path = config.get('ckan.storage_path', '')
         if storage_path:
             _storage_path = storage_path
         else:
             log.critical('''Please specify a ckan.storage_path in your config
                          for your uploads''')
-            _storage_path = False
+            _storage_path = ''
 
     return _storage_path
 
@@ -109,6 +109,14 @@ def get_max_resource_size() -> int:
 
 
 class Upload(object):
+    storage_path: Optional[str]
+    filename: Optional[str]
+    filepath: Optional[str]
+    object_type: Optional[str]
+    old_filename: Optional[str]
+    old_filepath: Optional[str]
+
+
     def __init__(self, object_type: str, old_filename: Optional[str]=None) -> None:
         ''' Setup upload by creating a subdirectory of the storage directory
         of name object_type. old_filename is the name of the file in the url
@@ -174,6 +182,8 @@ class Upload(object):
         max_size is size in MB maximum of the file'''
 
         if self.filename:
+            assert self.upload_file and self.filepath
+
             with open(self.tmp_filepath, 'wb+') as output_file:
                 try:
                     _copy_file(self.upload_file, output_file, max_size)
@@ -186,7 +196,8 @@ class Upload(object):
             self.clear = True
 
         if (self.clear and self.old_filename
-                and not self.old_filename.startswith('http')):
+                and not self.old_filename.startswith('http')
+                and self.old_filepath):
             try:
                 os.remove(self.old_filepath)
             except OSError:
@@ -224,6 +235,7 @@ class ResourceUpload(object):
             self.filesize = 0  # bytes
 
             self.filename = upload_field_storage.filename
+            assert self.filename is not None
             self.filename = munge.munge_filename(self.filename)
             resource['url'] = self.filename
             resource['url_type'] = 'upload'
@@ -251,6 +263,7 @@ class ResourceUpload(object):
             resource['url_type'] = ''
 
     def get_directory(self, id: str) -> str:
+        assert self.storage_path
         directory = os.path.join(self.storage_path,
                                  id[0:3], id[3:6])
         return directory
@@ -291,6 +304,7 @@ class ResourceUpload(object):
                     raise
             tmp_filepath = filepath + '~'
             with open(tmp_filepath, 'wb+') as output_file:
+                assert self.upload_file
                 try:
                     _copy_file(self.upload_file, output_file, max_size)
                 except logic.ValidationError:

@@ -12,7 +12,7 @@ from ckan.common import config
 import ckan
 import ckan.model as model
 from ckan.logic.schema import update_configuration_schema
-from typing import Dict, Tuple, Union
+from typing import Dict, List, Tuple, Union
 
 
 log = logging.getLogger(__name__)

@@ -49,7 +49,7 @@ def webassets_init() -> None:
 
     static_path = get_webassets_path()
 
-    public = config.get(u'ckan.base_public_folder')
+    public = config.get(u'ckan.base_public_folder', '')
 
     public_folder = os.path.abspath(os.path.join(
         os.path.dirname(__file__), u'..', public))
@@ -135,10 +135,10 @@ def render_assets(type_: str) -> Markup:
     try:
         assets = g.webassets
     except AttributeError:
-        return u''
+        return Markup(u'')
 
     if not assets:
-        return u''
+        return Markup(u'')
     collection = assets[type_]
     tags = u'\n'.join([_to_tag(asset, type_) for asset in assets[type_]])
     collection[:] = []

@@ -1,5 +1,6 @@
 # encoding: utf-8
 
+from ckan.types import CKANApp
 import os
 import sys
 import re
@@ -22,7 +23,7 @@ from werkzeug.routing import Rule
 from flask_babel import Babel
 
 from beaker.middleware import SessionMiddleware
-from ckan.common import asbool
+from ckan.common import CKANConfig, asbool
 from repoze.who.config import WhoConfig
 from repoze.who.middleware import PluggableAuthenticationMiddleware
 
@@ -57,7 +58,7 @@ from ckan.lib.helpers import HelperAttributeDict
 from flask.blueprints import Blueprint
 from flask.wrappers import Response
 from werkzeug.local import LocalProxy
-from typing import Any, Dict, Tuple, Union
+from typing import Any, Dict, List, Optional, Tuple, Union
 log = logging.getLogger(__name__)
 
 
@@ -120,7 +121,7 @@ class CKANBabel(Babel):
             self._i18n_path_idx += 1
 
 
-def make_flask_stack(conf: Dict) -> Any:
+def make_flask_stack(conf: CKANConfig) -> CKANApp:
     """ This has to pass the flask app through all the same middleware that
     Pylons used """
 
@@ -138,7 +139,7 @@ def make_flask_stack(conf: Dict) -> Any:
         storage_folder = [os.path.join(storage, 'storage')]
 
     # Static files folders (core and extensions)
-    public_folder = config.get(u'ckan.base_public_folder')
+    public_folder = config.get(u'ckan.base_public_folder', '')
     app.static_folder = config.get(
         'extra_public_paths', ''
     ).split(',') + [os.path.join(root, public_folder)] + storage_folder
@@ -338,7 +339,7 @@ def make_flask_stack(conf: Dict) -> Any:
             app = TrackingMiddleware(app, config)
 
     # Add a reference to the actual Flask app so it's easier to access
-    app._wsgi_app = flask_app
+    app._wsgi_app = flask_app  # type: ignore
 
     return app
 
@@ -354,7 +355,7 @@ def get_locale() -> str:
         config.get(u'ckan.locale_default', u'en'))
 
 
-def ckan_before_request() -> None:
+def ckan_before_request() -> Optional[Response]:
     u'''
     Common handler executed before all Flask requests
 
@@ -450,7 +451,8 @@ class CKANFlask(MultiStaticFlask):
      requests by AskAppDispatcherMiddleware.
     '''
 
-    app_name = 'flask_app'
+    app_name: str = 'flask_app'
+    static_folder: List[str]
 
     def can_handle_request(self, environ: Any) -> Union[Tuple[bool, str], Tuple[bool, str, str]]:
         '''
@@ -514,7 +516,7 @@ def _register_core_blueprints(app):
     path = os.path.join(os.path.dirname(__file__), '..', '..', 'views')
 
     for loader, name, _ in pkgutil.iter_modules([path], 'ckan.views.'):
-        module = loader.find_module(name).load_module(name)
+        module = loader.find_module(name).load_module(name)  # type: ignore
         for blueprint in inspect.getmembers(module, is_blueprint):
             app.register_blueprint(blueprint[1])
             log.debug(u'Registered core blueprint: {0!r}'.format(blueprint[0]))
@@ -523,8 +525,8 @@ def _register_core_blueprints(app):
 def _register_error_handler(app):
     u'''Register error handler'''
 
-    def error_handler(e):
-        log.error(e, exc_info=sys.exc_info)
+    def error_handler(e) -> str:
+        log.error(e, exc_info=sys.exc_info)  # type: ignore
         if isinstance(e, HTTPException):
             extra_vars = {
                 u'code': e.code,
@@ -548,7 +550,7 @@ def _register_error_handler(app):
 def _setup_error_mail_handler(app):
 
     class ContextualFilter(logging.Filter):
-        def filter(self, log_record):
+        def filter(self, log_record) -> bool:
             log_record.url = request.path
             log_record.method = request.method
             log_record.ip = request.environ.get("REMOTE_ADDR")
@@ -560,15 +562,15 @@ def _setup_error_mail_handler(app):
         if ':' in smtp_server else smtp_server
     credentials = None
     if config.get('smtp.user'):
-        credentials = (config.get('smtp.user'), config.get('smtp.password'))
+        credentials = (config.get('smtp.user', ''), config.get('smtp.password', ''))
     secure = () if asbool(config.get('smtp.starttls')) else None
     mail_handler = SMTPHandler(
         mailhost=mailhost,
-        fromaddr=config.get('error_email_from'),
-        toaddrs=[config.get('email_to')],
+        fromaddr=config.get('error_email_from', ''),
+        toaddrs=[config.get('email_to', '')],
         subject='Application Error',
         credentials=credentials,
-        secure=secure
+        secure=secure  # type: ignore
     )
 
     mail_handler.setFormatter(logging.Formatter('''

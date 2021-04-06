@@ -36,12 +36,12 @@ def _get_secret(encode: bool) -> bytes:
     secret: str = config.get(config_key, '')
     if not secret:
         secret = u"string:" + config.get(_config_secret_fallback, u"")
-    type_, value = secret.split(u":", 1)
+    type_, string = secret.split(u":", 1)
     if type_ == u"file":
-        with open(value, u"rb") as key_file:
+        with open(string, u"rb") as key_file:
             value = key_file.read()
     else:
-        value = bytes(value, u'utf8')
+        value = bytes(string, u'utf8')
     if not value:
         raise CkanConfigurationException(
             (
@@ -117,17 +117,17 @@ def add_extra(result: Dict[str, Any]) -> Dict[str, Any]:
 def get_user_from_token(token: str, update_access_time: bool=True) -> Optional[model.User]:
     data = decode(token)
     if not data:
-        return
+        return None
     # do preprocessing in reverse order, allowing onion-like
     # "unwrapping" of the data, added during postprocessing, when
     # token was created
     for plugin in reversed(list(_get_plugins())):
         data = plugin.preprocess_api_token(data)
     if not data or u"jti" not in data:
-        return
+        return None
     token_obj = model.ApiToken.get(data[u"jti"])
     if not token_obj:
-        return
+        return None
     if update_access_time:
         token_obj.touch(True)
     return token_obj.owner

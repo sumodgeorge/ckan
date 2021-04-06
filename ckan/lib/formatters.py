@@ -59,7 +59,7 @@ def localised_nice_date(datetime_: datetime.datetime, show_date: bool=False, wit
         return format_date(datetime_, format or 'long')
 
 
-def localised_number(number: int) -> str:
+def localised_number(number: float) -> str:
     ''' Returns a localised unicode representation of number '''
     return format_number(number)
 

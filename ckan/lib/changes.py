@@ -6,11 +6,17 @@ dataset
 '''
 
 import logging
-from typing import Dict, List
+from typing import Any, Dict, List
+from typing_extensions import TypedDict
 log = logging.getLogger(__name__)
 
 
-def _extras_to_dict(extras_list):
+class Extra(TypedDict):
+    key: str
+    value: Any
+
+
+def _extras_to_dict(extras_list: List[Extra]) -> Dict[str, Any]:
     '''
     Takes a list of dictionaries with the following format:
     [
@@ -820,7 +826,7 @@ def _extra_fields(change_list, old, new):
                                     u'value_list': extra_fields_new})
 
     elif u'extras' in old:
-        deleted_fields = _extras_to_dict(old['extras']).keys()
+        deleted_fields = list(_extras_to_dict(old['extras']).keys())
         if len(deleted_fields) == 1:
             change_list.append({u'type': u'extra_fields',
                                 u'method': u'remove_one',

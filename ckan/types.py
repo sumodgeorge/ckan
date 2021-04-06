@@ -91,3 +91,5 @@ class PUploader(Protocol):
 
 class PResourceUploader(Protocol):
     ...
+
+CKANApp = Any
