@@ -297,6 +297,7 @@ class PackageSearchIndex(SearchIndex):
             dataset) if dataset else [] # TestPackageSearchIndex-workaround
 
         # send to solr:
+        conn = None
         try:
             conn = make_connection()
             commit = not defer_commit

@@ -15,7 +15,7 @@ from ckan.common import config
 from ckan.lib.search.common import (
     make_connection, SearchError, SearchQueryError
 )
-from typing import Any, Dict, List, NoReturn, Optional
+from typing import Any, Dict, List, NoReturn, Optional, Union
 
 log = logging.getLogger(__name__)
 
@@ -159,7 +159,7 @@ class SearchQuery(object):
         """
         return []
 
-    def run(self, query: Optional[str]=None, terms: List[st]=[], fields: Dict={}, facet_by: List[str]=[], options: Optional[Dict]=None, **kwargs: Any) -> NoReturn:
+    def run(self, query: Optional[str]=None, terms: List[str]=[], fields: Dict={}, facet_by: List[str]=[], options: Optional[QueryOptions]=None, **kwargs: Any) -> NoReturn:
         raise SearchError("SearchQuery.run() not implemented!")
 
     # convenience, allows to query(..)
@@ -168,7 +168,7 @@ class SearchQuery(object):
 
 class TagSearchQuery(SearchQuery):
     """Search for tags."""
-    def run(self, query: Optional[str]=None, fields: Optional[Dict]=None, options: Optional[Dict]=None, **kwargs: Any) -> Dict:
+    def run(self, query: Optional[Union[str, List[str]]]=None, fields: Optional[Dict]=None, options: Optional[QueryOptions]=None, **kwargs: Any) -> Dict:
         query = [] if query is None else query
         fields = {} if fields is None else fields
 
@@ -208,7 +208,7 @@ class TagSearchQuery(SearchQuery):
 
 class ResourceSearchQuery(SearchQuery):
     """Search for resources."""
-    def run(self, fields: Dict={}, options: Optional[Dict]=None, **kwargs: Any) -> Dict:
+    def run(self, fields: Dict={}, options: Optional[QueryOptions]=None, **kwargs: Any) -> Dict:
         if options is None:
             options = QueryOptions(**kwargs)
         else:
@@ -336,7 +336,7 @@ class PackageSearchQuery(SearchQuery):
         fq.extend(query.get('fq_list', []))
 
         # show only results from this CKAN instance
-        fq.append('+site_id:%s' % solr_literal(config.get('ckan.site_id')))
+        fq.append('+site_id:%s' % solr_literal(config['ckan.site_id']))
 
         # filter for package status
         if not '+state:' in query.get('fq', ''):
