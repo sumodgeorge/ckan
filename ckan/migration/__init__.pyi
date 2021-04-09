@@ -1,3 +1,0 @@
-from typing import Any
-
-def skip_based_on_legacy_engine_version(op: Any, filename: str) -> bool: ...
