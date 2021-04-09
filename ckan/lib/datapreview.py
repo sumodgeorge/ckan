@@ -7,14 +7,14 @@ Functions and data structures that are needed for the ckan data preview.
 
 import logging
 
-from six.moves.urllib.parse import urlparse
+from six.moves.urllib.parse import urlparse  # type: ignore
 
 from ckan.common import config
 
 import ckan.plugins as p
 from ckan import logic
 from ckan.common import _
-from typing import Dict, Iterable, List, Optional
+from typing import Any, Dict, Iterable, List, Optional
 
 
 log = logging.getLogger(__name__)
@@ -23,7 +23,7 @@ log = logging.getLogger(__name__)
 DEFAULT_RESOURCE_VIEW_TYPES = ['image_view', 'recline_view']
 
 
-def res_format(resource: Dict) -> Optional[str]:
+def res_format(resource: Dict[str, Any]) -> Optional[str]:
     ''' The assumed resource format in lower case. '''
     if not resource['url']:
         return None

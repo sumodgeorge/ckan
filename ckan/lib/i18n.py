@@ -103,7 +103,7 @@ def get_locales_from_config() -> Set[str]:
     return all_locales
 
 
-def _get_locales():
+def _get_locales() -> List[str]:
     # FIXME this wants cleaning up and merging with get_locales_from_config()
     assert not config.get('lang'), \
         ('"lang" config option not supported - please use ckan.locale_default '
@@ -209,12 +209,13 @@ def get_available_locales() -> List[Locale]:
             # so e.g. `zn_CH` instead of `zn_Hans_CH` this is needed
             # to properly construct urls with url_for
             parsed_locale = Locale.parse(locale)
-            parsed_locale.short_name = locale
+            parsed_locale.short_name = locale  # type: ignore
 
             # Add the full identifier (eg `pt_BR`) to the locale classes,
             # as it does not offer a way of accessing it directly
-            parsed_locale.identifier = \
-                get_identifier_from_locale_class(parsed_locale)
+            parsed_locale.identifier = get_identifier_from_locale_class(  # type: ignore
+                parsed_locale  # type: ignore
+            )
             available_locales.append(parsed_locale)
     return available_locales
 
@@ -374,7 +375,7 @@ def build_js_translations() -> None:
     # Collect all language codes (an extension might add support for a
     # language that isn't supported by CKAN core, yet).
     langs = set()
-    i18n_dirs = collections.OrderedDict([(ckan_i18n_dir, u'ckan')])
+    i18n_dirs: Dict[str, str] = collections.OrderedDict([(ckan_i18n_dir, u'ckan')])
     for item in os.listdir(ckan_i18n_dir):
         if os.path.isdir(os.path.join(ckan_i18n_dir, item)):
             langs.add(item)

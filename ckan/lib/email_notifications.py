@@ -14,7 +14,7 @@ import ckan.logic as logic
 import ckan.lib.base as base
 
 from ckan.common import ungettext, config
-from typing import Dict, List
+from typing import Any, Dict, List
 
 
 def string_to_timedelta(s: str) -> datetime.timedelta:
@@ -37,27 +37,28 @@ def string_to_timedelta(s: str) -> datetime.timedelta:
 
     '''
     patterns = []
-    days_only_pattern = '(?P<days>\d+)\s+day(s)?'
+    days_only_pattern = r'(?P<days>\d+)\s+day(s)?'
     patterns.append(days_only_pattern)
-    hms_only_pattern = '(?P<hours>\d?\d):(?P<minutes>\d\d):(?P<seconds>\d\d)'
+    hms_only_pattern = r'(?P<hours>\d?\d):(?P<minutes>\d\d):(?P<seconds>\d\d)'
     patterns.append(hms_only_pattern)
-    ms_only_pattern = '.(?P<milliseconds>\d\d\d)(?P<microseconds>\d\d\d)'
+    ms_only_pattern = r'.(?P<milliseconds>\d\d\d)(?P<microseconds>\d\d\d)'
     patterns.append(ms_only_pattern)
     hms_and_ms_pattern = hms_only_pattern + ms_only_pattern
     patterns.append(hms_and_ms_pattern)
-    days_and_hms_pattern = '{0},\s+{1}'.format(days_only_pattern,
+    days_and_hms_pattern = r'{0},\s+{1}'.format(days_only_pattern,
             hms_only_pattern)
     patterns.append(days_and_hms_pattern)
     days_and_hms_and_ms_pattern = days_and_hms_pattern + ms_only_pattern
     patterns.append(days_and_hms_and_ms_pattern)
 
+    match = None
     for pattern in patterns:
         match = re.match('^{0}$'.format(pattern), s)
         if match:
             break
 
     if not match:
-        raise logic.ValidationError('Not a valid time: {0}'.format(s))
+        raise logic.ValidationError({'message': 'Not a valid time: {0}'.format(s)})
 
     gd = match.groupdict()
     days = int(gd.get('days', '0'))
@@ -72,7 +73,7 @@ def string_to_timedelta(s: str) -> datetime.timedelta:
     return delta
 
 
-def _notifications_for_activities(activities, user_dict):
+def _notifications_for_activities(activities: List[Dict[str, Any]], user_dict: Dict[str, Any]) -> List[Dict[str, str]]:
     '''Return one or more email notifications covering the given activities.
 
     This function handles grouping multiple activities into a single digest
@@ -115,7 +116,7 @@ def _notifications_for_activities(activities, user_dict):
     return notifications
 
 
-def _notifications_from_dashboard_activity_list(user_dict, since):
+def _notifications_from_dashboard_activity_list(user_dict: Dict[str, Any], since: datetime.datetime) -> List[Dict[str, str]]:
     '''Return any email notifications from the given user's dashboard activity
     list since `since`.
 

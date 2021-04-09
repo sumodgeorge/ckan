@@ -35,7 +35,7 @@ class UsernamePasswordError(Exception):
 
 class ActionError(Exception):
 
-    def __init__(self, message: str=''):
+    def __init__(self, message: Optional[str]=''):
         self.message = message
         super(ActionError, self).__init__(message)
 
@@ -77,8 +77,9 @@ class ValidationError(ActionError):
             error_dict = {'message': error_dict}
         # tags errors are a mess so let's clean them up
         if 'tags' in error_dict:
-            tag_errors = []
+            tag_errors: List[Any] = []
             for error in error_dict['tags']:
+                assert isinstance(error, dict)
                 try:
                     tag_errors.append(', '.join(error['name']))
                 except KeyError:

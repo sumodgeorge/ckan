@@ -6,6 +6,7 @@ extend CKAN.
 '''
 from inspect import isclass
 from typing import Any, Callable, Dict, Iterable, List, Optional, TYPE_CHECKING, Tuple, Type, Union
+from typing_extensions import TypedDict, Literal
 
 from pyutilib.component.core import Interface as _pca_Interface
 
@@ -469,8 +470,12 @@ class IResourcePreview(Interface):
         custom view plugins.
 
     '''
+    class CanPreviewDict(TypedDict):
+        can_preview: bool
+        fixable: str
+        quality: Literal[1, 2, 3]
 
-    def can_preview(self, data_dict):
+    def can_preview(self, data_dict) -> Union[bool, CanPreviewDict]:
         u'''Return info on whether the plugin can preview the resource.
 
         This can be done in two ways:

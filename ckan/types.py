@@ -29,8 +29,9 @@ DataDict = Dict[str, Any]
 ErrorDict = Dict[str, Union[List[Union[str, Dict[str, Any]]], str]]
 
 class Context(TypedDict, total=False):
-    user: Optional[str]
-    model: Optional[Any]
+    user: str
+    model: Any
+    session: AlchemySession
     ignore_auth: Optional[bool]
     auth_user_obj: Optional['User']
 
