@@ -34,15 +34,24 @@ class Context(TypedDict, total=False):
     user: str
     model: model_
     session: AlchemySession
-    ignore_auth: Optional[bool]
+
     auth_user_obj: Optional['model_.User']
 
-    group: Optional['model_.Group']
-    metadata_modified: Optional[str]
-    dataset_counts: Optional[Dict]
-    limits: Optional[Dict]
-    with_capacity: Optional[bool]
+    active: Optional[bool]
+    allow_partial_update: Optional[bool]
+    for_edit: Optional[bool]
+    for_view: Optional[bool]
+    ignore_auth: Optional[bool]
+
+    keep_email: Optional[bool]
+    keep_apikey: Optional[bool]
+
     api_version: Optional[int]
+    dataset_counts: Optional[Dict]
+    group: Optional['model_.Group']
+    limits: Optional[Dict]
+    metadata_modified: Optional[str]
+    with_capacity: Optional[bool]
 
 
 class AuthResult(TypedDict, total=False):
