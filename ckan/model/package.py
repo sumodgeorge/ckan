@@ -119,7 +119,7 @@ class Package(core.StatefulObjectMixin,
 
     resources_all: List["Resource"]
     ratings: List["Rating"]
-    _extras: List['PackageExtra']
+    _extras: Dict[str, Any]  # List['PackageExtra']
     extras: AssociationProxy
 
     relationships_as_subject: 'PackageRelationship'

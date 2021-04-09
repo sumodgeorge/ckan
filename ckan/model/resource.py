@@ -85,6 +85,8 @@ class Resource(core.StatefulObjectMixin,
 
     package: Package
 
+    url_changed: Optional[bool]
+
     def __init__(self, url: str=u'', format: str=u'', description: str=u'', hash: str=u'',
                  extras: Optional[Dict]=None, package_id: Optional[str]=None, **kwargs: Any) -> None:
         self.id = _types.make_uuid()

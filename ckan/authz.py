@@ -284,7 +284,7 @@ def get_roles_with_permission(permission: str) -> List[str]:
     return roles
 
 
-def has_user_permission_for_group_or_org(group_id: str, user_name: str, permission: str) -> bool:
+def has_user_permission_for_group_or_org(group_id: Optional[str], user_name: str, permission: str) -> bool:
     ''' Check if the user has the given permissions for the group, allowing for
     sysadmin rights and permission cascading down a group hierarchy.
 

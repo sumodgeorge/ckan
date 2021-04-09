@@ -1,5 +1,6 @@
 # encoding: utf-8
 
+from ckan.types import Context
 import datetime
 from sqlalchemy.orm import class_mapper
 import sqlalchemy
@@ -13,7 +14,7 @@ from sqlalchemy import Table
 try:
     RowProxy = sqlalchemy.engine.result.RowProxy
 except AttributeError:
-    RowProxy = sqlalchemy.engine.base.RowProxy
+    RowProxy = sqlalchemy.engine.base.RowProxy  # type: ignore
 
 try:
     long # type: ignore
@@ -28,7 +29,7 @@ except NameError:
 
 legacy_dict_sort = lambda x: (len(x), dict.items(x))
 
-def table_dictize(obj: Any, context: Dict, **kw) -> Dict[str, Any]:
+def table_dictize(obj: Any, context: Context, **kw) -> Dict[str, Any]:
     '''Get any model object and represent it as a dict'''
 
     result_dict = {}
@@ -75,7 +76,7 @@ def table_dictize(obj: Any, context: Dict, **kw) -> Dict[str, Any]:
     return result_dict
 
 
-def obj_list_dictize(obj_list: List[Any], context: Dict, sort_key: Callable=legacy_dict_sort) -> List[dict]:
+def obj_list_dictize(obj_list: List[Any], context: Context, sort_key: Callable=legacy_dict_sort) -> List[dict]:
     '''Get a list of model object and represent it as a list of dicts'''
 
     result_list = []
@@ -93,7 +94,7 @@ def obj_list_dictize(obj_list: List[Any], context: Dict, sort_key: Callable=lega
 
     return sorted(result_list, key=sort_key)
 
-def obj_dict_dictize(obj_dict: Dict, context: Dict, sort_key: Callable=lambda x:x) -> List[dict]:
+def obj_dict_dictize(obj_dict: Dict, context: Context, sort_key: Callable=lambda x:x) -> List[dict]:
     '''Get a dict whose values are model objects
     and represent it as a list of dicts'''
 
@@ -105,7 +106,7 @@ def obj_dict_dictize(obj_dict: Dict, context: Dict, sort_key: Callable=lambda x:
     return sorted(result_list, key=sort_key)
 
 
-def get_unique_constraints(table: Table, context: Dict) -> List[list]:
+def get_unique_constraints(table: Table, context: Context) -> List[list]:
     '''Get a list of unique constraints for a sqlalchemy table'''
 
     list_of_constraints = []
@@ -117,7 +118,7 @@ def get_unique_constraints(table: Table, context: Dict) -> List[list]:
 
     return list_of_constraints
 
-def table_dict_save(table_dict: Dict, ModelClass: Any, context: Dict, extra_attrs: Iterable[str]=()) -> Any:
+def table_dict_save(table_dict: Dict, ModelClass: Any, context: Context, extra_attrs: Iterable[str]=()) -> Any:
     '''Given a dict and a model class, update or create a sqlalchemy object.
     This will use an existing object if "id" is supplied OR if any unique
     constraints are met. e.g supplying just a tag name will get out that tag obj.

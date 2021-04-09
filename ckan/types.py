@@ -1,8 +1,9 @@
+import datetime
 from functools import partial
 from typing import (
     Any, Callable, Dict, Iterable, List,
     Mapping, Optional, Tuple, Union,
-    TYPE_CHECKING
+    TYPE_CHECKING, Type
 )
 from sqlalchemy.orm.scoping import ScopedSession, scoped_session
 from typing_extensions import Protocol, TypedDict
@@ -10,7 +11,7 @@ from typing_extensions import Protocol, TypedDict
 from sqlalchemy.orm import Session, Query
 
 if TYPE_CHECKING:
-    from ckan.model import User
+    import ckan.model as model_
 
 AlchemySession = ScopedSession
 # class AlchemySession(scoped_session):
@@ -30,12 +31,18 @@ ErrorDict = Dict[str, Union[List[Union[str, Dict[str, Any]]], str]]
 
 class Context(TypedDict, total=False):
     user: str
-    model: Any
+    model: model_
     session: AlchemySession
     ignore_auth: Optional[bool]
-    auth_user_obj: Optional['User']
+    auth_user_obj: Optional['model_.User']
 
-    group: Optional[str]
+    group: Optional['model_.Group']
+    metadata_modified: Optional[str]
+    dataset_counts: Optional[Dict]
+    limits: Optional[Dict]
+    with_capacity: Optional[bool]
+    api_version: Optional[int]
+
 
 class AuthResult(TypedDict, total=False):
     success: bool

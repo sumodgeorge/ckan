@@ -252,6 +252,8 @@ class ResourceSearchQuery(SearchQuery):
 
 
 class PackageSearchQuery(SearchQuery):
+    facets: Dict
+
     def get_all_entity_ids(self, max_results: int=1000) -> List[str]:
         """
         Return a list of the IDs of all indexed packages.

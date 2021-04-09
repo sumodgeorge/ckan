@@ -4,20 +4,25 @@ import datetime
 import uuid
 import logging
 
+from typing import Any, Dict, List, Optional, TYPE_CHECKING, Type
+
 from sqlalchemy.orm import class_mapper
 import six
 from six import string_types
 
 import ckan.lib.dictization as d
 import ckan.authz as authz
-from ckan.model.follower import ModelFollowingModel
-from typing import Dict, List, Type
-import ckan.model as model
+from ckan.types import Context
+
+if TYPE_CHECKING:
+    import ckan.model as model
+    from ckan.model.follower import ModelFollowingModel
+
 
 log = logging.getLogger(__name__)
 
 
-def resource_dict_save(res_dict: Dict, context: Dict) -> model.Resource:
+def resource_dict_save(res_dict: Dict, context: Context) -> 'model.Resource':
     model = context["model"]
     session = context["session"]
 
@@ -57,7 +62,7 @@ def resource_dict_save(res_dict: Dict, context: Dict) -> model.Resource:
     return obj
 
 
-def package_resource_list_save(res_dicts: List[Dict], package: model.Package, context: Dict) -> None:
+def package_resource_list_save(res_dicts: Optional[List[Dict]], package: 'model.Package', context: Context) -> None:
     allow_partial_update = context.get("allow_partial_update", False)
     if res_dicts is None and allow_partial_update:
         return
@@ -89,7 +94,7 @@ def package_resource_list_save(res_dicts: List[Dict], package: model.Package, co
         resource_list.append(resource)
 
 
-def package_extras_save(extra_dicts: List[Dict], pkg: model.Package, context) -> None:
+def package_extras_save(extra_dicts: Optional[List[Dict]], pkg: 'model.Package', context: Context) -> None:
     allow_partial_update = context.get("allow_partial_update", False)
     if extra_dicts is None and allow_partial_update:
         return
@@ -124,7 +129,7 @@ def package_extras_save(extra_dicts: List[Dict], pkg: model.Package, context) ->
         session.delete(extra)
 
 
-def package_tag_list_save(tag_dicts: List[Dict], package: model.Package, context: Dict) -> None:
+def package_tag_list_save(tag_dicts: Optional[List[Dict]], package: 'model.Package', context: Context) -> None:
     allow_partial_update = context.get("allow_partial_update", False)
     if tag_dicts is None and allow_partial_update:
         return
@@ -168,7 +173,7 @@ def package_tag_list_save(tag_dicts: List[Dict], package: model.Package, context
 
     package.package_tag_all[:] = tag_package_tag.values()
 
-def package_membership_list_save(group_dicts: List[Dict], package: model.Package, context) -> None:
+def package_membership_list_save(group_dicts: Optional[List[Dict]], package: 'model.Package', context: Context) -> None:
 
     allow_partial_update = context.get("allow_partial_update", False)
     if group_dicts is None and allow_partial_update:
@@ -235,7 +240,7 @@ def package_membership_list_save(group_dicts: List[Dict], package: model.Package
             session.add(member_obj)
 
 
-def relationship_list_save(relationship_dicts: List[Dict], package: model.Package, attr: str, context: Dict) -> None:
+def relationship_list_save(relationship_dicts: Optional[List[Dict]], package: 'model.Package', attr: str, context: Context) -> None:
 
     allow_partial_update = context.get("allow_partial_update", False)
     if relationship_dicts is None and allow_partial_update:
@@ -259,7 +264,7 @@ def relationship_list_save(relationship_dicts: List[Dict], package: model.Packag
         relationship.state = 'deleted'
         relationship_list.append(relationship)
 
-def package_dict_save(pkg_dict: Dict, context: Dict) -> model.Package:
+def package_dict_save(pkg_dict: Dict, context: Context) -> 'model.Package':
     model = context["model"]
     package = context.get("package")
     allow_partial_update = context.get("allow_partial_update", False)
@@ -294,10 +299,11 @@ def package_dict_save(pkg_dict: Dict, context: Dict) -> model.Package:
 
     return pkg
 
-def group_member_save(context: Dict, group_dict: Dict, member_table_name: str) -> Dict:
+def group_member_save(context: Context, group_dict: Dict, member_table_name: str) -> Dict:
     model = context["model"]
     session = context["session"]
     group = context['group']
+    assert group is not None
     entity_list = group_dict.get(member_table_name, None)
 
     if entity_list is None:
@@ -354,7 +360,7 @@ def group_member_save(context: Dict, group_dict: Dict, member_table_name: str) -
     return processed
 
 
-def group_dict_save(group_dict: Dict, context: Dict, prevent_packages_update: bool=False) -> model.Group:
+def group_dict_save(group_dict: Dict, context: Context, prevent_packages_update: bool=False) -> 'model.Group':
     from ckan.lib.search import rebuild
 
     model = context["model"]
@@ -413,7 +419,7 @@ def group_dict_save(group_dict: Dict, context: Dict, prevent_packages_update: bo
     return group
 
 
-def user_dict_save(user_dict: Dict, context: Dict) -> model.User:
+def user_dict_save(user_dict: Dict, context: Context) -> 'model.User':
 
     model = context['model']
     session = context['session']
@@ -436,7 +442,7 @@ def user_dict_save(user_dict: Dict, context: Dict) -> model.User:
     return user
 
 
-def package_api_to_dict(api1_dict: Dict, context: Dict) -> Dict:
+def package_api_to_dict(api1_dict: Dict[str, Any], context: Context) -> Dict:
 
     package = context.get("package")
     api_version = context.get('api_version')
@@ -455,7 +461,7 @@ def package_api_to_dict(api1_dict: Dict, context: Dict) -> Dict:
             updated_extras = {}
             if package:
                 updated_extras.update(package.extras)
-            updated_extras.update(value)
+            updated_extras.update(value)  # type: ignore
 
             new_value = []
 
@@ -479,7 +485,7 @@ def package_api_to_dict(api1_dict: Dict, context: Dict) -> Dict:
 
     return dictized
 
-def group_api_to_dict(api1_dict: Dict, context: Dict) -> Dict:
+def group_api_to_dict(api1_dict: Dict, context: Context) -> Dict:
 
     dictized = {}
 
@@ -494,7 +500,7 @@ def group_api_to_dict(api1_dict: Dict, context: Dict) -> Dict:
 
     return dictized
 
-def task_status_dict_save(task_status_dict: Dict, context: Dict) -> model.TaskStatus:
+def task_status_dict_save(task_status_dict: Dict, context: Context) -> 'model.TaskStatus':
     model = context["model"]
     task_status = context.get("task_status")
     allow_partial_update = context.get("allow_partial_update", False)
@@ -504,7 +510,7 @@ def task_status_dict_save(task_status_dict: Dict, context: Dict) -> model.TaskSt
     task_status = d.table_dict_save(task_status_dict, model.TaskStatus, context)
     return task_status
 
-def activity_dict_save(activity_dict: Dict, context: Dict) -> model.Activity:
+def activity_dict_save(activity_dict: Dict, context: Context) -> 'model.Activity':
 
     model = context['model']
     session = context['session']
@@ -523,7 +529,7 @@ def activity_dict_save(activity_dict: Dict, context: Dict) -> model.Activity:
 
     return activity_obj
 
-def vocabulary_tag_list_save(new_tag_dicts: List[Dict], vocabulary_obj: model.Voacbulary, context: Dict) -> None:
+def vocabulary_tag_list_save(new_tag_dicts: List[Dict], vocabulary_obj: 'model.Vocabulary', context: Context) -> None:
     model = context['model']
     session = context['session']
 
@@ -540,7 +546,7 @@ def vocabulary_tag_list_save(new_tag_dicts: List[Dict], vocabulary_obj: model.Vo
             # then add it.
             tag_dict_save(tag_dict, {'model': model, 'session': session})
 
-def vocabulary_dict_save(vocabulary_dict: Dict, context: Dict) -> model.Vocabulary:
+def vocabulary_dict_save(vocabulary_dict: Dict, context: Context) -> 'model.Vocabulary':
     model = context['model']
     session = context['session']
     vocabulary_name = vocabulary_dict['name']
@@ -554,13 +560,13 @@ def vocabulary_dict_save(vocabulary_dict: Dict, context: Dict) -> model.Vocabula
 
     return vocabulary_obj
 
-def vocabulary_dict_update(vocabulary_dict: Dict, context: Dict) -> model.Vocabulary:
+def vocabulary_dict_update(vocabulary_dict: Dict, context: Context) -> 'model.Vocabulary':
 
     model = context['model']
     session = context['session']
 
-    vocabulary_obj = model.vocabulary.Vocabulary.get(vocabulary_dict['id'])
-
+    vocabulary_obj = model.Vocabulary.get(vocabulary_dict['id'])
+    assert vocabulary_obj
     if 'name' in vocabulary_dict:
         vocabulary_obj.name = vocabulary_dict['name']
 
@@ -570,7 +576,7 @@ def vocabulary_dict_update(vocabulary_dict: Dict, context: Dict) -> model.Vocabu
 
     return vocabulary_obj
 
-def tag_dict_save(tag_dict: Dict, context: Dict) -> model.Tag:
+def tag_dict_save(tag_dict: Dict, context: Context) -> 'model.Tag':
     model = context['model']
     tag = context.get('tag')
     if tag:
@@ -578,7 +584,7 @@ def tag_dict_save(tag_dict: Dict, context: Dict) -> model.Tag:
     tag = d.table_dict_save(tag_dict, model.Tag, context)
     return tag
 
-def follower_dict_save(data_dict: Dict, context: Dict, FollowerClass: Type[ModelFollowingModel]) -> Type[ModelFollowingModel]:
+def follower_dict_save(data_dict: Dict, context: Context, FollowerClass: Type['ModelFollowingModel']) -> 'ModelFollowingModel':
     model = context['model']
     session = context['session']
     follower_obj = FollowerClass(
@@ -588,7 +594,7 @@ def follower_dict_save(data_dict: Dict, context: Dict, FollowerClass: Type[Model
     return follower_obj
 
 
-def resource_view_dict_save(data_dict: Dict, context: Dict) -> model.ResourceView:
+def resource_view_dict_save(data_dict: Dict, context: Context) -> 'model.ResourceView':
     model = context['model']
     resource_view = context.get('resource_view')
     if resource_view:
@@ -603,7 +609,7 @@ def resource_view_dict_save(data_dict: Dict, context: Dict) -> model.ResourceVie
     return d.table_dict_save(data_dict, model.ResourceView, context)
 
 
-def api_token_save(data_dict: Dict, context: Dict) -> model.ApiToken:
+def api_token_save(data_dict: Dict, context: Context) -> 'model.ApiToken':
     model = context[u"model"]
     return d.table_dict_save(
         {

@@ -172,7 +172,7 @@ def munge_filename(filename: str) -> str:
     return filename
 
 
-def _munge_to_length(string, min_length, max_length):
+def _munge_to_length(string: str, min_length: int, max_length: int) -> str:
     '''Pad/truncates a string'''
     if len(string) < min_length:
         string += '_' * (min_length - len(string))

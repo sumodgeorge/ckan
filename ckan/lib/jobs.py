@@ -55,7 +55,7 @@ def _connect():
     return conn
 
 
-def _get_queue_name_prefix():
+def _get_queue_name_prefix() -> str:
     u'''
     Get the queue name prefix.
     '''
@@ -202,6 +202,7 @@ def dictize_job(job: Job) -> Dict:
     :returns: The dictized job.
     :rtype: dict
     '''
+    assert job.origin is not None
     return {
         u'id': job.id,
         u'title': job.meta.get(u'title'),
@@ -231,7 +232,7 @@ class Worker(rq.Worker):
     non-committed changes are rolled back and instance variables bound
     to the old session have to be re-fetched from the database.
     '''
-    def __init__(self, queues: List[str]=None, *args: Any, **kwargs: Any) -> None:
+    def __init__(self, queues: Optional[Iterable[str]]=None, *args: Any, **kwargs: Any) -> None:
         u'''
         Constructor.
 
@@ -243,10 +244,12 @@ class Worker(rq.Worker):
             with the name of a single queue or a list of queue names.
             If not given then the default queue is used.
         '''
-        queues = queues or [DEFAULT_QUEUE_NAME]
-        queues = [get_queue(q) for q in ensure_list(queues)]
+        queue_names: Iterable[str] = ensure_list(  # type: ignore
+            queues or [DEFAULT_QUEUE_NAME]
+        )
+        qs = [get_queue(q) for q in queue_names]
         rq.worker.logger.setLevel(logging.INFO)
-        super(Worker, self).__init__(queues, *args, **kwargs)
+        super(Worker, self).__init__(qs, *args, **kwargs)
 
     def register_birth(self, *args, **kwargs) -> None:
         result = super(Worker, self).register_birth(*args, **kwargs)
@@ -292,7 +295,7 @@ class Worker(rq.Worker):
                       job.id, self.key, exc_info[1]))
         return super(Worker, self).handle_exception(job, *exc_info)
 
-    def main_work_horse(self, job, queue) -> NoReturn:
+    def main_work_horse(self, job, queue):
         # This method is called in a worker's work horse process right
         # after forking.
         load_environment(config)

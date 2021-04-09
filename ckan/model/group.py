@@ -13,7 +13,7 @@ from ckan.model import domain_object
 from ckan.model import user as _user
 from ckan.types import Query
 from ckan.model import package as _package
-from typing import Dict, List,  Optional, TYPE_CHECKING, Tuple, Union, overload
+from typing import Any, Dict, List,  Optional, TYPE_CHECKING, Tuple, Union, overload
 from typing_extensions import Literal
 
 if TYPE_CHECKING:
@@ -142,7 +142,7 @@ class Group(core.StatefulObjectMixin,
     approval_status: str
     state: str
 
-    _extras: List['GroupExtra']
+    _extras: Dict[str, Any]  # List['GroupExtra']
     extras: AssociationProxy
     member_all: List[Member]
 
