@@ -1,5 +1,6 @@
 # encoding: utf-8
 
+from ckan.types import Context, ValidationErrorDict
 import six
 from six import text_type
 
@@ -13,23 +14,24 @@ StopOnError = df.StopOnError
 Invalid = df.Invalid
 
 
-def identity_converter(key: Tuple, data: Dict, errors: Dict, context: Dict) -> None:
+
+def identity_converter(key: Tuple, data: Dict, errors: ValidationErrorDict, context: Context) -> None:
     return
 
-def keep_extras(key: Tuple, data: Dict, errors: Dict, context: Dict) -> None:
+def keep_extras(key: Tuple, data: Dict, errors: ValidationErrorDict, context: Context) -> None:
 
     extras = data.pop(key, {})
     for extras_key, value in six.iteritems(extras):
         data[key[:-1] + (extras_key,)] = value
 
-def not_missing(key: Tuple, data: Dict, errors: Dict, context: Dict) -> None:
+def not_missing(key: Tuple, data: Dict, errors: ValidationErrorDict, context: Context) -> None:
 
     value = data.get(key)
     if value is missing:
         errors[key].append(_('Missing value'))
         raise StopOnError
 
-def not_empty(key: Tuple, data: Dict, errors: Dict, context: Dict) -> None:
+def not_empty(key: Tuple, data: Dict, errors: ValidationErrorDict, context: Context) -> None:
 
     value = data.get(key)
     if not value or value is missing:
@@ -58,7 +60,7 @@ def both_not_empty(other_key: str) -> Callable:
 
     return callable
 
-def empty(key: Tuple, data: Dict, errors: Dict, context: Dict) -> None:
+def empty(key: Tuple, data: Dict, errors: ValidationErrorDict, context: Context) -> None:
 
     value = data.pop(key, None)
 
@@ -70,7 +72,7 @@ def empty(key: Tuple, data: Dict, errors: Dict, context: Dict) -> None:
         errors[key].append(_(
             'The input field %(name)s was not expected.') % {"name": key_name})
 
-def ignore(key: Tuple, data: Dict, errors: Dict, context: Dict) -> NoReturn:
+def ignore(key: Tuple, data: Dict, errors: ValidationErrorDict, context: Context) -> NoReturn:
 
     value = data.pop(key, None)
     raise StopOnError
@@ -97,7 +99,7 @@ def configured_default(config_name: str, default_value_if_not_configured: Any) -
         default_value = default_value_if_not_configured
     return default(default_value)
 
-def ignore_missing(key: Tuple, data: Dict, errors: Dict, context: Dict) -> None:
+def ignore_missing(key: Tuple, data: Dict, errors: ValidationErrorDict, context: Context) -> None:
     '''If the key is missing from the data, ignore the rest of the key's
     schema.
 
@@ -118,7 +120,7 @@ def ignore_missing(key: Tuple, data: Dict, errors: Dict, context: Dict) -> None:
         data.pop(key, None)
         raise StopOnError
 
-def ignore_empty(key: Tuple, data: Dict, errors: Dict, context: Dict) -> None:
+def ignore_empty(key: Tuple, data: Dict, errors: ValidationErrorDict, context: Context) -> None:
 
     value = data.get(key)
 
@@ -126,7 +128,7 @@ def ignore_empty(key: Tuple, data: Dict, errors: Dict, context: Dict) -> None:
         data.pop(key, None)
         raise StopOnError
 
-def convert_int(value: Any, context: Dict) -> int:
+def convert_int(value: Any) -> int:
 
     try:
         return int(value)
@@ -182,11 +184,10 @@ def limit_to_configured_maximum(config_option: str, default_limit: int) -> Calla
     defined by a configuration option, or if that is not set, a given int
     default_limit.
     '''
-    def callable(key, data, errors, context):
-
-        value = convert_int(data.get(key), context)
+    def callable(value):
+        value = convert_int(value)
         limit = int(config.get(config_option, default_limit))
         if value > limit:
-            data[key] = limit
+            return limit
 
     return callable

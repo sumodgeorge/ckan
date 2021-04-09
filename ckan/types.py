@@ -28,6 +28,7 @@ TuplizedKey = Tuple[Any, ...]
 
 DataDict = Dict[str, Any]
 ErrorDict = Dict[str, Union[List[Union[str, Dict[str, Any]]], str]]
+ValidationErrorDict = Dict[Tuple, List[str]]
 
 class Context(TypedDict, total=False):
     user: str

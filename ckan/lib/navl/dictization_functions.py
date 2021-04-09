@@ -1,12 +1,13 @@
 # encoding: utf-8
 
+from ckan.types import Context
 import copy
 import json
 
 import six
 from six import text_type
 from ckan.common import config, _
-from typing import Any, Callable, Dict, Iterable, List, Optional, Set, Tuple
+from typing import Any, Callable, Collection, Dict, Iterable, List, Optional, Sequence, Set, Tuple, Union, cast
 
 
 class Missing(object):
@@ -46,6 +47,8 @@ class State(object):
 
 
 class DictizationError(Exception):
+    error: Optional[str]
+
     def __str__(self):
         return six.ensure_str(self.__unicode__())
 
@@ -79,7 +82,7 @@ class StopOnError(DictizationError):
     pass
 
 
-def flattened_order_key(key: Iterable) -> Tuple:
+def flattened_order_key(key: Sequence) -> Tuple:
     '''order by key length first then values'''
 
     return tuple([len(key)] + list(key))
@@ -219,7 +222,7 @@ def augment_data(data: Dict, schema: Dict) -> Dict:
     return new_data
 
 
-def convert(converter: Callable, key: Any, converted_data: Dict, errors: Dict[str, List], context: Dict) -> None:
+def convert(converter: Callable, key: Any, converted_data: Dict, errors: Dict[str, List], context: Context) -> None:
 
     try:
         value = converter(converted_data.get(key))
@@ -255,7 +258,7 @@ def convert(converter: Callable, key: Any, converted_data: Dict, errors: Dict[st
         return
 
 
-def validate(data: Dict, schema: Dict, context: Optional[Dict]=None) -> Tuple[Dict, Dict]:
+def validate(data: Dict, schema: Dict, context: Optional[Context]=None) -> Tuple[Dict, Dict]:
     '''Validate an unflattened nested dict against a schema.'''
     context = context or {}
 
@@ -268,7 +271,7 @@ def validate(data: Dict, schema: Dict, context: Optional[Dict]=None) -> Tuple[Di
 
     # create a copy of the context which also includes the schema keys so
     # they can be used by the validators
-    validators_context = dict(context, schema_keys=list(schema.keys()))
+    validators_context = cast(Context, dict(context, schema_keys=list(schema.keys())))
 
     flattened = flatten_dict(data)
     converted_data, errors = _validate(flattened, schema, validators_context)
@@ -291,7 +294,7 @@ def validate(data: Dict, schema: Dict, context: Optional[Dict]=None) -> Tuple[Di
     return converted_data, errors_unflattened
 
 
-def _validate(data, schema, context):
+def _validate(data, schema, context: Context):
     '''validate a flattened dict against a schema'''
     converted_data = augment_data(data, schema)
     full_schema = make_full_schema(data, schema)
@@ -409,7 +412,7 @@ def unflatten(data: Dict) -> Dict:
     clean_lists = {}
 
     for flattend_key in sorted(data.keys(), key=flattened_order_key):
-        current_pos = unflattened
+        current_pos: Union[List, Dict] = unflattened
 
         for key in flattend_key[:-1]:
             try:
@@ -417,6 +420,7 @@ def unflatten(data: Dict) -> Dict:
             except IndexError:
                 while True:
                     new_pos = {}
+                    assert isinstance(current_pos, list)
                     current_pos.append(new_pos)
                     if key < len(current_pos):
                         break
@@ -493,7 +497,7 @@ def check_list(data_list: List, select_list: List, parent_path: Tuple=()) -> Lis
     return unmatched
 
 
-def resolve_string_key(data: Dict, string_key: str) -> Tuple[Any, Tuple]:
+def resolve_string_key(data: Union[Dict, List], string_key: str) -> Tuple[Any, Tuple]:
     """
     return (child, parent_path) if string_key is found in data
     raise DataError on incompatible types or key not found.
