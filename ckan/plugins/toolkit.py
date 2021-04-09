@@ -81,10 +81,6 @@ class _Toolkit(ModuleType):
         'StopOnError',
         # validation invalid exception
         'Invalid',
-        # old class for providing CLI interfaces
-        'CkanCommand',
-        # function for initializing CLI interfaces
-        'load_config',
         # function to promt the exception in CLI command
         'error_shout',
         # base class for IDatasetForm plugins
@@ -93,10 +89,6 @@ class _Toolkit(ModuleType):
         'DefaultGroupForm',
         # base class for IGroupForm plugins for orgs
         'DefaultOrganizationForm',
-        # response object for cookies etc
-        'response',
-        # Allow controllers to be created
-        'BaseController',
         # abort actions
         'abort',
         # allow redirections
@@ -166,9 +158,6 @@ class _Toolkit(ModuleType):
         from ckan.lib import mailer
 
         import ckan.common as converters
-        if six.PY2:
-            import ckan.lib.cli as old_cli
-            import pylons  # type: ignore
 
         # Allow class access to these modules
         self.__class__.ckan = ckan
@@ -329,21 +318,6 @@ For example: ``bar = toolkit.aslist(config.get('ckan.foo.bar', []))``
         t['CkanVersionException'] = CkanVersionException
         t['HelperError'] = HelperError
         t['enqueue_job'] = enqueue_job
-
-        if six.PY2:
-            t['response'] = pylons.response  # type: ignore
-            self.docstring_overrides['response'] = '''
-The Pylons response object.
-
-Pylons uses this object to generate the HTTP response it returns to the web
-browser. It has attributes like the HTTP status code, the response headers,
-content type, cookies, etc.
-
-'''
-            t['BaseController'] = base.BaseController  # type: ignore
-            # TODO: Sort these out
-            t['CkanCommand'] = old_cli.CkanCommand  # type: ignore
-            t['load_config'] = old_cli.load_config  # type: ignore
 
         # check contents list correct
         errors = set(t).symmetric_difference(set(self.contents))

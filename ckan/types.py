@@ -32,7 +32,7 @@ ValidationErrorDict = Dict[Tuple, List[str]]
 
 class Context(TypedDict, total=False):
     user: str
-    model: model_
+    model: 'model_'
     session: AlchemySession
 
     auth_user_obj: Optional['model_.User']

@@ -141,7 +141,7 @@ def load_environment(conf: CKANConfig):
 # A mapping of config settings that can be overridden by env vars.
 # Note: Do not remove the following lines, they are used in the docs
 # Start CONFIG_FROM_ENV_VARS
-CONFIG_FROM_ENV_VAR: Dict[str, str] = {
+CONFIG_FROM_ENV_VARS: Dict[str, str] = {
     'sqlalchemy.url': 'CKAN_SQLALCHEMY_URL',
     'ckan.datastore.write_url': 'CKAN_DATASTORE_WRITE_URL',
     'ckan.datastore.read_url': 'CKAN_DATASTORE_READ_URL',

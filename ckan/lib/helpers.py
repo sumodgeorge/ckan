@@ -1699,7 +1699,7 @@ def get_page_number(params: Dict, key: str='page', default: int=1) -> int:
 
 
 @core_helper
-def get_display_timezone() -> pytz.BaseTzInfo:
+def get_display_timezone() -> datetime.tzinfo:
     ''' Returns a pytz timezone for the display_timezone setting in the
     configuration file or UTC if not specified.
     :rtype: timezone
