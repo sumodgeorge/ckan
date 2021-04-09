@@ -1,26 +1,19 @@
-import datetime
 from functools import partial
 from typing import (
     Any, Callable, Dict, Iterable, List,
     Mapping, Optional, Tuple, Union,
-    TYPE_CHECKING, Type
+    TYPE_CHECKING
 )
-from sqlalchemy.orm.scoping import ScopedSession, scoped_session
+from sqlalchemy.orm.scoping import ScopedSession
 from typing_extensions import Protocol, TypedDict
 
-from sqlalchemy.orm import Session, Query
+from sqlalchemy.orm import Query
 
 if TYPE_CHECKING:
     import ckan.model as model_
 
 AlchemySession = ScopedSession
-# class AlchemySession(scoped_session):
-#     def __call__(self): ...
-#     def remove(self) -> None: ...
-#     def rollback(self) -> None: ...
-#     def commit(self) -> None: ...
-#     def configure(self, **kwargs: Any) -> None: ...
-
+Query = Query
 
 Config = Dict[str, Union[str, Mapping[str, str]]]
 
@@ -28,7 +21,7 @@ TuplizedKey = Tuple[Any, ...]
 
 DataDict = Dict[str, Any]
 ErrorDict = Dict[str, Union[List[Union[str, Dict[str, Any]]], str]]
-ValidationErrorDict = Dict[Tuple, List[str]]
+TuplizedErrorDict = Dict[Tuple, List[str]]
 
 class Context(TypedDict, total=False):
     user: str
@@ -62,16 +55,20 @@ class AuthResult(TypedDict, total=False):
 class ValueValidator(Protocol):
     def __call__(self, value: Any) -> Any: ...
 
+
 class ContextValidator(Protocol):
     def __call__(self, *, value: Any, context: Context) -> Any: ...
+
+
 class DataValidator(Protocol):
     def __call__(
         self,
         key: TuplizedKey,
         data: Dict[TuplizedKey, Any],
-        errors: ErrorDict,
+        errors: TuplizedErrorDict,
         context: Context,
     ) -> Any: ...
+
 
 Validator = Union[ValueValidator, ContextValidator, DataValidator]
 
