@@ -35,13 +35,17 @@ class Context(TypedDict, total=False):
     for_edit: Optional[bool]
     for_view: Optional[bool]
     ignore_auth: Optional[bool]
+    preview: Optional[bool]
 
     keep_email: Optional[bool]
     keep_apikey: Optional[bool]
 
+
+    group: Optional['model_.Group']
+    package: Optional['model_.Package']
+
     api_version: Optional[int]
     dataset_counts: Optional[Dict]
-    group: Optional['model_.Group']
     limits: Optional[Dict]
     metadata_modified: Optional[str]
     with_capacity: Optional[bool]
@@ -101,10 +105,13 @@ class PFeed(Protocol):
 
 
 class PUploader(Protocol):
-    ...
+    def __init__(self, object_type: str, old_filename: Optional[str]=None) -> None: ...
+    def upload(self, max_size: int=...) -> None: ...
+
 
 
 class PResourceUploader(Protocol):
-    ...
-
+    def __init__(self, resource: Dict) -> None: ...
+    def get_path(self, id: str) -> str: ...
+    def upload(self, id: str, max_size: int=...) -> None: ...
 CKANApp = Any

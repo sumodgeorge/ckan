@@ -14,7 +14,7 @@ from flask.blueprints import Blueprint
 from flask.wrappers import Response
 
 
-from ckan.types import Action, AuthFunction, PFeed, PUploader, PResourceUploader, Schema
+from ckan.types import Action, AuthFunction, Context, DataDict, PFeed, PUploader, PResourceUploader, Schema
 
 if TYPE_CHECKING:
     import click
@@ -393,7 +393,7 @@ class IResourceView(Interface):
         '''
         return {u'name': self.__class__.__name__}
 
-    def can_view(self, data_dict: Dict) -> bool:
+    def can_view(self, data_dict: DataDict) -> bool:
         u'''
         Returns whether the plugin can render a particular resource.
 
@@ -407,7 +407,7 @@ class IResourceView(Interface):
         :rtype: bool
         '''
 
-    def setup_template_variables(self, context: Dict, data_dict: Dict) -> Dict:
+    def setup_template_variables(self, context: Context, data_dict: DataDict) -> Dict:
         u'''
         Adds variables to be passed to the template being rendered.
 
@@ -424,7 +424,7 @@ class IResourceView(Interface):
         :rtype: dict
         '''
 
-    def view_template(self, context: Dict, data_dict: Dict) -> str:
+    def view_template(self, context: Context, data_dict: DataDict) -> str:
         u'''
         Returns a string representing the location of the template to be
         rendered when the view is displayed
@@ -442,7 +442,7 @@ class IResourceView(Interface):
         :rtype: string
         '''
 
-    def form_template(self, context: Dict, data_dict: Dict) -> str:
+    def form_template(self, context: Context, data_dict: DataDict) -> str:
         u'''
         Returns a string representing the location of the template to be
         rendered when the edit view form is displayed
@@ -508,7 +508,7 @@ class IResourcePreview(Interface):
 
         '''
 
-    def setup_template_variables(self, context, data_dict):
+    def setup_template_variables(self, context: Context, data_dict: DataDict) -> None:
         u'''
         Add variables to c just prior to the template being rendered.
         The ``data_dict`` contains the resource and the dataset.
@@ -516,7 +516,7 @@ class IResourcePreview(Interface):
         Change the url to a proxied domain if necessary.
         '''
 
-    def preview_template(self, context, data_dict):
+    def preview_template(self, context: Context, data_dict: DataDict) -> str:
         u'''
         Returns a string representing the location of the template to be
         rendered for the read page.
@@ -567,7 +567,7 @@ class IGroupController(Interface):
         '''
         pass
 
-    def before_view(self, data_dict: Dict) -> Dict:
+    def before_view(self, data_dict: DataDict) -> Dict:
         u'''
         Extensions will receive this before the group gets
         displayed. The dictionary passed will be the one that gets
@@ -607,7 +607,7 @@ class IOrganizationController(Interface):
         '''
         pass
 
-    def before_view(self, data_dict: Dict) -> Dict:
+    def before_view(self, data_dict: DataDict) -> Dict:
         u'''
         Extensions will receive this before the organization gets
         displayed. The dictionary passed will be the one that gets
@@ -641,7 +641,7 @@ class IPackageController(Interface):
         '''
         pass
 
-    def after_create(self, context: Dict, pkg_dict: Dict) -> None:
+    def after_create(self, context: Context, pkg_dict: Dict) -> None:
         u'''
         Extensions will receive the validated data dict after the dataset
         has been created (Note that the create method will return a dataset
@@ -650,21 +650,21 @@ class IPackageController(Interface):
         '''
         pass
 
-    def after_update(self, context: Dict, pkg_dict: Dict) -> None:
+    def after_update(self, context: Context, pkg_dict: Dict) -> None:
         u'''
         Extensions will receive the validated data dict after the dataset
         has been updated.
         '''
         pass
 
-    def after_delete(self, context: Dict, pkg_dict: Dict) -> None:
+    def after_delete(self, context: Context, pkg_dict: Dict) -> None:
         u'''
         Extensions will receive the data dict (typically containing
         just the dataset id) after the dataset has been deleted.
         '''
         pass
 
-    def after_show(self, context: Dict, pkg_dict: Dict) -> None:
+    def after_show(self, context: Context, pkg_dict: Dict) -> None:
         u'''
         Extensions will receive the validated data dict after the dataset
         is ready for display.
@@ -725,7 +725,7 @@ class IResourceController(Interface):
     Hook into the resource view.
     '''
 
-    def before_create(self, context: Dict, resource: Dict) -> None:
+    def before_create(self, context: Context, resource: Dict) -> None:
         u'''
         Extensions will receive this before a resource is created.
 
@@ -738,7 +738,7 @@ class IResourceController(Interface):
         '''
         pass
 
-    def after_create(self, context: Dict, resource: Dict) -> None:
+    def after_create(self, context: Context, resource: Dict) -> None:
         u'''
         Extensions will receive this after a resource is created.
 
@@ -754,7 +754,7 @@ class IResourceController(Interface):
         '''
         pass
 
-    def before_update(self, context: Dict, current: Dict, resource: Dict) -> None:
+    def before_update(self, context: Context, current: Dict, resource: Dict) -> None:
         u'''
         Extensions will receive this before a resource is updated.
 
@@ -769,7 +769,7 @@ class IResourceController(Interface):
         '''
         pass
 
-    def after_update(self, context: Dict, resource: Dict) -> None:
+    def after_update(self, context: Context, resource: Dict) -> None:
         u'''
         Extensions will receive this after a resource is updated.
 
@@ -785,7 +785,7 @@ class IResourceController(Interface):
         '''
         pass
 
-    def before_delete(self, context: Dict, resource, resources: List[Dict]) -> None:
+    def before_delete(self, context: Context, resource, resources: List[Dict]) -> None:
         u'''
         Extensions will receive this before a resource is deleted.
 
@@ -803,7 +803,7 @@ class IResourceController(Interface):
         '''
         pass
 
-    def after_delete(self, context: Dict, resources: List[Dict]) -> None:
+    def after_delete(self, context: Context, resources: List[Dict]) -> None:
         u'''
         Extensions will receive this after a resource is deleted.
 
@@ -898,7 +898,7 @@ class IConfigurer(Interface):
         :param config: ``config`` object
         '''
 
-    def update_config_schema(self, schema: Dict) -> Dict:
+    def update_config_schema(self, schema: Schema) -> Dict:
         u'''
         Return a schema with the runtime-editable config options.
 
@@ -1222,7 +1222,7 @@ class IDatasetForm(Interface):
 
         '''
 
-    def setup_template_variables(self, context: Dict, data_dict: Dict) -> None:
+    def setup_template_variables(self, context: Context, data_dict: DataDict) -> None:
         u'''Add variables to the template context for use in dataset templates.
 
         This function is called before a dataset template is rendered. If you
@@ -1319,7 +1319,7 @@ class IDatasetForm(Interface):
         :rtype: string
         '''
 
-    def validate(self, context: Dict, data_dict: Dict, schema: Dict, action: str) -> Tuple[Dict, Dict]:
+    def validate(self, context: Context, data_dict: DataDict, schema: Schema, action: str) -> Tuple[Dict, Dict]:
         u'''Customize validation of datasets.
 
         When this method is implemented it is used to perform all validation
@@ -1505,19 +1505,19 @@ class IGroupForm(Interface):
         format suitable for the form (optional)
         '''
 
-    def check_data_dict(self, data_dict: Dict) -> None:
+    def check_data_dict(self, data_dict: DataDict) -> None:
         u'''
         Check if the return data is correct.
 
         raise a DataError if not.
         '''
 
-    def setup_template_variables(self, context: Dict, data_dict: Dict) -> None:
+    def setup_template_variables(self, context: Context, data_dict: DataDict) -> None:
         u'''
         Add variables to c just prior to the template being rendered.
         '''
 
-    def validate(self, context: Dict, data_dict: Dict, schema: Dict, action: str) -> Tuple[Dict, Dict]:
+    def validate(self, context: Context, data_dict: DataDict, schema: Schema, action: str) -> Tuple[Dict, Dict]:
         u'''Customize validation of groups.
 
         When this method is implemented it is used to perform all validation
@@ -2011,7 +2011,7 @@ class IApiToken(Interface):
         """
         return data
 
-    def postprocess_api_token(self, data: Dict[str, Any], jti: str, data_dict: Dict[str, Any]) -> Dict[str, Any]:
+    def postprocess_api_token(self, data: Dict[str, Any], jti: str, data_dict: DataDict[str, Any]) -> Dict[str, Any]:
         """Encode additional information into API Token.
 
         Allows passing any kind of additional information into API
@@ -2035,7 +2035,7 @@ class IApiToken(Interface):
         """
         return data
 
-    def add_extra_fields(self, data_dict: Dict) -> Dict:
+    def add_extra_fields(self, data_dict: DataDict) -> Dict:
         """Provide additional information alongside with API Token.
 
         Any extra information that is not itself a part of a token,

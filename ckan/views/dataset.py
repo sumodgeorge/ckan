@@ -1,4 +1,5 @@
 # encoding: utf-8
+from ckan.types import Context
 import logging
 from collections import OrderedDict
 from functools import partial
@@ -51,7 +52,7 @@ dataset = Blueprint(
 )
 
 
-def _setup_template_variables(context:Dict, data_dict:Dict, package_type:Optional[str]=None) -> None:
+def _setup_template_variables(context:Context, data_dict:Dict, package_type:Optional[str]=None) -> None:
     return lookup_package_plugin(package_type).setup_template_variables(
         context, data_dict
     )
@@ -158,7 +159,7 @@ def _form_save_redirect(pkg_name, action, package_type=None):
     return h.redirect_to(url)
 
 
-def _get_package_type(id:str) -> Optional[str]:
+def _get_package_type(id:str) -> str:
     """
     Given the id of a package this method will return the type of the
     package, or 'dataset' if no type is currently set
@@ -166,7 +167,7 @@ def _get_package_type(id:str) -> Optional[str]:
     pkg = model.Package.get(id)
     if pkg:
         return pkg.type or u'dataset'
-    return None
+    return u'dataset'
 
 
 def _get_search_details() -> Dict:

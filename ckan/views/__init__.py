@@ -1,11 +1,16 @@
 # encoding: utf-8
 
+import logging
+
+from typing import Any, Callable, Optional
+
 from sqlalchemy import inspect
 from ckan.common import asbool
 import six
 from six import text_type
 from six.moves.urllib.parse import quote  # type: ignore
 from werkzeug.utils import import_string, cached_property
+from flask.wrappers import Response
 
 import ckan.model as model
 import ckan.lib.api_token as api_token
@@ -14,9 +19,7 @@ from ckan.lib.helpers import redirect_to as redirect
 from ckan.lib.i18n import get_locales_from_config
 import ckan.plugins as p
 
-import logging
-from typing import Any, Callable, Optional
-from flask.wrappers import Response
+
 log = logging.getLogger(__name__)
 
 APIKEY_HEADER_NAME_KEY = u'apikey_header_name'
@@ -211,7 +214,7 @@ def _identify_user_default():
             g.user = g.userobj.name
 
 
-def _get_user_for_apikey():
+def _get_user_for_apikey() -> Optional[model.User]:
     apikey_header_name = config.get(APIKEY_HEADER_NAME_KEY,
                                     APIKEY_HEADER_NAME_DEFAULT)
     apikey = request.headers.get(apikey_header_name, u'')

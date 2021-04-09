@@ -1,5 +1,6 @@
 # encoding: utf-8
 import cgi
+from ckan.types import Context
 import json
 import logging
 from typing import Dict, Tuple
@@ -292,7 +293,7 @@ class CreateView(MethodView):
         self, package_type: str, id: str, data: Optional[Dict]=None, errors: Optional[Dict]=None, error_summary: Optional[Dict]=None
     ) -> str:
         # get resources for sidebar
-        context = {
+        context: Context = {
             u'model': model,
             u'session': model.Session,
             u'user': g.user,
@@ -338,7 +339,7 @@ class CreateView(MethodView):
 
 class EditView(MethodView):
     def _prepare(self, id):
-        context = {
+        context: Context = {
             u'model': model,
             u'session': model.Session,
             u'api_version': 3,
@@ -443,7 +444,7 @@ class EditView(MethodView):
 
 class DeleteView(MethodView):
     def _prepare(self, id):
-        context = {
+        context: Context = {
             u'model': model,
             u'session': model.Session,
             u'user': g.user,
@@ -517,7 +518,7 @@ class DeleteView(MethodView):
 
 def views(package_type: str, id: str, resource_id: str) -> str:
     package_type = _get_package_type(id)
-    context = {
+    context: Context = {
         u'model': model,
         u'session': model.Session,
         u'user': g.user,
@@ -616,8 +617,8 @@ def view(package_type: str, id: str, resource_id: str, view_id: Optional[str]=No
 
 # FIXME: could anyone think about better name?
 class EditResourceViewView(MethodView):
-    def _prepare(self, id, resource_id) -> Tuple[Dict, Dict]:
-        context = {
+    def _prepare(self, id, resource_id) -> Tuple[Context, Dict]:
+        context: Context = {
             u'model': model,
             u'session': model.Session,
             u'user': g.user,
@@ -897,7 +898,7 @@ def datapreview(package_type: str, id: str, resource_id: str) -> str:
     img tag where the image is loaded directly or an iframe that embeds a
     webpage, or a recline preview.
     """
-    context = {
+    context: Context = {
         u'model': model,
         u'session': model.Session,
         u'user': g.user,
