@@ -470,7 +470,7 @@ def _url_for_flask(*args, **kw):
         # based on `ckan.site_url`, which is essentially what we did on Pylons
         protocol, host = get_site_protocol_and_host()
         # these items cannot be empty because CKAN won't start otherwise
-        assert (protocol, host) is not (None, None)
+        assert (protocol, host) != (None, None)
         parts = urlparse(my_url)
         my_url = urlunparse((protocol, host, parts.path, parts.params,
                              parts.query, parts.fragment))

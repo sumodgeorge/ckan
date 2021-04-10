@@ -2011,7 +2011,7 @@ class IApiToken(Interface):
         """
         return data
 
-    def postprocess_api_token(self, data: Dict[str, Any], jti: str, data_dict: DataDict[str, Any]) -> Dict[str, Any]:
+    def postprocess_api_token(self, data: Dict[str, Any], jti: str, data_dict: Dict[str, Any]) -> Dict[str, Any]:
         """Encode additional information into API Token.
 
         Allows passing any kind of additional information into API
