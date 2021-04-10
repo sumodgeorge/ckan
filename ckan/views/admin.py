@@ -1,10 +1,12 @@
 # encoding: utf-8
 
 import logging
+from typing import Dict, List, Union
 
 from ckan.views.home import CACHE_PARAMETERS
 from flask import Blueprint
 from flask.views import MethodView
+from flask.wrappers import Response
 
 import ckan.lib.app_globals as app_globals
 import ckan.lib.base as base
@@ -13,22 +15,23 @@ import ckan.lib.navl.dictization_functions as dict_fns
 import ckan.logic as logic
 import ckan.model as model
 from ckan.common import g, _, config, request
-from typing import Union
-from flask.wrappers import Response
+
+from ckan.types import Context, Query
+
 
 log = logging.getLogger(__name__)
 
 admin = Blueprint(u'admin', __name__, url_prefix=u'/ckan-admin')
 
 
-def _get_sysadmins():
+def _get_sysadmins() -> Query:
     q = model.Session.query(model.User).filter(
         model.User.sysadmin.is_(True),  # type: ignore
         model.User.state == u'active')
     return q
 
 
-def _get_config_options():
+def _get_config_options() -> Dict[str, List[Dict[str, str]]]:
     homepages = [{
         u'value': u'1',
         u'text': (u'Introductory area, search, featured'
@@ -45,7 +48,7 @@ def _get_config_options():
     return dict(homepages=homepages)
 
 
-def _get_config_items():
+def _get_config_items() -> List[str]:
     return [
         u'ckan.site_title', u'ckan.main_css', u'ckan.site_description',
         u'ckan.site_logo', u'ckan.site_about', u'ckan.site_intro_text',
@@ -56,7 +59,7 @@ def _get_config_items():
 @admin.before_request
 def before_request() -> None:
     try:
-        context = {"model": model, "user": g.user, "auth_user_obj": g.userobj}
+        context: Context = {"model": model, "user": g.user, "auth_user_obj": g.userobj}
         logic.check_access(u'sysadmin', context)
     except logic.NotAuthorized:
         base.abort(403, _(u'Need to be system administrator to administer'))

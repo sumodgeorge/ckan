@@ -3,7 +3,7 @@
 import os
 import logging
 import html
-from typing import Any, Dict
+from typing import Any, Callable, Dict, List, Optional, Tuple
 
 from flask import Blueprint, make_response
 import six
@@ -40,8 +40,8 @@ API_MAX_VERSION = 3
 api = Blueprint(u'api', __name__, url_prefix=u'/api')
 
 
-def _finish(status_int, response_data=None,
-            content_type=u'text', headers=None):
+def _finish(status_int: int, response_data: Any=None,
+            content_type: str=u'text', headers: Optional[Dict[str, Any]]=None) -> Response:
     u'''When a controller method has completed, call this method
     to prepare the response.
 
@@ -80,9 +80,9 @@ def _finish(status_int, response_data=None,
     return make_response((response_msg, status_int, headers))
 
 
-def _finish_ok(response_data=None,
-               content_type=u'json',
-               resource_location=None):
+def _finish_ok(response_data: Any=None,
+               content_type: str=u'json',
+               resource_location: Optional[str]=None) -> Response:
     u'''If a controller method has completed successfully then
     calling this method will prepare the response.
 
@@ -114,18 +114,18 @@ def _finish_ok(response_data=None,
     return _finish(status_int, response_data, content_type, headers)
 
 
-def _finish_bad_request(extra_msg=None):
+def _finish_bad_request(extra_msg: str=None) -> Response:
     response_data = _(u'Bad request')
     if extra_msg:
         response_data = u'%s - %s' % (response_data, extra_msg)
     return _finish(400, response_data, u'json')
 
 
-def _wrap_jsonp(callback, response_msg):
+def _wrap_jsonp(callback: str, response_msg: str) -> str:
     return u'{0}({1});'.format(callback, response_msg)
 
 
-def _get_request_data(try_url_params=False):
+def _get_request_data(try_url_params: bool=False):
     u'''Returns a dictionary, extracted from a request.
 
     If there is no data, None or "" is returned.
@@ -147,7 +147,7 @@ def _get_request_data(try_url_params=False):
         be a list of strings, otherwise just a string.
 
     '''
-    def mixed(multi_dict):
+    def mixed(multi_dict) -> Dict[str, Any]:
         u'''Return a dict with values being lists if they have more than one
            item or a string otherwise
         '''
@@ -477,7 +477,7 @@ api.add_url_rule(u'/<int(min=3, max={0}):ver>/action/<logic_function>'.format(
 
 # Util API
 
-util_rules = [
+util_rules: List[Tuple[str, Callable]] = [
     (u'/util/dataset/autocomplete', dataset_autocomplete),
     (u'/util/user/autocomplete', user_autocomplete),
     (u'/util/tag/autocomplete', tag_autocomplete),

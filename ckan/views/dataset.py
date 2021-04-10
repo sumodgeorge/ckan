@@ -27,7 +27,7 @@ from ckan.lib.plugins import lookup_package_plugin
 from ckan.lib.render import TemplateNotFound
 from ckan.lib.search import SearchError, SearchQueryError, SearchIndexError
 from ckan.views import LazyView
-from typing import Dict, Optional, Union
+from typing import Any, Dict, Iterable, List, Optional, Sequence, Tuple, Union
 from flask.blueprints import Blueprint
 from flask.wrappers import Response
 
@@ -74,6 +74,8 @@ def _encode_params(params):
             for k, v in params]
 
 
+Params = List[Tuple[str, Any]]
+
 def url_with_params(url: str, params: Params) -> str:
     params = _encode_params(params)
     return url + u'?' + urlencode(params)
@@ -107,7 +109,7 @@ def remove_field(package_type: Optional[str], key: str, value: Optional[str]=Non
     )
 
 
-def _sort_by(params_nosort, package_type, fields):
+def _sort_by(params_nosort: Params, package_type: str, fields: Iterable[Tuple[str, str]]) -> str:
     """Sort by the given list of fields.
 
     Each entry in the list is a 2-tuple: (fieldname, sort_order)
@@ -122,13 +124,13 @@ def _sort_by(params_nosort, package_type, fields):
     return search_url(params, package_type)
 
 
-def _pager_url(params_nopage, package_type, q=None, page=None):
+def _pager_url(params_nopage: Params, package_type: str, q=None, page=None) -> str:
     params = list(params_nopage)
     params.append((u'page', page))
     return search_url(params, package_type)
 
 
-def _tag_string_to_list(tag_string):
+def _tag_string_to_list(tag_string: str) -> List[Dict[str, str]]:
     """This is used to change tags from a sting to a list of dicts.
     """
     out = []
@@ -139,7 +141,7 @@ def _tag_string_to_list(tag_string):
     return out
 
 
-def _form_save_redirect(pkg_name, action, package_type=None):
+def _form_save_redirect(pkg_name: str, action: str, package_type: Optional[str]=None) -> Response:
     """This redirects the user to the CKAN package/read page,
     unless there is request parameter giving an alternate location,
     perhaps an external website.
@@ -159,7 +161,7 @@ def _form_save_redirect(pkg_name, action, package_type=None):
     return h.redirect_to(url)
 
 
-def _get_package_type(id:str) -> str:
+def _get_package_type(id: str) -> str:
     """
     Given the id of a package this method will return the type of the
     package, or 'dataset' if no type is currently set
@@ -170,7 +172,7 @@ def _get_package_type(id:str) -> str:
     return u'dataset'
 
 
-def _get_search_details() -> Dict:
+def _get_search_details() -> Dict[str, Any]:
     fq = u''
 
     # fields_grouped will contain a dict of params containing
@@ -391,7 +393,7 @@ def search(package_type: str) -> str:
 
 
 def resources(package_type: str, id: str) -> Union[Response, str]:
-    context = {
+    context: Context = {
         u'model': model,
         u'session': model.Session,
         u'user': g.user,
@@ -433,7 +435,7 @@ def resources(package_type: str, id: str) -> Union[Response, str]:
 
 
 def read(package_type: str, id: str) -> Union[Response, str]:
-    context = {
+    context: Context = {
         u'model': model,
         u'session': model.Session,
         u'user': g.user,
@@ -531,12 +533,12 @@ def read(package_type: str, id: str) -> Union[Response, str]:
 
 
 class CreateView(MethodView):
-    def _is_save(self):
+    def _is_save(self) -> bool:
         return u'save' in request.form
 
-    def _prepare(self):
+    def _prepare(self) -> Context:
 
-        context = {
+        context: Context = {
             u'model': model,
             u'session': model.Session,
             u'user': g.user,
@@ -711,8 +713,8 @@ class CreateView(MethodView):
 
 
 class EditView(MethodView):
-    def _prepare(self):
-        context = {
+    def _prepare(self) -> Context:
+        context: Context = {
             u'model': model,
             u'session': model.Session,
             u'user': g.user,
@@ -858,8 +860,8 @@ class EditView(MethodView):
 
 
 class DeleteView(MethodView):
-    def _prepare(self):
-        context = {
+    def _prepare(self) -> Context:
+        context: Context = {
             u'model': model,
             u'session': model.Session,
             u'user': g.user,
@@ -912,7 +914,7 @@ class DeleteView(MethodView):
 def follow(package_type: str, id: str) -> Response:
     """Start following this dataset.
     """
-    context = {
+    context: Context = {
         u'model': model,
         u'session': model.Session,
         u'user': g.user,
@@ -967,7 +969,7 @@ def unfollow(package_type: str, id: str) -> Response:
 
 
 def followers(package_type: str, id: Optional[str]=None) -> Union[Response, str]:
-    context = {
+    context: Context = {
         u'model': model,
         u'session': model.Session,
         u'user': g.user,
@@ -1007,8 +1009,8 @@ def followers(package_type: str, id: Optional[str]=None) -> Union[Response, str]
 
 
 class GroupView(MethodView):
-    def _prepare(self, id):
-        context = {
+    def _prepare(self, id) -> Tuple[Context, Dict[str, Any]]:
+        context: Context = {
             u'model': model,
             u'session': model.Session,
             u'user': g.user,
@@ -1091,7 +1093,7 @@ class GroupView(MethodView):
 def activity(package_type: str, id: str) -> Union[Response, str]:
     """Render this package's public activity stream page.
     """
-    context = {
+    context: Context = {
         u'model': model,
         u'session': model.Session,
         u'user': g.user,
@@ -1131,7 +1133,7 @@ def changes(id: str, package_type: Optional[str]=None) -> Union[Response, str]:
     Shows the changes to a dataset in one particular activity stream item.
     '''
     activity_id = id
-    context = {
+    context: Context = {
         u'model': model, u'session': model.Session,
         u'user': g.user, u'auth_user_obj': g.userobj
     }
@@ -1250,7 +1252,7 @@ def changes_multiple(package_type: Optional[str]=None) -> Union[Response, str]:
 
 
 def collaborators_read(package_type: str, id: str) -> Union[Response, str]:
-    context = {u'model': model, u'user': g.user}
+    context: Context = {u'model': model, u'user': g.user}
     data_dict = {u'id': id}
 
     try:
@@ -1268,7 +1270,7 @@ def collaborators_read(package_type: str, id: str) -> Union[Response, str]:
 
 
 def collaborator_delete(package_type: str, id: str, user_id) -> Response:
-    context = {u'model': model, u'user': g.user}
+    context: Context = {u'model': model, u'user': g.user}
 
     try:
         get_action(u'package_collaborator_delete')(context, {
@@ -1289,7 +1291,7 @@ def collaborator_delete(package_type: str, id: str, user_id) -> Response:
 class CollaboratorEditView(MethodView):
 
     def post(self, package_type: str, id: str) -> Response:
-        context = {u'model': model, u'user': g.user}
+        context: Context = {u'model': model, u'user': g.user}
 
         try:
             form_dict = logic.clean_dict(
@@ -1327,7 +1329,7 @@ class CollaboratorEditView(MethodView):
         return h.redirect_to(u'dataset.collaborators_read', id=id)
 
     def get(self, package_type: str, id) -> Union[Response, str]:
-        context = {u'model': model, u'user': g.user}
+        context: Context = {u'model': model, u'user': g.user}
         data_dict = {u'id': id}
 
         try:

@@ -3,6 +3,8 @@
 import logging
 import re
 from collections import OrderedDict
+from typing import Any, Dict, Optional, Union, cast
+from typing_extensions import Literal
 
 import six
 from six import string_types
@@ -23,8 +25,8 @@ from ckan.views.dataset import _get_search_details
 
 from flask import Blueprint
 from flask.views import MethodView
-from typing import Dict, Optional, Union
 from flask.wrappers import Response
+from ckan.types import Action, AuthResult, Context, DataDict, Schema
 
 
 NotFound = logic.NotFound
@@ -44,7 +46,7 @@ lookup_group_controller = lib_plugins.lookup_group_controller
 is_org = False
 
 
-def _get_group_template(template_type, group_type=None):
+def _get_group_template(template_type: str, group_type: Optional[str]=None) -> str:
     group_plugin = lookup_group_plugin(group_type)
     method = getattr(group_plugin, template_type)
     try:
@@ -55,37 +57,37 @@ def _get_group_template(template_type, group_type=None):
         return method()
 
 
-def _db_to_form_schema(group_type=None):
+def _db_to_form_schema(group_type=None) -> Schema:
     u'''This is an interface to manipulate data from the database
      into a format suitable for the form (optional)'''
     return lookup_group_plugin(group_type).db_to_form_schema()
 
 
-def _setup_template_variables(context, data_dict, group_type=None):
+def _setup_template_variables(context: Context, data_dict: DataDict, group_type: Optional[str]=None) -> None:
     if u'type' not in data_dict:
         data_dict[u'type'] = group_type
     return lookup_group_plugin(group_type).\
         setup_template_variables(context, data_dict)
 
 
-def _replace_group_org(string):
+def _replace_group_org(string: str) -> str:
     u''' substitute organization for group if this is an org'''
     if is_org:
         return re.sub(u'^group', u'organization', string)
     return string
 
 
-def _action(action_name):
+def _action(action_name: str) -> Action:
     u''' select the correct group/org action '''
     return get_action(_replace_group_org(action_name))
 
 
-def _check_access(action_name, *args, **kw):
+def _check_access(action_name: str, *args, **kw) -> Literal[True]:
     u''' select the correct group/org check_access '''
     return check_access(_replace_group_org(action_name), *args, **kw)
 
 
-def _force_reindex(grp):
+def _force_reindex(grp: Dict[str, Any]) -> None:
     u''' When the group name has changed, we need to force a reindex
     of the datasets within the group, otherwise they will stop
     appearing on the read page for the group (as they're connected via
@@ -95,7 +97,7 @@ def _force_reindex(grp):
         search.rebuild(dataset.name)
 
 
-def _guess_group_type(expecting_name=False):
+def _guess_group_type(expecting_name: bool=False) -> str:
     u"""
             Guess the type of group from the URL.
             * The default url '/group/xyz' returns None
@@ -125,7 +127,7 @@ def index(group_type: str, is_organization: bool) -> str:
     page = h.get_page_number(request.params) or 1
     items_per_page = int(config.get(u'ckan.datasets_per_page', 20))
 
-    context = {
+    context: Context = {
         u'model': model,
         u'session': model.Session,
         u'user': g.user,
@@ -205,10 +207,10 @@ def index(group_type: str, is_organization: bool) -> str:
         _get_group_template(u'index_template', group_type), extra_vars)
 
 
-def _read(id, limit, group_type):
+def _read(id: Optional[str], limit: int, group_type: str) -> Dict[str, Any]:
     u''' This is common code used by both read and bulk_process'''
     extra_vars = {}
-    context = {
+    context: Context = {
         u'model': model,
         u'session': model.Session,
         u'user': g.user,
@@ -379,16 +381,16 @@ def _read(id, limit, group_type):
     return extra_vars
 
 
-def _update_facet_titles(facets, group_type):
+def _update_facet_titles(facets, group_type) -> Dict[str, Any]:
     for plugin in plugins.PluginImplementations(plugins.IFacets):
         facets = plugin.group_facets(facets, group_type, None)
     return facets
 
 
-def _get_group_dict(id, group_type):
+def _get_group_dict(id: str, group_type: str) -> Dict[str, Any]:
     u''' returns the result of group_show action or aborts if there is a
     problem '''
-    context = {
+    context: Context = {
         u'model': model,
         u'session': model.Session,
         u'user': g.user,
@@ -403,10 +405,10 @@ def _get_group_dict(id, group_type):
         base.abort(404, _(u'Group not found'))
 
 
-def read(group_type: str, is_organization: bool, id: Optional[str]=None, limit: int=20) -> str:
+def read(group_type: str, is_organization: bool, id: Optional[str]=None, limit: int=20) -> Union[str, Response]:
     extra_vars = {}
     set_org(is_organization)
-    context = {
+    context: Context = {
         u'model': model,
         u'session': model.Session,
         u'user': g.user,
@@ -456,7 +458,7 @@ def read(group_type: str, is_organization: bool, id: Optional[str]=None, limit: 
     extra_vars["group_dict"] = group_dict
 
     return base.render(
-        _get_group_template(u'read_template', g.group_dict['type']),
+        _get_group_template(u'read_template', cast(str, g.group_dict['type'])),
         extra_vars)
 
 
@@ -464,7 +466,7 @@ def activity(id: str, group_type: str, is_organization: bool, offset: int=0) -> 
     u'''Render this group's public activity stream page.'''
     extra_vars = {}
     set_org(is_organization)
-    context = {
+    context: Context = {
         u'model': model,
         u'session': model.Session,
         u'user': g.user,
@@ -507,7 +509,7 @@ def activity(id: str, group_type: str, is_organization: bool, offset: int=0) -> 
 def about(id: str, group_type: str, is_organization: bool) -> str:
     extra_vars = {}
     set_org(is_organization)
-    context = {u'model': model, u'session': model.Session, u'user': g.user}
+    context: Context = {u'model': model, u'session': model.Session, u'user': g.user}
     group_dict = _get_group_dict(id, group_type)
     group_type = group_dict['type']
     _setup_template_variables(context, {u'id': id}, group_type=group_type)
@@ -528,10 +530,10 @@ def about(id: str, group_type: str, is_organization: bool) -> str:
 def members(id: str, group_type: str, is_organization: bool) -> str:
     extra_vars = {}
     set_org(is_organization)
-    context = {u'model': model, u'session': model.Session, u'user': g.user}
+    context: Context = {u'model': model, u'session': model.Session, u'user': g.user}
 
     try:
-        data_dict = {u'id': id}
+        data_dict: Dict[str, Any] = {u'id': id}
         check_access(u'group_edit_permissions', context, data_dict)
         members = get_action(u'member_list')(context, {
             u'id': id,
@@ -566,7 +568,7 @@ def member_delete(id: str, group_type: str, is_organization: bool) -> Union[Resp
     if u'cancel' in request.params:
         return h.redirect_to(u'{}.members'.format(group_type), id=id)
 
-    context = {u'model': model, u'session': model.Session, u'user': g.user}
+    context: Context = {u'model': model, u'session': model.Session, u'user': g.user}
 
     try:
         _check_access(u'group_member_delete', context, {u'id': id})
@@ -612,7 +614,7 @@ def history(id: str, group_type: str, is_organization: bool) -> Response:
 def follow(id: str, group_type: str, is_organization: bool) -> Response:
     u'''Start following this group.'''
     set_org(is_organization)
-    context = {u'model': model, u'session': model.Session, u'user': g.user}
+    context: Context = {u'model': model, u'session': model.Session, u'user': g.user}
     data_dict = {u'id': id}
     try:
         get_action(u'follow_group')(context, data_dict)
@@ -632,7 +634,7 @@ def follow(id: str, group_type: str, is_organization: bool) -> Response:
 def unfollow(id: str, group_type: str, is_organization: bool) -> Response:
     u'''Stop following this group.'''
     set_org(is_organization)
-    context = {u'model': model, u'session': model.Session, u'user': g.user}
+    context: Context = {u'model': model, u'session': model.Session, u'user': g.user}
     data_dict = {u'id': id}
     try:
         get_action(u'unfollow_group')(context, data_dict)
@@ -652,7 +654,7 @@ def unfollow(id: str, group_type: str, is_organization: bool) -> Response:
 def followers(id: str, group_type: str, is_organization: bool) -> str:
     extra_vars = {}
     set_org(is_organization)
-    context = {u'model': model, u'session': model.Session, u'user': g.user}
+    context: Context = {u'model': model, u'session': model.Session, u'user': g.user}
     group_dict = _get_group_dict(id, group_type)
     try:
         followers = \
@@ -700,11 +702,11 @@ def admins(id: str, group_type: str, is_organization: bool) -> str:
 class BulkProcessView(MethodView):
     u''' Bulk process view'''
 
-    def _prepare(self, group_type):
+    def _prepare(self, group_type: str) -> Context:
 
         # check we are org admin
 
-        context = {
+        context: Context = {
             u'model': model,
             u'session': model.Session,
             u'user': g.user,
@@ -718,7 +720,7 @@ class BulkProcessView(MethodView):
         extra_vars = {}
         set_org(is_organization)
         context = self._prepare(group_type)
-        data_dict = {u'id': id, u'type': group_type}
+        data_dict: Dict[str, Any] = {u'id': id, u'type': group_type}
         data_dict['include_datasets'] = False
         try:
             group_dict = _action(u'group_show')(context, data_dict)
@@ -827,7 +829,7 @@ class BulkProcessView(MethodView):
 class CreateGroupView(MethodView):
     u'''Create group view '''
 
-    def _prepare(self, data=None):
+    def _prepare(self, data: Dict[str, Any]=None) -> Context:
         if data and u'type' in data:
             group_type = data['type']
         else:
@@ -835,7 +837,7 @@ class CreateGroupView(MethodView):
         if data:
             data['type'] = group_type
 
-        context = {
+        context: Context = {
             u'model': model,
             u'session': model.Session,
             u'user': g.user,
@@ -876,7 +878,7 @@ class CreateGroupView(MethodView):
             return self.get(group_type, is_organization,
                             data_dict, errors, error_summary)
 
-        return h.redirect_to(group['type'] + u'.read', id=group['name'])
+        return h.redirect_to(cast(str, group['type']) + u'.read', id=group['name'])
 
     def get(self, group_type: str, is_organization: bool,
             data: Optional[Dict]=None, errors: Optional[Dict]=None, error_summary: Optional[Dict]=None) -> str:
@@ -920,10 +922,10 @@ class CreateGroupView(MethodView):
 class EditGroupView(MethodView):
     u''' Edit group view'''
 
-    def _prepare(self, id):
+    def _prepare(self, id: str) -> Context:
         data_dict = {u'id': id, u'include_datasets': False}
 
-        context = {
+        context: Context = {
             u'model': model,
             u'session': model.Session,
             u'user': g.user,
@@ -966,9 +968,10 @@ class EditGroupView(MethodView):
         except ValidationError as e:
             errors = e.error_dict
             error_summary = e.error_summary
+            assert id
             return self.get(id, group_type, is_organization,
                             data_dict, errors, error_summary)
-        return h.redirect_to(group[u'type'] + u'.read', id=group[u'name'])
+        return h.redirect_to(cast(str, group[u'type']) + u'.read', id=group[u'name'])
 
     def get(self, id: str, group_type: str, is_organization: bool,
             data: Optional[Dict]=None, errors: Optional[Dict]=None, error_summary: Optional[Dict]=None) -> str:
@@ -1011,8 +1014,8 @@ class EditGroupView(MethodView):
 class DeleteGroupView(MethodView):
     u'''Delete group view '''
 
-    def _prepare(self, id=None):
-        context = {
+    def _prepare(self, id: Optional[str]=None) -> Context:
+        context: Context = {
             u'model': model,
             u'session': model.Session,
             u'user': g.user,
@@ -1047,7 +1050,7 @@ class DeleteGroupView(MethodView):
 
         return h.redirect_to(u'{}.index'.format(group_type))
 
-    def get(self, group_type: str, is_organization: bool, id: bool=None) -> str:
+    def get(self, group_type: str, is_organization: bool, id: Optional[str]=None) -> Union[str, Response]:
         extra_vars = {}
         set_org(is_organization)
         context = self._prepare(id)
@@ -1068,8 +1071,8 @@ class DeleteGroupView(MethodView):
 class MembersGroupView(MethodView):
     u'''New members group view'''
 
-    def _prepare(self, id=None):
-        context = {
+    def _prepare(self, id: Optional[str]=None) -> Context:
+        context: Context = {
             u'model': model,
             u'session': model.Session,
             u'user': g.user
@@ -1121,7 +1124,7 @@ class MembersGroupView(MethodView):
         set_org(is_organization)
         context = self._prepare(id)
         user = request.params.get(u'user')
-        data_dict = {u'id': id}
+        data_dict: Dict[str, Any] = {u'id': id}
         data_dict['include_datasets'] = False
         group_dict = _action(u'group_show')(context, data_dict)
         roles = _action(u'member_roles_list')(context, {

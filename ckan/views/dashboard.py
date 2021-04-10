@@ -1,7 +1,10 @@
 # encoding: utf-8
+from ckan.types import Context
 import logging
+from typing import Optional
 
 from flask import Blueprint
+from flask.wrappers import Response
 
 import ckan.lib.base as base
 import ckan.lib.helpers as h
@@ -16,13 +19,13 @@ dashboard = Blueprint(u'dashboard', __name__, url_prefix=u'/dashboard')
 
 
 @dashboard.before_request
-def before_request() -> None:
+def before_request() -> Optional[Response]:
     if not g.userobj:
         h.flash_error(_(u'Not authorized to see this page'))
         return h.redirect_to(u'user.login')
 
     try:
-        context = {
+        context: Context = {
             "model": model, "user": g.user, "auth_user_obj": g.userobj
         }
         logic.check_access(u'site_read', context)

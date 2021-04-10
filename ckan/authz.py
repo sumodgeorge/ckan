@@ -344,7 +344,7 @@ def _has_user_permission_for_groups(user_id: str, permission: str, group_ids: Li
     return False
 
 
-def users_role_for_group_or_org(group_id: str, user_name: str) -> Optional[str]:
+def users_role_for_group_or_org(group_id: Optional[str], user_name: Optional[str]) -> Optional[str]:
     ''' Returns the user's role for the group. (Ignores privileges that cascade
     in a group hierarchy.)
 
@@ -403,7 +403,7 @@ def has_user_permission_for_some_org(user_name: str, permission: str) -> bool:
     return permission_exists
 
 
-def get_user_id_for_username(user_name: str, allow_none: bool=False) -> Optional[str]:
+def get_user_id_for_username(user_name: Optional[str], allow_none: bool=False) -> Optional[str]:
     ''' Helper function to get user id '''
     # first check if we have the user object already and get from there
     user = _get_user(user_name)

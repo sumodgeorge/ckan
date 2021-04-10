@@ -32,7 +32,7 @@ class CKANConfigLoader(object):
 
     def _update_defaults(self, new_defaults) -> None:
         for key, value in new_defaults.items():
-            self.parser._defaults[key] = value
+            self.parser._defaults[key] = value  # type: ignore
 
     def _read_config_file(self, filename) -> None:
         defaults = {u'here': os.path.dirname(os.path.abspath(filename))}
@@ -46,7 +46,7 @@ class CKANConfigLoader(object):
                 value = self.parser.get(self.section, option)
                 self.config[option] = value
                 if option in self.parser.defaults():
-                    self.config[u'global_conf'][option] = value
+                    self.config[u'global_conf'][option] = value  # type: ignore
 
     def _create_config_object(self) -> None:
         use_config_path = self.config_file
@@ -54,7 +54,7 @@ class CKANConfigLoader(object):
 
         # # The global_config key is to keep compatibility with Pylons.
         # # It can be safely removed when the Flask migration is completed.
-        self.config[u'global_conf'] = self.parser.defaults().copy()
+        self.config[u'global_conf'] = self.parser.defaults().copy()  # type: ignore
 
         self._update_config()
 

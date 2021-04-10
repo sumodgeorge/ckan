@@ -1,7 +1,8 @@
 # encoding: utf-8
 
+from ckan.types import Context, DataDict
 import logging
-from typing import Dict, Optional
+from typing import Dict, Optional, Tuple
 
 from six.moves.urllib.parse import urlparse  # type: ignore
 from flask import Blueprint, make_response
@@ -28,7 +29,7 @@ BASE_URL = config.get(u'ckan.site_url')
 SITE_TITLE = config.get(u'ckan.site_title', u'CKAN')
 
 
-def _package_search(data_dict):
+def _package_search(data_dict: DataDict) -> Tuple[int, List[Dict[str, Any]]]:
     """
     Helper method that wraps the package_search action.
 
@@ -53,7 +54,7 @@ def _package_search(data_dict):
     return query['count'], query['results']
 
 
-def _enclosure(pkg):
+def _enclosure(pkg: Dict[str, Any]) -> 'Enclosure':
     url = h.url_for(
         u'api.action',
         logic_function=u'package_show',
@@ -160,7 +161,7 @@ def output_feed(results: List[Dict], feed_title: str, feed_description: str, fee
         last_page=navigation_urls[u'last'], )
 
     for pkg in results:
-        additional_fields = {}
+        additional_fields: Dict[str, Any] = {}
 
         for plugin in plugins.PluginImplementations(plugins.IFeed):
             if hasattr(plugin, u'get_item_additional_fields'):
@@ -175,8 +176,8 @@ def output_feed(results: List[Dict], feed_title: str, feed_description: str, fee
                 ver=3,
                 _external=True),
             description=pkg.get(u'notes', u''),
-            updated=h.date_str_to_datetime(pkg.get(u'metadata_modified')),
-            published=h.date_str_to_datetime(pkg.get(u'metadata_created')),
+            updated=h.date_str_to_datetime(pkg.get(u'metadata_modified', '')),
+            published=h.date_str_to_datetime(pkg.get(u'metadata_created', '')),
             unique_id=_create_atom_id(u'/dataset/%s' % pkg['id']),
             author_name=pkg.get(u'author', u''),
             author_email=pkg.get(u'author_email', u''),
@@ -191,7 +192,7 @@ def output_feed(results: List[Dict], feed_title: str, feed_description: str, fee
 
 def group(id: str) -> Response:
     try:
-        context = {
+        context: Context = {
             u'model': model,
             u'session': model.Session,
             u'user': g.user,
@@ -206,7 +207,7 @@ def group(id: str) -> Response:
 
 def organization(id: str) -> Response:
     try:
-        context = {
+        context: Context = {
             u'model': model,
             u'session': model.Session,
             u'user': g.user,
@@ -303,7 +304,7 @@ def group_or_organization(obj_dict: Dict, is_org: bool) -> Response:
         navigation_urls=navigation_urls)
 
 
-def _parse_url_params():
+def _parse_url_params() -> Tuple[Dict[str, Any], Dict[str, Any]]:
     """
     Constructs a search-query dict from the URL query parameters.
 
@@ -404,7 +405,7 @@ def custom() -> Response:
         navigation_urls=navigation_urls)
 
 
-def _alternate_url(params, **kwargs):
+def _alternate_url(params: Dict[str, Any], **kwargs) -> str:
     search_params = params.copy()
     search_params.update(kwargs)
 
@@ -415,7 +416,7 @@ def _alternate_url(params, **kwargs):
     return _feed_url(search_params, controller=u'dataset', action=u'search')
 
 
-def _feed_url(query, controller, action, **kwargs):
+def _feed_url(query: Dict[str, Any], controller: str, action: str, **kwargs) -> str:
     """
     Constructs the url for the given action.  Encoding the query
     parameters.
@@ -425,7 +426,7 @@ def _feed_url(query, controller, action, **kwargs):
     return h.url_for(controller=controller, action=action, **kwargs)
 
 
-def _navigation_urls(query, controller, action, item_count, limit, **kwargs):
+def _navigation_urls(query: Dict[str, Any], controller: str, action: str, item_count: int, limit: int, **kwargs) -> Dict[str, Any]:
     """
     Constructs and returns first, last, prev and next links for paging
     """
@@ -470,7 +471,7 @@ def _navigation_urls(query, controller, action, item_count, limit, **kwargs):
     return urls
 
 
-def _create_atom_id(resource_path, authority_name=None, date_string=None):
+def _create_atom_id(resource_path: str, authority_name: Optional[str]=None, date_string: Optional[str]=None) -> str:
     """
     Helper method that creates an atom id for a feed or entry.
 

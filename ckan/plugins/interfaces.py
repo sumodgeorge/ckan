@@ -304,7 +304,7 @@ class IFeed(Interface):
         return CKANFeed
 
 
-    def get_item_additional_fields(self, dataset_dict: Dict) -> None:
+    def get_item_additional_fields(self, dataset_dict: Dict[str, Any]) -> Dict[str, Any]:
         """
         Allows plugins to set additional fields on a feed item.
 
@@ -313,7 +313,7 @@ class IFeed(Interface):
         :returns: the fields to set
         :rtype: dictionary
         """
-        pass
+        return {}
 
 
 class IResourceUrlChange(Interface):
@@ -1499,7 +1499,7 @@ class IGroupForm(Interface):
         suitable for the database.
         '''
 
-    def db_to_form_schema(self) -> None:
+    def db_to_form_schema(self) -> Schema:
         u'''
         Returns the schema for mapping group data from the database into a
         format suitable for the form (optional)
@@ -1630,7 +1630,7 @@ class IFacets(Interface):
         '''
         return facets_dict
 
-    def group_facets(self, facets_dict: Dict, group_type: str, package_type: str) -> Dict:
+    def group_facets(self, facets_dict: Dict, group_type: str, package_type: Optional[str]) -> Dict[str, Any]:
         u'''Modify and return the ``facets_dict`` for a group's page.
 
         The ``package_type`` is the type of dataset that these facets apply to.

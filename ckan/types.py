@@ -1,3 +1,4 @@
+import datetime
 from functools import partial
 from typing import (
     Any, Callable, Dict, Iterable, List,
@@ -29,13 +30,25 @@ class Context(TypedDict, total=False):
     session: AlchemySession
 
     auth_user_obj: Optional['model_.User']
+    user_obj: Optional['model_.User']
 
+    id: Optional[str]
+    user_id: Optional[str]
+    user_is_admin: Optional[bool]
+    return_query: Optional[bool]
+
+    reset_password: Optional[bool]
+    save: Optional[bool]
     active: Optional[bool]
     allow_partial_update: Optional[bool]
     for_edit: Optional[bool]
     for_view: Optional[bool]
     ignore_auth: Optional[bool]
     preview: Optional[bool]
+    allow_state_change: Optional[bool]
+    is_member: Optional[bool]
+
+    message: Optional[str]
 
     keep_email: Optional[bool]
     keep_apikey: Optional[bool]
@@ -102,6 +115,23 @@ class PFeed(Protocol):
         first_page: Optional[str],
         last_page: Optional[str],
     ) -> None: ...
+    def add_item(
+            self,
+            title: str,
+            link: str,
+            description: str,
+            updated: datetime.datetime,
+            publised: datetime.datetime,
+            unique_id: str,
+            author_name: Optional[str],
+            author_email: Optional[str],
+            categories: List[str],
+            enclosure: Any,
+            **additional_fields: Any
+    ) -> None: ...
+
+    def writeString(self, encoding: str) -> str: ...
+
 
 
 class PUploader(Protocol):
