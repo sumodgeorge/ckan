@@ -1,5 +1,6 @@
 import datetime
 from functools import partial
+from types import ModuleType
 from typing import (
     Any, Callable, Dict, Iterable, List,
     Mapping, Optional, Tuple, Union,
@@ -12,6 +13,7 @@ from sqlalchemy.orm import Query
 
 if TYPE_CHECKING:
     import ckan.model as model_
+
 
 AlchemySession = ScopedSession
 Query = Query
@@ -29,6 +31,8 @@ class Context(TypedDict, total=False):
     model: 'model_'
     session: AlchemySession
 
+    __auth_user_obj_checked: Optional[bool]
+    __auth_audit: Optional[List[Tuple[str, int]]]
     auth_user_obj: Optional['model_.User']
     user_obj: Optional['model_.User']
 
@@ -90,13 +94,14 @@ class DataValidator(Protocol):
 Validator = Union[ValueValidator, ContextValidator, DataValidator]
 
 
-Schema = Dict[str, Iterable[Validator]]
+Schema = Dict[str, Union[Iterable[Validator], 'Schema']]
 ComplexSchemaFunc = Callable[..., Schema]
 PlainSchemaFunc = Callable[[], Schema]
 
+NativeAuthFunction = Callable[[Context, Optional[DataDict]], AuthResult]
 AuthFunction = Union[
-    Callable[[Context, Optional[DataDict]], AuthResult],
-    partial
+    NativeAuthFunction,
+    # partial
 ]
 Action = Callable[[Context, DataDict], Dict]
 

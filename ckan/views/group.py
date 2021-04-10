@@ -127,7 +127,7 @@ def index(group_type: str, is_organization: bool) -> str:
     page = h.get_page_number(request.params) or 1
     items_per_page = int(config.get(u'ckan.datasets_per_page', 20))
 
-    context: Context = {
+    context = {
         u'model': model,
         u'session': model.Session,
         u'user': g.user,

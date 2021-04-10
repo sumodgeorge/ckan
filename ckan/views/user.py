@@ -20,7 +20,7 @@ import ckan.model as model
 import ckan.plugins as plugins
 from ckan import authz
 from ckan.common import _, config, g, request
-from typing import Dict, Optional, Tuple, Union
+from typing import Any, Dict, Optional, Tuple, Union
 from flask.wrappers import Response
 
 log = logging.getLogger(__name__)
@@ -55,7 +55,7 @@ def _new_form_to_db_schema() -> Schema:
     return schema.user_new_form_schema()
 
 
-def _extra_template_variables(context: Context, data_dict: Dict) -> Dict:
+def _extra_template_variables(context: Context, data_dict: Dict[str, Any]) -> Dict[str, Any]:
     is_sysadmin = authz.is_sysadmin(g.user)
     try:
         user_dict = logic.get_action(u'user_show')(context, data_dict)

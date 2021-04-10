@@ -11,10 +11,10 @@ import ckan.logic.validators as validators
 
 from ckan.common import _
 from typing import Any, Dict
-from ckan.types import Context, ErrorDict, TuplizedKey
+from ckan.types import Context, DataValidator, TuplizedErrorDict, TuplizedKey
 
 
-def convert_to_extras(key: TuplizedKey, data: Dict[TuplizedKey, Any], errors: ErrorDict, context: Context) -> Any:
+def convert_to_extras(key: TuplizedKey, data: Dict[TuplizedKey, Any], errors: TuplizedErrorDict, context: Context) -> Any:
 
     # Get the current extras index
     current_indexes = [k[1] for k in data.keys()
@@ -26,7 +26,7 @@ def convert_to_extras(key: TuplizedKey, data: Dict[TuplizedKey, Any], errors: Er
     data[('extras', new_index, 'value')] = data[key]
 
 
-def convert_from_extras(key: TuplizedKey, data: Dict[TuplizedKey, Any], errors: ErrorDict, context: Context) -> Any:
+def convert_from_extras(key: TuplizedKey, data: Dict[TuplizedKey, Any], errors: TuplizedErrorDict, context: Context) -> Any:
 
     def remove_from_extras(data, key):
         to_remove = []
@@ -52,7 +52,7 @@ def extras_unicode_convert(extras, context):
         extras[extra] = text_type(extras[extra])
     return extras
 
-def free_tags_only(key: TuplizedKey, data: Dict[TuplizedKey, Any], errors: ErrorDict, context: Context) -> Any:
+def free_tags_only(key: TuplizedKey, data: Dict[TuplizedKey, Any], errors: TuplizedErrorDict, context: Context) -> Any:
     tag_number = key[1]
     if not data.get(('tags', tag_number, 'vocabulary_id')):
         return
@@ -60,8 +60,8 @@ def free_tags_only(key: TuplizedKey, data: Dict[TuplizedKey, Any], errors: Error
         if k[0] == 'tags' and k[1] == tag_number:
             del data[k]
 
-def convert_to_tags(vocab: Any) -> Any:
-    def callable(key, data, errors, context):
+def convert_to_tags(vocab: Any) -> DataValidator:
+    def func(key, data, errors, context):
         new_tags = data.get(key)
         if not new_tags:
             return
@@ -85,10 +85,10 @@ def convert_to_tags(vocab: Any) -> Any:
         for num, tag in enumerate(new_tags):
             data[('tags', num + n, 'name')] = tag
             data[('tags', num + n, 'vocabulary_id')] = v.id
-    return callable
+    return func
 
-def convert_from_tags(vocab: Any) -> Any:
-    def callable(key, data, errors, context):
+def convert_from_tags(vocab: Any) -> DataValidator:
+    def func(key, data, errors, context):
         v = model.Vocabulary.get(vocab)
         if not v:
             raise df.Invalid(_('Tag vocabulary "%s" does not exist') % vocab)
@@ -100,7 +100,7 @@ def convert_from_tags(vocab: Any) -> Any:
                     name = data[k].get('display_name', data[k]['name'])
                     tags.append(name)
         data[key] = tags
-    return callable
+    return func
 
 def convert_user_name_or_id_to_id(user_name_or_id: Any, context: Context) -> Any:
     '''Return the user id for the given user name or id.

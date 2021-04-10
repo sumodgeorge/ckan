@@ -214,7 +214,11 @@ config = local.config = CKANConfig()
 # Proxies to already thread-local safe objects
 request = CKANRequest(_get_request)
 # Provide a `c`  alias for `g` for backwards compatibility
+g: Any
+c: Any
 g = c = LocalProxy(_get_c)
+
+session: Any
 session = LocalProxy(_get_session)
 
 truthy = frozenset([u'true', u'yes', u'on', u'y', u't', u'1'])

@@ -90,7 +90,7 @@ def _get_dashboard_context(filter_type=None, filter_id=None, q=None):
 
 
 def index(offset: int=0) -> str:
-    context = {
+    context: Context = {
         u'model': model,
         u'session': model.Session,
         u'user': g.user,
@@ -122,21 +122,21 @@ def index(offset: int=0) -> str:
 
 
 def datasets() -> str:
-    context = {u'for_view': True, u'user': g.user, u'auth_user_obj': g.userobj}
+    context: Context = {u'for_view': True, u'user': g.user, u'auth_user_obj': g.userobj}
     data_dict = {u'user_obj': g.userobj, u'include_datasets': True}
     extra_vars = _extra_template_variables(context, data_dict)
     return base.render(u'user/dashboard_datasets.html', extra_vars)
 
 
 def organizations() -> str:
-    context = {u'for_view': True, u'user': g.user, u'auth_user_obj': g.userobj}
+    context: Context = {u'for_view': True, u'user': g.user, u'auth_user_obj': g.userobj}
     data_dict = {u'user_obj': g.userobj}
     extra_vars = _extra_template_variables(context, data_dict)
     return base.render(u'user/dashboard_organizations.html', extra_vars)
 
 
 def groups() -> str:
-    context = {u'for_view': True, u'user': g.user, u'auth_user_obj': g.userobj}
+    context: Context = {u'for_view': True, u'user': g.user, u'auth_user_obj': g.userobj}
     data_dict = {u'user_obj': g.userobj}
     extra_vars = _extra_template_variables(context, data_dict)
     return base.render(u'user/dashboard_groups.html', extra_vars)
