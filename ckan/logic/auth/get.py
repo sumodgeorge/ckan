@@ -133,6 +133,7 @@ def resource_show(context: Context, data_dict: DataDict) -> AuthResult:
     resource = get_resource_object(context, data_dict)
 
     # check authentication against package
+    assert resource.package_id
     pkg = model.Package.get(resource.package_id)
     if not pkg:
         raise logic.NotFound(_('No package found for this resource, cannot check auth.'))
@@ -371,7 +372,7 @@ def _followee_list(context: Context, data_dict: DataDict) -> AuthResult:
         return {'success': False, 'msg': _('Not authorized')}
 
     # Any user is authorized to see what she herself is following.
-    requested_user = model.User.get(data_dict.get('id'))
+    requested_user = model.User.get(data_dict.get('id', ''))
     if authorized_user == requested_user:
         return {'success': True}
 

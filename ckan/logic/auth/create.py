@@ -157,7 +157,7 @@ def user_invite(context: Context, data_dict: DataDict) -> AuthResult:
     return group_member_create(context, data_dict)
 
 
-def _check_group_auth(context: Context, data_dict: DataDict) -> AuthResult:
+def _check_group_auth(context: Context, data_dict: DataDict) -> bool:
     '''Has this user got update permission for all of the given groups?
     If there is a package in the context then ignore that package's groups.
     (owner_org is checked elsewhere.)

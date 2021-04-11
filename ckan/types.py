@@ -61,6 +61,8 @@ class Context(TypedDict, total=False):
     group: Optional['model_.Group']
     package: Optional['model_.Package']
 
+    resource_view: Optional['model_.ResourceView']
+    relationship: Optional['model_.PackageRelationship']
     api_version: Optional[int]
     dataset_counts: Optional[Dict]
     limits: Optional[Dict]
@@ -98,9 +100,11 @@ Schema = Dict[str, Union[Iterable[Validator], 'Schema']]
 ComplexSchemaFunc = Callable[..., Schema]
 PlainSchemaFunc = Callable[[], Schema]
 
-NativeAuthFunction = Callable[[Context, Optional[DataDict]], AuthResult]
+AuthFunctionWithOptionalDataDict = Callable[[Context, Optional[DataDict]], AuthResult]
+AuthFunctionWithMandatoryDataDict = Callable[[Context, DataDict], AuthResult]
 AuthFunction = Union[
-    NativeAuthFunction,
+    AuthFunctionWithOptionalDataDict,
+    AuthFunctionWithMandatoryDataDict,
     # partial
 ]
 Action = Callable[[Context, DataDict], Dict]

@@ -30,6 +30,7 @@ def resource_delete(context: Context, data_dict: DataDict) -> AuthResult:
     resource = get_resource_object(context, data_dict)
 
     # check authentication against package
+    assert resource.package_id
     pkg = model.Package.get(resource.package_id)
     if not pkg:
         raise logic.NotFound(_('No package found for this resource, cannot check auth.'))

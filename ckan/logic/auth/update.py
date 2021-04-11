@@ -74,6 +74,7 @@ def resource_update(context: Context, data_dict: DataDict) -> AuthResult:
     resource = logic_auth.get_resource_object(context, data_dict)
 
     # check authentication against package
+    assert resource.package_id
     pkg = model.Package.get(resource.package_id)
     if not pkg:
         raise logic.NotFound(
