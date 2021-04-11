@@ -413,8 +413,6 @@ class Package(core.StatefulObjectMixin,
         register = cls.get_license_register()
         return [(l.title, l.id) for l in register.values()]
 
-    license = property()
-
     def get_license(self) -> Optional["License"]:
         if self.license_id:
             try:
@@ -425,7 +423,6 @@ class Package(core.StatefulObjectMixin,
             license = None
         return license
 
-    @license.setter
     def set_license(self, license: Any) -> None:
         if isinstance(license, _license.License):
             self.license_id = license.id
@@ -434,6 +431,8 @@ class Package(core.StatefulObjectMixin,
         else:
             msg = "Value not a license object or entity: %s" % repr(license)
             raise Exception(msg)
+
+    license = property(get_license, set_license)
 
     @maintain.deprecated('`is_private` attriute of model.Package is ' +
                          'deprecated and should not be used.  Use `private`')
