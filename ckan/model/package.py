@@ -107,7 +107,7 @@ class Package(core.StatefulObjectMixin,
     notes: str
     licensce_id: str
     type: str
-    owner_org: str
+    owner_org: Optional[str]
     creator_user_id: str
     metadata_created: datetime.datetime
     metadata_modified: datetime.datetime

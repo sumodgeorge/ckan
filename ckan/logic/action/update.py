@@ -30,8 +30,11 @@ import ckan.lib.app_globals as app_globals
 
 
 from ckan.common import _, request
-from typing import Dict, Union
-from ckan.types import Context, DataDict
+from typing import Any, Dict, List, TYPE_CHECKING, Union, cast
+from ckan.types import Context, DataDict, Schema
+
+if TYPE_CHECKING:
+    import ckan.model as model_
 
 log = logging.getLogger(__name__)
 
@@ -64,7 +67,7 @@ def resource_update(context: Context, data_dict: DataDict) -> Dict:
     '''
     model = context['model']
     user = context['user']
-    id = _get_or_bust(data_dict, "id")
+    id: str = _get_or_bust(data_dict, "id")
 
     if not data_dict.get('url'):
         data_dict['url'] = ''
@@ -83,7 +86,8 @@ def resource_update(context: Context, data_dict: DataDict) -> Dict:
     package_id = resource.package.id
     pkg_dict = _get_action('package_show')(context, {'id': package_id})
 
-    for n, p in enumerate(pkg_dict['resources']):
+    resources = cast(List[Dict[str, Any]], pkg_dict['resources'])
+    for n, p in enumerate(resources):
         if p['id'] == id:
             break
     else:
@@ -96,18 +100,19 @@ def resource_update(context: Context, data_dict: DataDict) -> Dict:
         data_dict['datastore_active'] = resource.extras['datastore_active']
 
     for plugin in plugins.PluginImplementations(plugins.IResourceController):
-        plugin.before_update(context, pkg_dict['resources'][n], data_dict)
+        plugin.before_update(context, resources[n], data_dict)
 
-    pkg_dict['resources'][n] = data_dict
+    resources[n] = data_dict
 
     try:
         context['use_cache'] = False
         updated_pkg_dict = _get_action('package_update')(context, pkg_dict)
     except ValidationError as e:
         try:
-            raise ValidationError(e.error_dict['resources'][n])
+            error_dict = cast(Dict, e.error_dict['resources'][n])
         except (KeyError, IndexError):
-            raise ValidationError(e.error_dict)
+            error_dict = e.error_dict
+        raise ValidationError(error_dict)
 
     resource = _get_action('resource_show')(context, {'id': id})
 
@@ -181,6 +186,8 @@ def resource_view_reorder(context: Context, data_dict: DataDict) -> Dict:
     :returns: the updated order of the view
     :rtype: dictionary
     '''
+    id: str
+    order: List[str]
     model = context['model']
     id, order = _get_or_bust(data_dict, ["id", "order"])
     if not isinstance(order, list):
@@ -461,9 +468,8 @@ def package_revise(context: Context, data_dict: DataDict) -> Dict:
     if name_or_id is None:
         raise ValidationError({'match__id': _('Missing value')})
 
-    package_show_context = dict(
-        context,
-        for_update=True)
+    package_show_context = context.copy()
+    package_show_context['for_update'] = True
     orig = _get_action('package_show')(
         package_show_context,
         {'id': name_or_id})
@@ -479,10 +485,10 @@ def package_revise(context: Context, data_dict: DataDict) -> Dict:
 
     if unmatched:
         model.Session.rollback()
-        raise ValidationError([{'match': [
+        raise ValidationError({'message': [{'match': [
             '__'.join(str(p) for p in unm)
             for unm in unmatched
-        ]}])
+        ]}]})
 
     if 'filter' in data:
         orig_id = orig['id']
@@ -494,18 +500,18 @@ def package_revise(context: Context, data_dict: DataDict) -> Dict:
             dfunc.update_merge_dict(orig, data['update'])
         except dfunc.DataError as de:
             model.Session.rollback()
-            raise ValidationError([{'update': [de.error]}])
+            raise ValidationError({'message': [{'update': [de.error]}]})
 
     # update __extend keys before __#__* so that files may be
     # attached to newly added resources in the same call
-    try:
-        for k, v in sorted(
-                data['update__'].items(),
-                key=lambda s: s[0][-6] if s[0].endswith('extend') else s[0]):
+    for k, v in sorted(
+            data['update__'].items(),
+            key=lambda s: s[0][-6] if s[0].endswith('extend') else s[0]):
+        try:
             dfunc.update_merge_string_key(orig, k, v)
-    except dfunc.DataError as de:
-        model.Session.rollback()
-        raise ValidationError([{k: [de.error]}])
+        except dfunc.DataError as de:
+            model.Session.rollback()
+            raise ValidationError({'message': [{k: [de.error]}]})
 
     _check_access('package_revise', context, {"update": orig})
 
@@ -514,7 +520,7 @@ def package_revise(context: Context, data_dict: DataDict) -> Dict:
     # on update or "nothing changed" status once possible
     rval = {
         'package': _get_action('package_update')(
-            dict(context, package=pkg),
+            cast(Context, dict(context, package=pkg)),
             orig)}
     if 'include' in data_dict:
         dfunc.filter_glob_match(rval, data_dict['include'])
@@ -565,7 +571,7 @@ def package_resource_reorder(context: Context, data_dict: DataDict) -> Dict:
     return {'id': id, 'order': [resource['id'] for resource in new_resources]}
 
 
-def _update_package_relationship(relationship, comment, context):
+def _update_package_relationship(relationship: 'model_.PackageRelationship', comment: str, context: Context) -> Dict[str, Any]:
     model = context['model']
     api = context.get('api_version')
     ref_package_by = 'id' if api == 2 else 'name'
@@ -615,7 +621,7 @@ def package_relationship_update(context: Context, data_dict: DataDict) -> Dict:
     if not pkg1:
         raise NotFound('Subject package %r was not found.' % id)
     if not pkg2:
-        return NotFound('Object package %r was not found.' % id2)
+        raise NotFound('Object package %r was not found.' % id2)
 
     data, errors = _validate(data_dict, schema, context)
     if errors:
@@ -714,7 +720,7 @@ def _group_or_org_update(context, data_dict, is_org=False):
     # a 'changed' group activity. We detect this and change it to a 'deleted'
     # activity.
     if group.state == u'deleted':
-        if session.query(ckan.model.Activity).filter_by(
+        if session.query(model.Activity).filter_by(
                 object_id=group.id, activity_type='deleted').all():
             # A 'deleted group' activity for this group has already been
             # emitted.
@@ -728,7 +734,7 @@ def _group_or_org_update(context, data_dict, is_org=False):
         activity_dict['data'] = {
                 'group': dictization.table_dictize(group, context)
                 }
-        activity_create_context = {
+        activity_create_context: Context = {
             'model': model,
             'user': user,
             'defer_commit': True,
@@ -843,7 +849,7 @@ def user_update(context: Context, data_dict: DataDict) -> Dict:
             'object_id': user.id,
             'activity_type': 'changed user',
             }
-    activity_create_context = {
+    activity_create_context: Context = {
         'model': model,
         'user': author,
         'defer_commit': True,
@@ -897,7 +903,7 @@ def user_generate_apikey(context: Context, data_dict: DataDict) -> Dict:
 
     # change key
     old_data = _get_action('user_show')(context, data_dict)
-    old_data['apikey'] = model.types.make_uuid()
+    old_data['apikey'] = model.types.make_uuid()  # type: ignore
     data_dict = old_data
     return _get_action('user_update')(context, data_dict)
 
@@ -1058,7 +1064,7 @@ def term_translation_update_many(context: Context, data_dict: DataDict) -> Dict:
 
     model.Session.commit()
 
-    return {'success': '%s rows updated' % (num + 1)}
+    return {'success': '%s rows updated' % (num + 1)}  # type: ignore
 
 
 def vocabulary_update(context: Context, data_dict: DataDict) -> Dict:
@@ -1082,7 +1088,7 @@ def vocabulary_update(context: Context, data_dict: DataDict) -> Dict:
     if not vocab_id:
         raise ValidationError({'id': _('id not in data')})
 
-    vocab = model.vocabulary.Vocabulary.get(vocab_id)
+    vocab = model.Vocabulary.get(vocab_id)
     if vocab is None:
         raise NotFound(_('Could not find vocabulary "%s"') % vocab_id)
 
@@ -1141,8 +1147,8 @@ def send_email_notifications(context: Context, data_dict: DataDict) -> None:
 
     if not converters.asbool(
             config.get('ckan.activity_streams_email_notifications')):
-        raise ValidationError('ckan.activity_streams_email_notifications'
-                              ' is not enabled in config')
+        raise ValidationError({'message': 'ckan.activity_streams_email_notifications'
+                               ' is not enabled in config'})
 
     email_notifications.get_and_send_notifications_for_all_users()
 
@@ -1158,7 +1164,7 @@ def package_owner_org_update(context: Context, data_dict: DataDict) -> None:
     '''
     model = context['model']
     user = context['user']
-    name_or_id = data_dict.get('id')
+    name_or_id = data_dict.get('id', '')
     organization_id = data_dict.get('organization_id')
 
     _check_access('package_owner_org_update', context, data_dict)

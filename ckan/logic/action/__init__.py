@@ -39,7 +39,7 @@ def get_domain_object(model: model, domain_object_ref: str) -> DomainObject:
     (First match returned, in order: system, package, group, auth_group, user).
     '''
     if domain_object_ref in ('system', 'System'):
-        return model.System
+        return model.System()
     pkg = model.Package.get(domain_object_ref)
     if pkg:
         return pkg
@@ -56,7 +56,7 @@ def error_summary(error_dict: ErrorDict) -> Dict[str, str]:
     ''' Do some i18n stuff on the error_dict keys '''
 
     def prettify(field_name):
-        field_name = re.sub('(?<!\w)[Uu]rl(?!\w)', 'URL',
+        field_name = re.sub(r'(?<!\w)[Uu]rl(?!\w)', 'URL',
                             field_name.replace('_', ' ').capitalize())
         return _(field_name.replace('_', ' '))
 

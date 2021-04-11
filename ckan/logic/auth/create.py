@@ -28,7 +28,7 @@ def package_create(context: Context, data_dict: Optional[DataDict]=None) -> Auth
     if not check1:
         return {'success': False, 'msg': _('User %s not authorized to create packages') % user}
 
-    check2 = _check_group_auth(context,data_dict)
+    check2 = _check_group_auth(context, data_dict)
     if not check2:
         return {'success': False, 'msg': _('User %s not authorized to edit these groups') % user}
 
@@ -157,7 +157,7 @@ def user_invite(context: Context, data_dict: DataDict) -> AuthResult:
     return group_member_create(context, data_dict)
 
 
-def _check_group_auth(context: Context, data_dict: DataDict) -> bool:
+def _check_group_auth(context: Context, data_dict: Optional[DataDict]) -> bool:
     '''Has this user got update permission for all of the given groups?
     If there is a package in the context then ignore that package's groups.
     (owner_org is checked elsewhere.)

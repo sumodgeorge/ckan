@@ -4,7 +4,7 @@ import functools
 import logging
 import re
 from collections import defaultdict
-from typing import Any, Callable, Container, Dict, List, Optional, Tuple, TypeVar, Union, cast
+from typing import Any, Callable, Container, Dict, Iterable, List, Optional, Tuple, TypeVar, Union, cast, overload
 from typing_extensions import Literal
 
 from werkzeug.local import LocalProxy
@@ -516,6 +516,11 @@ def get_action(action: str) -> Action:
 
     return _actions[action]
 
+
+@overload
+def get_or_bust(data_dict: Dict, keys: str) -> Any: ...
+@overload
+def get_or_bust(data_dict: Dict, keys: Iterable[str]) -> Tuple[Any, ...]: ...
 
 def get_or_bust(data_dict: Dict, keys: Union[str, List[str]]) -> Union[Any, Tuple]:
     '''Return the value(s) from the given data_dict for the given key(s).

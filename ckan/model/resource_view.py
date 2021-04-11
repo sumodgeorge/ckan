@@ -30,7 +30,7 @@ class ResourceView(domain_object.DomainObject):
     resource_id: str
     title: Optional[str]
     description: Optional[str]
-    viev_type: str
+    view_type: str
     order: int
     config: Dict
 

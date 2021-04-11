@@ -41,26 +41,31 @@ class Context(TypedDict, total=False):
     user_is_admin: Optional[bool]
     return_query: Optional[bool]
 
+    defer_commit: Optional[bool]
     reset_password: Optional[bool]
     save: Optional[bool]
     active: Optional[bool]
     allow_partial_update: Optional[bool]
+    for_update: Optional[bool]
     for_edit: Optional[bool]
     for_view: Optional[bool]
     ignore_auth: Optional[bool]
     preview: Optional[bool]
     allow_state_change: Optional[bool]
     is_member: Optional[bool]
+    use_cache: Optional[bool]
 
     message: Optional[str]
 
     keep_email: Optional[bool]
     keep_apikey: Optional[bool]
 
-
+    schema: Optional['Schema']
     group: Optional['model_.Group']
     package: Optional['model_.Package']
 
+    task_status: Optional['model_.TaskStatus']
+    resource: Optional['model_.Resource']
     resource_view: Optional['model_.ResourceView']
     relationship: Optional['model_.PackageRelationship']
     api_version: Optional[int]
@@ -94,7 +99,6 @@ class DataValidator(Protocol):
 
 
 Validator = Union[ValueValidator, ContextValidator, DataValidator]
-
 
 Schema = Dict[str, Union[Iterable[Validator], 'Schema']]
 ComplexSchemaFunc = Callable[..., Schema]
@@ -146,10 +150,13 @@ class PFeed(Protocol):
 class PUploader(Protocol):
     def __init__(self, object_type: str, old_filename: Optional[str]=None) -> None: ...
     def upload(self, max_size: int=...) -> None: ...
+    def update_data_dict(self, data_dict: Dict[str, Any], url_field: str, file_field: str, clear_field: str) -> None: ...
 
 
 
 class PResourceUploader(Protocol):
+    mimetype: str
+    filesize: int
     def __init__(self, resource: Dict) -> None: ...
     def get_path(self, id: str) -> str: ...
     def upload(self, id: str, max_size: int=...) -> None: ...

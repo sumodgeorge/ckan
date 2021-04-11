@@ -1505,7 +1505,7 @@ class IGroupForm(Interface):
         format suitable for the form (optional)
         '''
 
-    def check_data_dict(self, data_dict: DataDict) -> None:
+    def check_data_dict(self, data_dict: DataDict, schema: Optional[Schema]=None) -> None:
         u'''
         Check if the return data is correct.
 

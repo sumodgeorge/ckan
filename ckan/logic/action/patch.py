@@ -8,11 +8,11 @@ from ckan.logic import (
     check_access as _check_access,
     get_or_bust as _get_or_bust,
 )
-from typing import Dict
+from typing import Dict, Union
 from ckan.types import Context, DataDict
 
 
-def package_patch(context: Context, data_dict: DataDict) -> Dict:
+def package_patch(context: Context, data_dict: DataDict) -> Union[str, Dict]:
     '''Patch a dataset (package).
 
     :param id: the id or name of the dataset
@@ -35,7 +35,7 @@ def package_patch(context: Context, data_dict: DataDict) -> Dict:
     '''
     _check_access('package_patch', context, data_dict)
 
-    show_context = {
+    show_context: Context = {
         'model': context['model'],
         'session': context['session'],
         'user': context['user'],
@@ -66,7 +66,7 @@ def resource_patch(context: Context, data_dict: DataDict) -> Dict:
     '''
     _check_access('resource_patch', context, data_dict)
 
-    show_context = {
+    show_context: Context = {
         'model': context['model'],
         'session': context['session'],
         'user': context['user'],
@@ -95,7 +95,7 @@ def group_patch(context: Context, data_dict: DataDict) -> Dict:
     '''
     _check_access('group_patch', context, data_dict)
 
-    show_context = {
+    show_context: Context = {
         'model': context['model'],
         'session': context['session'],
         'user': context['user'],
@@ -110,7 +110,7 @@ def group_patch(context: Context, data_dict: DataDict) -> Dict:
     patched.pop('display_name', None)
     patched.update(data_dict)
     return _update.group_update(
-        dict(context, allow_partial_update=True), patched)
+        Context(**context, allow_partial_update=True), patched)
 
 
 def organization_patch(context: Context, data_dict: DataDict) -> Dict:
@@ -126,7 +126,7 @@ def organization_patch(context: Context, data_dict: DataDict) -> Dict:
     '''
     _check_access('organization_patch', context, data_dict)
 
-    show_context = {
+    show_context: Context = {
         'model': context['model'],
         'session': context['session'],
         'user': context['user'],
@@ -141,7 +141,7 @@ def organization_patch(context: Context, data_dict: DataDict) -> Dict:
     patched.pop('display_name', None)
     patched.update(data_dict)
     return _update.organization_update(
-        dict(context, allow_partial_update=True), patched)
+        Context(**context, allow_partial_update=True), patched)
 
 
 def user_patch(context: Context, data_dict: DataDict) -> Dict:
@@ -157,7 +157,7 @@ def user_patch(context: Context, data_dict: DataDict) -> Dict:
     '''
     _check_access('user_patch', context, data_dict)
 
-    show_context = {
+    show_context: Context = {
         'model': context['model'],
         'session': context['session'],
         'user': context['user'],
