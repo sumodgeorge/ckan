@@ -1,11 +1,11 @@
 # encoding: utf-8
 
 import sys
-from typing import Any, ClassVar, Dict, Optional, TYPE_CHECKING, Tuple, Union
+from typing import Any, Dict, Optional, TYPE_CHECKING, Tuple, Union, cast
 from types import ModuleType
 
 
-class _Toolkit(ModuleType):
+class _Toolkit(object):
     '''This class is intended to make functions/objects consistently
     available to plugins, whilst giving core CKAN developers the ability move
     code around or change underlying frameworks etc. This object allows
@@ -124,9 +124,7 @@ class _Toolkit(ModuleType):
         'CkanVersionException',
     ]
 
-    def __init__(self, name):
-        super().__init__(name)
-
+    def __init__(self):
         self._toolkit = {}
 
         # For some members in the the toolkit (e.g. that are exported from
@@ -547,7 +545,7 @@ For example: ``bar = toolkit.aslist(config.get('ckan.foo.bar', []))``
 
 
 # https://mail.python.org/pipermail/python-ideas/2012-May/014969.html
-sys.modules[__name__] = _Toolkit('toolkit')
+sys.modules[__name__] = cast(ModuleType, _Toolkit())
 
 if TYPE_CHECKING:
     import ckan

@@ -1,7 +1,5 @@
 # encoding: utf-8
 
-import logging
-
 from typing import Any, Callable, Optional
 
 from sqlalchemy import inspect
@@ -19,7 +17,7 @@ from ckan.lib.helpers import redirect_to as redirect
 from ckan.lib.i18n import get_locales_from_config
 import ckan.plugins as p
 
-
+import logging
 log = logging.getLogger(__name__)
 
 APIKEY_HEADER_NAME_KEY = u'apikey_header_name'
