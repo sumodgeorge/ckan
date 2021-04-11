@@ -1455,7 +1455,7 @@ def linked_user(user: Union[str, model.User], maxlength: int=0, avatar: int=20) 
         user_obj = model.User.get(user_name)
         if not user_obj:
             return user_name
-    assert isinstance(user, model.User)
+        user = user_obj
     if user:
         name = user.name if model.User.VALID_NAME.match(user.name) else user.id
         displayname = user.display_name

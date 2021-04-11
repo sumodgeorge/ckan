@@ -189,5 +189,6 @@ def limit_to_configured_maximum(config_option: str, default_limit: int) -> Calla
         limit = int(config.get(config_option, default_limit))
         if value > limit:
             return limit
+        return value
 
     return callable

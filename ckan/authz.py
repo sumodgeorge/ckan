@@ -1,6 +1,7 @@
 # encoding: utf-8
 
 import functools
+import inspect
 import sys
 
 from collections import defaultdict, OrderedDict
@@ -72,7 +73,7 @@ class AuthFunctions:
             for part in module_path.split('.')[1:]:
                 module = getattr(module, part)
 
-            for key, v in module.__dict__.items():
+            for key, v in inspect.getmembers(module, inspect.isfunction):
                 if not key.startswith('_'):
                     # Whitelist all auth functions defined in
                     # logic/auth/get.py as not requiring an authorized user,
