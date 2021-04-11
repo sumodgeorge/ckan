@@ -5,7 +5,7 @@ extend CKAN.
 
 '''
 from inspect import isclass
-from typing import Any, Callable, Dict, Iterable, List, Optional, TYPE_CHECKING, Tuple, Type, Union
+from typing import Any, Callable, Dict, Iterable, List, Optional, Sequence, TYPE_CHECKING, Tuple, Type, Union
 from typing_extensions import TypedDict, Literal
 
 from pyutilib.component.core import Interface as _pca_Interface
@@ -1118,7 +1118,7 @@ class IDatasetForm(Interface):
     See ``ckanext/example_idatasetform`` for an example plugin.
 
     '''
-    def package_types(self) -> Iterable[str]:
+    def package_types(self) -> Sequence[str]:
         u'''Return an iterable of dataset (package) types that this plugin
         handles.
 

@@ -32,8 +32,8 @@ from ckan.common import _, config
 
 # FIXME this looks nasty and should be shared better
 from ckan.logic.action.update import _update_package_relationship
-from typing import Dict
-from ckan.types import Context, DataDict
+from typing import Any, Dict, List, Optional, Union, cast
+from ckan.types import Context, DataDict, ErrorDict, Schema
 
 log = logging.getLogger(__name__)
 
@@ -49,7 +49,7 @@ NotAuthorized = logic.NotAuthorized
 _get_or_bust = logic.get_or_bust
 
 
-def package_create(context: Context, data_dict: DataDict) -> Dict:
+def package_create(context: Context, data_dict: DataDict) -> Union[Dict, str]:
     '''Create a new dataset (package).
 
     You must be authorized to create new datasets. If you specify any groups
@@ -320,13 +320,16 @@ def resource_create(context: Context, data_dict: DataDict) -> Dict:
         context.pop('defer_commit')
     except ValidationError as e:
         try:
-            raise ValidationError(e.error_dict['resources'][-1])
+            error_dict = cast(ErrorDict, e.error_dict['resources'][-1])
         except (KeyError, IndexError):
-            raise ValidationError(e.error_dict)
+            error_dict = e.error_dict
+        raise ValidationError(error_dict)
 
     # Get out resource_id resource from model as it will not appear in
     # package_show until after commit
-    upload.upload(context['package'].resources[-1].id,
+    package = context['package']
+    assert package
+    upload.upload(package.resources[-1].id,
                   uploader.get_max_resource_size())
 
     model.repo.commit()
@@ -382,7 +385,7 @@ def resource_view_create(context: Context, data_dict: DataDict) -> Dict:
             )}
         )
 
-    default = logic.schema.default_create_resource_view_schema(view_plugin)
+    default: Schema = logic.schema.default_create_resource_view_schema(view_plugin)
     schema = context.get('schema', default)
     plugin_schema = view_plugin.info().get('schema', {})
     schema.update(plugin_schema)
@@ -397,13 +400,13 @@ def resource_view_create(context: Context, data_dict: DataDict) -> Dict:
     if context.get('preview'):
         return data
 
-    max_order = model.Session.query(
+    max_order: Optional[int] = model.Session.query(
         func.max(model.ResourceView.order)
-    ).filter_by(resource_id=resource_id).first()
+    ).filter_by(resource_id=resource_id).scalar()
 
     order = 0
-    if max_order[0] is not None:
-        order = max_order[0] + 1
+    if max_order is not None:
+        order = max_order + 1
     data['order'] = order
 
     resource_view = model_save.resource_view_dict_save(data, context)
@@ -412,7 +415,7 @@ def resource_view_create(context: Context, data_dict: DataDict) -> Dict:
     return model_dictize.resource_view_dictize(resource_view, context)
 
 
-def resource_create_default_resource_views(context: Context, data_dict: DataDict) -> Dict:
+def resource_create_default_resource_views(context: Context, data_dict: DataDict) -> List[Dict[str, Any]]:
     '''
     Creates the default views (if necessary) on the provided resource
 
@@ -459,7 +462,7 @@ def resource_create_default_resource_views(context: Context, data_dict: DataDict
         create_datastore_views=create_datastore_views)
 
 
-def package_create_default_resource_views(context: Context, data_dict: DataDict) -> Dict:
+def package_create_default_resource_views(context: Context, data_dict: DataDict) -> List[Dict[str, Any]]:
     '''
     Creates the default views on all resources of the provided dataset
 
@@ -531,7 +534,7 @@ def package_relationship_create(context: Context, data_dict: DataDict) -> Dict:
     if not pkg1:
         raise NotFound('Subject package %r was not found.' % id)
     if not pkg2:
-        return NotFound('Object package %r was not found.' % id2)
+        raise NotFound('Object package %r was not found.' % id2)
 
     data, errors = _validate(data_dict, schema, context)
     if errors:
@@ -554,7 +557,7 @@ def package_relationship_create(context: Context, data_dict: DataDict) -> Dict:
     return relationship_dicts
 
 
-def member_create(context: Context, data_dict: DataDict=None) -> Dict:
+def member_create(context: Context, data_dict: DataDict) -> Dict:
     '''Make an object (e.g. a user, dataset or group) a member of a group.
 
     If the object is already a member of the group then the capacity of the
@@ -601,6 +604,7 @@ def member_create(context: Context, data_dict: DataDict=None) -> Dict:
         filter(model.Member.state == 'active').first()
     if member:
         user_obj = model.User.get(user)
+        assert user_obj
         if member.table_name == u'user' and \
                 member.table_id == user_obj.id and \
                 member.capacity == u'admin' and \
@@ -656,9 +660,9 @@ def package_collaborator_create(context: Context, data_dict: DataDict) -> Dict:
 
     allowed_capacities = authz.get_collaborator_capacities()
     if capacity not in allowed_capacities:
-        raise ValidationError(
-            _('Role must be one of "{}"').format(', '.join(
-                allowed_capacities)))
+        raise ValidationError({
+            'message': _('Role must be one of "{}"').format(', '.join(
+                allowed_capacities))})
 
     _check_access('package_collaborator_create', context, data_dict)
 
@@ -671,7 +675,7 @@ def package_collaborator_create(context: Context, data_dict: DataDict) -> Dict:
         raise NotFound(_('User not found'))
 
     if not authz.check_config_permission('allow_dataset_collaborators'):
-        raise ValidationError(_('Dataset collaborators not enabled'))
+        raise ValidationError({'message': _('Dataset collaborators not enabled')})
 
     # Check if collaborator already exists
     collaborator = model.Session.query(model.PackageMember). \
@@ -692,7 +696,7 @@ def package_collaborator_create(context: Context, data_dict: DataDict) -> Dict:
     return model_dictize.member_dictize(collaborator, context)
 
 
-def _group_or_org_create(context, data_dict, is_org=False):
+def _group_or_org_create(context: Context, data_dict: DataDict, is_org: bool=False) -> Union[str, Dict[str, Any]]:
     model = context['model']
     user = context['user']
     session = context['session']
@@ -749,7 +753,7 @@ def _group_or_org_create(context, data_dict, is_org=False):
 
     user_id = model.User.by_name(six.ensure_text(user)).id
 
-    activity_dict = {
+    activity_dict: Dict[str, Any] = {
         'user_id': user_id,
         'object_id': group.id,
         'activity_type': activity_type,
@@ -757,7 +761,7 @@ def _group_or_org_create(context, data_dict, is_org=False):
     activity_dict['data'] = {
         'group': ckan.lib.dictization.table_dictize(group, context)
     }
-    activity_create_context = {
+    activity_create_context: Context = {
         'model': model,
         'user': user,
         'defer_commit': True,
@@ -781,7 +785,7 @@ def _group_or_org_create(context, data_dict, is_org=False):
         'object_type': 'user',
         'capacity': 'admin',
     }
-    member_create_context = {
+    member_create_context: Context = {
         'model': model,
         'user': user,
         'ignore_auth': True,  # we are not a member of the group at this point
@@ -800,7 +804,7 @@ def _group_or_org_create(context, data_dict, is_org=False):
     return output
 
 
-def group_create(context: Context, data_dict: DataDict) -> Dict:
+def group_create(context: Context, data_dict: DataDict) -> Union[str, Dict[str, Any]]:
     '''Create a new group.
 
     You must be authorized to create groups.
@@ -871,7 +875,7 @@ def group_create(context: Context, data_dict: DataDict) -> Dict:
     return _group_or_org_create(context, data_dict)
 
 
-def organization_create(context: Context, data_dict: DataDict) -> Dict:
+def organization_create(context: Context, data_dict: DataDict) -> Union[str, Dict[str, Any]]:
     '''Create a new organization.
 
     You must be authorized to create organizations.
@@ -930,7 +934,6 @@ def organization_create(context: Context, data_dict: DataDict) -> Dict:
     return _group_or_org_create(context, data_dict, is_org=True)
 
 
-@logic.auth_audit_exempt
 def rating_create(context: Context, data_dict: DataDict) -> Dict:
     '''Rate a dataset (package).
 
@@ -948,12 +951,15 @@ def rating_create(context: Context, data_dict: DataDict) -> Dict:
     :rtype: dictionary
 
     '''
+    _check_access('rating_create', context, data_dict)
     model = context['model']
     user = context.get("user")
 
-    package_ref = data_dict.get('package')
+    package_ref = data_dict.get('package', '')
     rating = data_dict.get('rating')
+    rating_int = 0
     opts_err = None
+    package = None
     if not package_ref:
         opts_err = _('You must supply a package id or name '
                      '(parameter "package").')
@@ -972,9 +978,11 @@ def rating_create(context: Context, data_dict: DataDict) -> Dict:
             elif not package:
                 opts_err = _('Not found') + ': %r' % package_ref
     if opts_err:
-        raise ValidationError(opts_err)
+        raise ValidationError({'message': opts_err})
 
     user = model.User.by_name(user)
+    assert package
+    assert user
     package.set_rating(user, rating_int)
     model.repo.commit()
 
@@ -1056,7 +1064,7 @@ def user_create(context: Context, data_dict: DataDict) -> Dict:
     # activity_create() (below) needs it.
     session.flush()
 
-    activity_create_context = {
+    activity_create_context: Context = {
         'model': model,
         'user': context['user'],
         'defer_commit': True,
@@ -1142,7 +1150,7 @@ def user_invite(context: Context, data_dict: DataDict) -> Dict:
         # Occasionally it won't meet the constraints, so check
         errors = {}
         logic.validators.user_password_validator(
-            'password', {'password': password}, errors, None)
+            ('password', ), {('password', ): password}, errors, context)
         if not errors:
             break
 
@@ -1151,6 +1159,7 @@ def user_invite(context: Context, data_dict: DataDict) -> Dict:
     data['state'] = ckan.model.State.PENDING
     user_dict = _get_action('user_create')(context, data)
     user = ckan.model.User.get(user_dict['id'])
+    assert user
     member_dict = {
         'username': user.id,
         'id': data['group_id'],
@@ -1174,7 +1183,7 @@ def user_invite(context: Context, data_dict: DataDict) -> Dict:
 
         msg = _('Error sending the invite email, ' +
                 'the user was not created: {0}').format(error)
-        raise ValidationError({'message': msg}, error_summary=msg)
+        raise ValidationError({'message': msg})
 
     return model_dictize.user_dictize(user, context)
 
@@ -1368,7 +1377,7 @@ def follow_user(context: Context, data_dict: DataDict) -> Dict:
     # Don't let a user follow herself.
     if userobj.id == validated_data_dict['id']:
         message = _('You cannot follow yourself')
-        raise ValidationError({'message': message}, error_summary=message)
+        raise ValidationError({'message': message})
 
     # Don't let a user follow someone she is already following.
     if model.UserFollowingUser.is_following(userobj.id,
@@ -1376,7 +1385,7 @@ def follow_user(context: Context, data_dict: DataDict) -> Dict:
         followeduserobj = model.User.get(validated_data_dict['id'])
         name = followeduserobj.display_name
         message = _('You are already following {0}').format(name)
-        raise ValidationError({'message': message}, error_summary=message)
+        raise ValidationError({'message': message})
 
     follower = model_save.follower_dict_save(
         validated_data_dict, context, model.UserFollowingUser)
@@ -1434,7 +1443,7 @@ def follow_dataset(context: Context, data_dict: DataDict) -> Dict:
         name = pkgobj.title or pkgobj.name or pkgobj.id
         message = _(
             'You are already following {0}').format(name)
-        raise ValidationError({'message': message}, error_summary=message)
+        raise ValidationError({'message': message})
 
     follower = model_save.follower_dict_save(validated_data_dict, context,
                                              model.UserFollowingDataset)
@@ -1573,7 +1582,7 @@ def follow_group(context: Context, data_dict: DataDict) -> Dict:
         name = groupobj.display_name
         message = _(
             'You are already following {0}').format(name)
-        raise ValidationError({'message': message}, error_summary=message)
+        raise ValidationError({'message': message})
 
     follower = model_save.follower_dict_save(validated_data_dict, context,
                                              model.UserFollowingGroup)

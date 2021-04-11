@@ -28,7 +28,7 @@ import ckan.authz as authz
 import ckan.lib.search as search
 import ckan.lib.munge as munge
 import ckan.model as model
-from ckan.types import Context, Query
+from ckan.types import Context
 
 ## package save
 
@@ -481,7 +481,7 @@ def user_list_dictize(obj_list: List[model.User], context: Context,
         result_list.append(user_dict)
     return sorted(result_list, key=sort_key, reverse=reverse)
 
-def member_dictize(member: model.Member, context: Context) -> Dict:
+def member_dictize(member: Union[model.Member, model.PackageMember], context: Context) -> Dict:
     return d.table_dictize(member, context)
 
 def user_dictize(

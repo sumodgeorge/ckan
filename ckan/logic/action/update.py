@@ -66,13 +66,14 @@ def resource_update(context: Context, data_dict: DataDict) -> Dict:
 
     '''
     model = context['model']
-    user = context['user']
     id: str = _get_or_bust(data_dict, "id")
 
     if not data_dict.get('url'):
         data_dict['url'] = ''
 
     resource = model.Resource.get(id)
+    if resource is None:
+        raise NotFound('Resource was not found.')
     context["resource"] = resource
     old_resource_format = resource.format
 
@@ -163,7 +164,10 @@ def resource_view_update(context: Context, data_dict: DataDict) -> Dict:
         raise ValidationError(errors)
 
     context['resource_view'] = resource_view
-    context['resource'] = model.Resource.get(resource_view.resource_id)
+    resource = model.Resource.get(resource_view.resource_id)
+    if resource is None:
+        raise NotFound('Resource was not found.')
+    context['resource'] = resource
 
     _check_access('resource_view_update', context, data_dict)
 
@@ -195,6 +199,8 @@ def resource_view_reorder(context: Context, data_dict: DataDict) -> Dict:
     if len(order) != len(set(order)):
         raise ValidationError({"order": "No duplicates allowed in order"})
     resource = model.Resource.get(id)
+    if resource is None:
+        raise NotFound('Resource was not found.')
     context['resource'] = resource
 
     _check_access('resource_view_reorder', context, data_dict)
@@ -823,9 +829,9 @@ def user_update(context: Context, data_dict: DataDict) -> Dict:
     id = _get_or_bust(data_dict, 'id')
 
     user_obj = model.User.get(id)
-    context['user_obj'] = user_obj
     if user_obj is None:
         raise NotFound('User was not found.')
+    context['user_obj'] = user_obj
 
     _check_access('user_update', context, data_dict)
 
@@ -894,9 +900,9 @@ def user_generate_apikey(context: Context, data_dict: DataDict) -> Dict:
 
     # check if user exists
     user_obj = model.User.get(id)
-    context['user_obj'] = user_obj
     if user_obj is None:
         raise NotFound('User was not found.')
+    context['user_obj'] = user_obj
 
     # check permission
     _check_access('user_generate_apikey', context, data_dict)
@@ -943,10 +949,9 @@ def task_status_update(context: Context, data_dict: DataDict) -> Dict:
 
     if id:
         task_status = model.TaskStatus.get(id)
-        context["task_status"] = task_status
-
         if task_status is None:
             raise NotFound(_('TaskStatus was not found.'))
+        context["task_status"] = task_status
 
     _check_access('task_status_update', context, data_dict)
 
@@ -1372,7 +1377,7 @@ def config_option_update(context: Context, data_dict: DataDict) -> Dict:
         msg = 'Configuration option(s) \'{0}\' can not be updated'.format(
               ' '.join(list(unsupported_options)))
 
-        raise ValidationError(msg, error_summary={'message': msg})
+        raise ValidationError({'message': msg})
 
     upload = uploader.get_uploader('admin')
     upload.update_data_dict(data_dict, 'ckan.site_logo',

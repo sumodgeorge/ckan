@@ -58,7 +58,7 @@ def reset_group_plugins() -> None:
     _group_controllers = {}
 
 
-def lookup_package_plugin(package_type: Optional[str]=None) -> Optional['plugins.IDatasetForm']:
+def lookup_package_plugin(package_type: Optional[str]=None) -> 'plugins.IDatasetForm':
     """
     Returns the plugin controller associoated with the given package type.
 
@@ -66,19 +66,22 @@ def lookup_package_plugin(package_type: Optional[str]=None) -> Optional['plugins
     fallback behaviour is used.
 
     """
+    assert _default_package_plugin
     if package_type is None:
         return _default_package_plugin
     return _package_plugins.get(package_type, _default_package_plugin)
 
 
 
-def lookup_group_plugin(group_type: Optional[str]=None) -> Optional['plugins.IGroupForm']:
+def lookup_group_plugin(group_type: Optional[str]=None) -> 'plugins.IGroupForm':
     """
     Returns the form plugin associated with the given group type.
 
     If the group type is None or cannot be found in the mapping, then the
     fallback behaviour is used.
     """
+    assert _default_group_plugin
+    assert _default_organization_plugin
     if group_type is None:
         return _default_group_plugin
     return _group_plugins.get(group_type, _default_organization_plugin
@@ -318,8 +321,8 @@ def get_permission_labels() -> Any:
     return DefaultPermissionLabels()
 
 
-class DefaultDatasetForm(plugins.IDatasetForm):
-    '''The default implementation of
+class DefaultDatasetForm(object):
+    '''The default implementatinon of
     :py:class:`~ckan.plugins.interfaces.IDatasetForm`.
 
     This class serves two purposes:
@@ -386,7 +389,7 @@ class DefaultDatasetForm(plugins.IDatasetForm):
         return 'package/snippets/resource_form.html'
 
 
-class DefaultGroupForm(plugins.IGroupForm):
+class DefaultGroupForm(object):
     """
     Provides a default implementation of the pluggable Group controller
     behaviour.
@@ -587,7 +590,7 @@ class DefaultOrganizationForm(DefaultGroupForm):
         return 'organization/activity_stream.html'
 
 
-class DefaultTranslation(plugins.ITranslation):
+class DefaultTranslation(object):
     name: str
 
     def i18n_directory(self) -> str:
@@ -624,7 +627,7 @@ class DefaultTranslation(plugins.ITranslation):
         return 'ckanext-{name}'.format(name=self.name)
 
 
-class DefaultPermissionLabels(plugins.IPermissionLabels):
+class DefaultPermissionLabels(object):
     u'''
     Default permissions for package_search/package_show:
     - everyone can read public datasets "public"

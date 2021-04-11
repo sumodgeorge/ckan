@@ -3,10 +3,11 @@ from functools import partial
 from types import ModuleType
 from typing import (
     Any, Callable, Dict, Iterable, List,
-    Mapping, Optional, Tuple, Union,
+    Mapping, Optional, Tuple, Type, Union,
     TYPE_CHECKING
 )
 from sqlalchemy.orm.scoping import ScopedSession
+from sqlalchemy import Table
 from typing_extensions import Protocol, TypedDict
 
 from sqlalchemy.orm import Query
@@ -19,6 +20,7 @@ AlchemySession = ScopedSession
 Query = Query
 
 Config = Dict[str, Union[str, Mapping[str, str]]]
+CKANApp = Any
 
 TuplizedKey = Tuple[Any, ...]
 
@@ -31,48 +33,49 @@ class Context(TypedDict, total=False):
     model: 'model_'
     session: AlchemySession
 
-    __auth_user_obj_checked: Optional[bool]
-    __auth_audit: Optional[List[Tuple[str, int]]]
-    auth_user_obj: Optional['model_.User']
-    user_obj: Optional['model_.User']
+    __auth_user_obj_checked: bool
+    __auth_audit: List[Tuple[str, int]]
+    auth_user_obj: 'model_.User'
+    user_obj: 'model_.User'
 
-    id: Optional[str]
-    user_id: Optional[str]
-    user_is_admin: Optional[bool]
-    return_query: Optional[bool]
+    id: str
+    user_id: str
+    user_is_admin: bool
+    return_query: bool
 
-    defer_commit: Optional[bool]
-    reset_password: Optional[bool]
-    save: Optional[bool]
-    active: Optional[bool]
-    allow_partial_update: Optional[bool]
-    for_update: Optional[bool]
-    for_edit: Optional[bool]
-    for_view: Optional[bool]
-    ignore_auth: Optional[bool]
-    preview: Optional[bool]
-    allow_state_change: Optional[bool]
-    is_member: Optional[bool]
-    use_cache: Optional[bool]
+    return_id_only: bool
+    defer_commit: bool
+    reset_password: bool
+    save: bool
+    active: bool
+    allow_partial_update: bool
+    for_update: bool
+    for_edit: bool
+    for_view: bool
+    ignore_auth: bool
+    preview: bool
+    allow_state_change: bool
+    is_member: bool
+    use_cache: bool
 
-    message: Optional[str]
+    message: str
 
-    keep_email: Optional[bool]
-    keep_apikey: Optional[bool]
+    keep_email: bool
+    keep_apikey: bool
 
-    schema: Optional['Schema']
-    group: Optional['model_.Group']
-    package: Optional['model_.Package']
+    schema: 'Schema'
+    group: 'model_.Group'
+    package: 'model_.Package'
 
-    task_status: Optional['model_.TaskStatus']
-    resource: Optional['model_.Resource']
-    resource_view: Optional['model_.ResourceView']
-    relationship: Optional['model_.PackageRelationship']
-    api_version: Optional[int]
-    dataset_counts: Optional[Dict]
-    limits: Optional[Dict]
-    metadata_modified: Optional[str]
-    with_capacity: Optional[bool]
+    task_status: 'model_.TaskStatus'
+    resource: 'model_.Resource'
+    resource_view: 'model_.ResourceView'
+    relationship: 'model_.PackageRelationship'
+    api_version: int
+    dataset_counts: Dict
+    limits: Dict
+    metadata_modified: str
+    with_capacity: bool
 
 
 class AuthResult(TypedDict, total=False):
@@ -111,7 +114,7 @@ AuthFunction = Union[
     AuthFunctionWithMandatoryDataDict,
     # partial
 ]
-Action = Callable[[Context, DataDict], Dict]
+Action = Callable[[Context, DataDict], Any]
 
 class PFeed(Protocol):
     def __init__(
@@ -153,11 +156,60 @@ class PUploader(Protocol):
     def update_data_dict(self, data_dict: Dict[str, Any], url_field: str, file_field: str, clear_field: str) -> None: ...
 
 
-
 class PResourceUploader(Protocol):
     mimetype: str
     filesize: int
     def __init__(self, resource: Dict) -> None: ...
     def get_path(self, id: str) -> str: ...
     def upload(self, id: str, max_size: int=...) -> None: ...
-CKANApp = Any
+
+
+class PModel(Protocol):
+    Session: AlchemySession
+    State: Type['model_.State']
+    System: Type['model_.System']
+    Package: Type['model_.Package']
+    PackageMember: Type['model_.PackageMember']
+    Tag: Type['model_.Tag']
+    PackageTag: Type['model_.PackageTag']
+    Member: Type['model_.Member']
+    User: Type['model_.User']
+    Group: Type['model_.Group']
+    GroupExtra: Type['model_.GroupExtra']
+    PackageExtra: Type['model_.PackageExtra']
+    Resource: Type['model_.Resource']
+    ResourceView: Type['model_.ResourceView']
+    TrackingSummary: Type['model_.TrackingSummary']
+    Rating: Type['model_.Rating']
+    PackageRelationship: Type['model_.PackageRelationship']
+    TaskStatus: Type['model_.TaskStatus']
+    Vocabulary: Type['model_.Vocabulary']
+    Activity: Type['model_.Activity']
+    ActivityDetail: Type['model_.ActivityDetail']
+    UserFollowingUser: Type['model_.UserFollowingUser']
+    UserFollowingDataset: Type['model_.UserFollowingDataset']
+    UserFollowingGroup: Type['model_.UserFollowingGroup']
+    SystemInfo: Type['model_.SystemInfo']
+    Dashboard: Type['model_.Dashboard']
+    ApiToken: Type['model_.ApiToken']
+
+    resource_table: Table
+    member_table: Table
+    tracking_raw_table: Table
+    tracking_summary_table: Table
+    resource_view_table: Table
+    package_extra_table: Table
+    group_extra_table: Table
+    group_table: Table
+    user_table: Table
+    package_tag_table: Table
+    tag_table: Table
+    package_member_table: Table
+    system_info_table: Table
+    term_translation_table: Table
+    activity_detail_table: Table
+    activity_table: Table
+    task_status_table: Table
+    package_relationship_table: Table
+
+    repo: 'model_.Repository'

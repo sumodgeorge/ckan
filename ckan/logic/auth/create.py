@@ -131,7 +131,6 @@ def organization_create(context: Context, data_dict: Optional[DataDict]=None) ->
             'msg': _('User %s not authorized to create organizations') % user}
 
 def rating_create(context: Context, data_dict: DataDict) -> AuthResult:
-    # No authz check in the logic function
     return {'success': True}
 
 

@@ -4,7 +4,7 @@ import datetime
 import uuid
 import logging
 
-from typing import Any, Dict, List, Optional, TYPE_CHECKING, Type
+from typing import Any, Dict, List, Optional, TYPE_CHECKING, Type, overload
 
 from sqlalchemy.orm import class_mapper
 import six
@@ -16,7 +16,7 @@ from ckan.types import Context
 
 if TYPE_CHECKING:
     import ckan.model as model
-    from ckan.model.follower import ModelFollowingModel
+    import ckan.model.follower as follower_
 
 
 log = logging.getLogger(__name__)
@@ -584,7 +584,14 @@ def tag_dict_save(tag_dict: Dict, context: Context) -> 'model.Tag':
     tag = d.table_dict_save(tag_dict, model.Tag, context)
     return tag
 
-def follower_dict_save(data_dict: Dict, context: Context, FollowerClass: Type['ModelFollowingModel']) -> 'ModelFollowingModel':
+@overload
+def follower_dict_save(data_dict: Dict, context: Context, FollowerClass: Type['follower_.UserFollowingUser']) -> 'follower_.UserFollowingUser': ...
+@overload
+def follower_dict_save(data_dict: Dict, context: Context, FollowerClass: Type['follower_.UserFollowingGroup']) -> 'follower_.UserFollowingGroup': ...
+@overload
+def follower_dict_save(data_dict: Dict, context: Context, FollowerClass: Type['follower_.UserFollowingDataset']) -> 'follower_.UserFollowingDataset': ...
+
+def follower_dict_save(data_dict: Dict, context: Context, FollowerClass: Type['follower_.ModelFollowingModel']) -> 'follower_.ModelFollowingModel':
     model = context['model']
     session = context['session']
     follower_obj = FollowerClass(

@@ -626,7 +626,7 @@ def auth_sysadmins_check(action: AuthFunction) -> AuthFunction:
     return action
 
 
-def auth_audit_exempt(action: AuthFunction) -> AuthFunction:
+def auth_audit_exempt(action: Any) -> Any:
     ''' Dirty hack to stop auth audit being done '''
     action.auth_audit_exempt = True
     return action

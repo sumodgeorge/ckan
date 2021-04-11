@@ -5,6 +5,7 @@
 Functions and data structures that are needed for the ckan data preview.
 """
 
+from ckan.types import Context
 import logging
 
 from six.moves.urllib.parse import urlparse  # type: ignore
@@ -201,7 +202,7 @@ def get_default_view_plugins(get_datastore_views: bool=False) -> List[p.IResourc
     return default_view_plugins
 
 
-def add_views_to_resource(context: Dict,
+def add_views_to_resource(context: Context,
                           resource_dict: Dict,
                           dataset_dict: Optional[Dict]=None,
                           view_types: List[str]=[],
@@ -274,7 +275,7 @@ def add_views_to_resource(context: Dict,
     return created_views
 
 
-def add_views_to_dataset_resources(context: Dict,
+def add_views_to_dataset_resources(context: Context,
                                    dataset_dict: Dict,
                                    view_types: List[str]=[],
                                    create_datastore_views: bool=False) -> List[Dict]:
