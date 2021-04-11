@@ -4,8 +4,12 @@ import functools
 import logging
 import re
 from collections import defaultdict
+from typing import Any, Callable, Container, Dict, List, Optional, Tuple, TypeVar, Union, cast
+from typing_extensions import Literal
 
 from werkzeug.local import LocalProxy
+from werkzeug.datastructures import MultiDict
+
 import six
 from six import string_types, text_type
 
@@ -15,9 +19,8 @@ import ckan.lib.navl.dictization_functions as df
 import ckan.plugins as p
 
 from ckan.common import _, c
-from typing import Any, Callable, Container, Dict, List, Literal, Optional, Tuple, TypeVar, Union, cast
+
 from ckan.types import Action, AuthFunction, ErrorDict, Context, Schema, Validator
-from werkzeug.datastructures import MultiDict
 
 Decorated = TypeVar("Decorated")
 

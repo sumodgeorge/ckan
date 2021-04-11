@@ -3,7 +3,8 @@
 from __future__ import print_function
 import six
 import re
-from typing import Any, Dict, Iterable, List, Literal, Optional
+from typing import Any, Dict, Iterable, List, Optional
+from typing_extensions import Literal
 
 INSERT_NEW_SECTIONS_BEFORE_SECTION = 'app:main'
 
