@@ -17,6 +17,7 @@ import ckan.lib.plugins as lib_plugins
 import ckan.logic as logic
 import ckan.plugins as plugins
 import ckan.lib.dictization
+import ckan.logic.validators
 import ckan.logic.action
 import ckan.logic.schema
 import ckan.lib.dictization.model_dictize as model_dictize
@@ -27,6 +28,7 @@ import ckan.lib.mailer as mailer
 import ckan.lib.datapreview
 import ckan.lib.api_token as api_token
 import ckan.authz as authz
+import ckan.model
 
 from ckan.common import _, config
 
@@ -385,7 +387,8 @@ def resource_view_create(context: Context, data_dict: DataDict) -> Dict:
             )}
         )
 
-    default: Schema = logic.schema.default_create_resource_view_schema(view_plugin)
+    default: Schema = ckan.logic.schema.default_create_resource_view_schema(
+        view_plugin)
     schema = context.get('schema', default)
     plugin_schema = view_plugin.info().get('schema', {})
     schema.update(plugin_schema)
@@ -415,7 +418,8 @@ def resource_view_create(context: Context, data_dict: DataDict) -> Dict:
     return model_dictize.resource_view_dictize(resource_view, context)
 
 
-def resource_create_default_resource_views(context: Context, data_dict: DataDict) -> List[Dict[str, Any]]:
+def resource_create_default_resource_views(
+        context: Context, data_dict: DataDict) -> List[Dict[str, Any]]:
     '''
     Creates the default views (if necessary) on the provided resource
 
@@ -462,7 +466,8 @@ def resource_create_default_resource_views(context: Context, data_dict: DataDict
         create_datastore_views=create_datastore_views)
 
 
-def package_create_default_resource_views(context: Context, data_dict: DataDict) -> List[Dict[str, Any]]:
+def package_create_default_resource_views(
+        context: Context, data_dict: DataDict) -> List[Dict[str, Any]]:
     '''
     Creates the default views on all resources of the provided dataset
 
@@ -589,7 +594,7 @@ def member_create(context: Context, data_dict: DataDict) -> Dict:
     if not group:
         raise NotFound('Group was not found.')
 
-    obj_class = ckan.logic.model_name_to_class(model, obj_type)
+    obj_class = logic.model_name_to_class(model, obj_type)
     obj = obj_class.get(obj_id)
     if not obj:
         raise NotFound('%s was not found.' % obj_type.title())
@@ -675,7 +680,8 @@ def package_collaborator_create(context: Context, data_dict: DataDict) -> Dict:
         raise NotFound(_('User not found'))
 
     if not authz.check_config_permission('allow_dataset_collaborators'):
-        raise ValidationError({'message': _('Dataset collaborators not enabled')})
+        raise ValidationError({
+            'message': _('Dataset collaborators not enabled')})
 
     # Check if collaborator already exists
     collaborator = model.Session.query(model.PackageMember). \
@@ -696,7 +702,9 @@ def package_collaborator_create(context: Context, data_dict: DataDict) -> Dict:
     return model_dictize.member_dictize(collaborator, context)
 
 
-def _group_or_org_create(context: Context, data_dict: DataDict, is_org: bool=False) -> Union[str, Dict[str, Any]]:
+def _group_or_org_create(context: Context,
+                         data_dict: DataDict,
+                         is_org: bool = False) -> Union[str, Dict[str, Any]]:
     model = context['model']
     user = context['user']
     session = context['session']
@@ -804,7 +812,8 @@ def _group_or_org_create(context: Context, data_dict: DataDict, is_org: bool=Fal
     return output
 
 
-def group_create(context: Context, data_dict: DataDict) -> Union[str, Dict[str, Any]]:
+def group_create(context: Context,
+                 data_dict: DataDict) -> Union[str, Dict[str, Any]]:
     '''Create a new group.
 
     You must be authorized to create groups.
@@ -875,7 +884,8 @@ def group_create(context: Context, data_dict: DataDict) -> Union[str, Dict[str, 
     return _group_or_org_create(context, data_dict)
 
 
-def organization_create(context: Context, data_dict: DataDict) -> Union[str, Dict[str, Any]]:
+def organization_create(context: Context,
+                        data_dict: DataDict) -> Union[str, Dict[str, Any]]:
     '''Create a new organization.
 
     You must be authorized to create organizations.
@@ -1149,16 +1159,16 @@ def user_invite(context: Context, data_dict: DataDict) -> Dict:
             for _ in range(12))
         # Occasionally it won't meet the constraints, so check
         errors = {}
-        logic.validators.user_password_validator(
+        ckan.logic.validators.user_password_validator(
             ('password', ), {('password', ): password}, errors, context)
         if not errors:
             break
 
     data['name'] = name
     data['password'] = password
-    data['state'] = ckan.model.State.PENDING
+    data['state'] = model.State.PENDING
     user_dict = _get_action('user_create')(context, data)
-    user = ckan.model.User.get(user_dict['id'])
+    user = model.User.get(user_dict['id'])
     assert user
     member_dict = {
         'username': user.id,
@@ -1483,19 +1493,19 @@ def _group_or_org_member_create(context, data_dict, is_org=False):
     else:
         message = _(u'User {username} does not exist.').format(
             username=username)
-        raise ValidationError({'message': message}, error_summary=message)
+        raise ValidationError({'message': message})
     member_dict = {
         'id': group.id,
         'object': user_id,
         'object_type': 'user',
         'capacity': role,
     }
-    member_create_context = {
+    member_create_context = cast(Context, {
         'model': model,
         'user': user,
         'session': session,
         'ignore_auth': context.get('ignore_auth'),
-    }
+    })
     return logic.get_action('member_create')(member_create_context,
                                              member_dict)
 

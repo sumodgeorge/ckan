@@ -165,7 +165,7 @@ class Group(core.StatefulObjectMixin,
             return self.name
 
     @classmethod
-    def get(cls, reference: str) -> Optional["Group"]:
+    def get(cls, reference: Optional[str]) -> Optional["Group"]:
         '''Returns a group object referenced by its id or name.'''
         query = meta.Session.query(cls).filter(cls.id == reference)
         group = query.first()

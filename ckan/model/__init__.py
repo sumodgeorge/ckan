@@ -134,7 +134,8 @@ import ckan.migration
 from ckan.common import config
 from . import (
     activity,
-    vocabulary
+    tag,
+    vocabulary,
 )
 from typing import Any, Callable, Collection, Dict, List, Optional, Tuple
 from sqlalchemy.engine import Engine

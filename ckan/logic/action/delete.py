@@ -10,20 +10,20 @@ import six
 import ckan.lib.jobs as jobs
 import ckan.logic
 import ckan.logic.action
+import ckan.logic.schema
 import ckan.plugins as plugins
 import ckan.lib.dictization as dictization
 import ckan.lib.dictization.model_dictize as model_dictize
 import ckan.lib.api_token as api_token
 from ckan import authz
+from  ckan.lib.navl.dictization_functions import validate
 
 from ckan.common import _
-from typing import List
-from ckan.types import Context, DataDict
+from typing import List, cast
+from ckan.types import Context, DataDict, ErrorDict
 
 
 log = logging.getLogger('ckan.logic')
-
-validate = ckan.lib.navl.dictization_functions.validate
 
 # Define some shortcuts
 # Ensure they are module-private so that they don't get loaded as available
@@ -61,7 +61,8 @@ def user_delete(context: Context, data_dict: DataDict) -> None:
     for membership in user_memberships:
         membership.delete()
 
-    datasets_where_user_is_collaborator = model.Session.query(model.PackageMember).filter(
+    datasets_where_user_is_collaborator = model.Session.query(
+        model.PackageMember).filter(
             model.PackageMember.user_id == user.id).all()
     for collaborator in datasets_where_user_is_collaborator:
         collaborator.delete()
@@ -147,9 +148,9 @@ def dataset_purge(context: Context, data_dict: DataDict) -> None:
     id = _get_or_bust(data_dict, 'id')
 
     pkg = model.Package.get(id)
-    context['package'] = pkg
     if pkg is None:
         raise NotFound('Dataset was not found')
+    context['package'] = pkg
 
     _check_access('dataset_purge', context, data_dict)
 
@@ -205,7 +206,7 @@ def resource_delete(context: Context, data_dict: DataDict) -> None:
     try:
         pkg_dict = _get_action('package_update')(context, pkg_dict)
     except ValidationError as e:
-        errors = e.error_dict['resources'][-1]
+        errors = cast(ErrorDict, e.error_dict['resources'][-1])
         raise ValidationError(errors)
 
     for plugin in plugins.PluginImplementations(plugins.IResourceController):
@@ -229,7 +230,10 @@ def resource_view_delete(context: Context, data_dict: DataDict) -> None:
         raise NotFound
 
     context["resource_view"] = resource_view
-    context['resource'] = model.Resource.get(resource_view.resource_id)
+    resource = model.Resource.get(resource_view.resource_id)
+    if not resource:
+        raise NotFound
+    context['resource'] = resource
     _check_access('resource_view_delete', context, data_dict)
 
     resource_view.delete()
@@ -247,7 +251,7 @@ def resource_view_clear(context: Context, data_dict: DataDict) -> None:
 
     _check_access('resource_view_clear', context, data_dict)
 
-    view_types = data_dict.get('view_types')
+    view_types = data_dict.get('view_types', [])
     model.ResourceView.delete_all(view_types)
     model.repo.commit()
 
@@ -277,7 +281,7 @@ def package_relationship_delete(context: Context, data_dict: DataDict) -> None:
     if not pkg1:
         raise NotFound('Subject package %r was not found.' % id)
     if not pkg2:
-        return NotFound('Object package %r was not found.' % id2)
+        raise NotFound('Object package %r was not found.' % id2)
 
     existing_rels = pkg1.get_relationships_with(pkg2, rel)
     if not existing_rels:
@@ -292,7 +296,7 @@ def package_relationship_delete(context: Context, data_dict: DataDict) -> None:
     relationship.delete()
     model.repo.commit()
 
-def member_delete(context: Context, data_dict: DataDict=None) -> None:
+def member_delete(context: Context, data_dict: DataDict) -> None:
     '''Remove an object (e.g. a user, dataset or group) from a group.
 
     You must be authorized to edit a group to remove objects from it.
@@ -308,7 +312,8 @@ def member_delete(context: Context, data_dict: DataDict=None) -> None:
     '''
     model = context['model']
 
-    group_id, obj_id, obj_type = _get_or_bust(data_dict, ['id', 'object', 'object_type'])
+    group_id, obj_id, obj_type = _get_or_bust(
+        data_dict, ['id', 'object', 'object_type'])
 
     group = model.Group.get(group_id)
     if not group:
@@ -357,7 +362,8 @@ def package_collaborator_delete(context: Context, data_dict: DataDict) -> None:
     _check_access('package_collaborator_delete', context, data_dict)
 
     if not authz.check_config_permission('allow_dataset_collaborators'):
-        raise ValidationError(_('Dataset collaborators not enabled'))
+        raise ValidationError({
+            'message': _('Dataset collaborators not enabled')})
 
     package = model.Package.get(package_id)
     if not package:
@@ -416,9 +422,11 @@ def _group_or_org_delete(context, data_dict, is_org=False):
                         .filter(model.Package.state != 'deleted') \
                         .count()
         if datasets:
-            if not authz.check_config_permission('ckan.auth.create_unowned_dataset'):
-                raise ValidationError(_('Organization cannot be deleted while it '
-                                      'still has datasets'))
+            if not authz.check_config_permission(
+                    'ckan.auth.create_unowned_dataset'):
+                raise ValidationError({
+                    'message': _('Organization cannot be deleted while it '
+                                      'still has datasets')})
 
             pkg_table = model.package_table
             # using Core SQLA instead of the ORM should be faster
@@ -452,13 +460,13 @@ def _group_or_org_delete(context, data_dict, is_org=False):
             'group': dictization.table_dictize(group, context)
             }
     }
-    activity_create_context = {
+    activity_create_context = cast(Context, {
         'model': model,
         'user': user,
         'defer_commit': True,
         'ignore_auth': True,
         'session': context['session']
-    }
+    })
     _get_action('activity_create')(activity_create_context, activity_dict)
 
     if is_org:
@@ -534,9 +542,11 @@ def _group_or_org_purge(context, data_dict, is_org=False):
                         .filter(model.Package.state != 'deleted') \
                         .count()
         if datasets:
-            if not authz.check_config_permission('ckan.auth.create_unowned_dataset'):
-                raise ValidationError('Organization cannot be purged while it '
-                                      'still has datasets')
+            if not authz.check_config_permission(
+                    'ckan.auth.create_unowned_dataset'):
+                raise ValidationError({
+                    'message': 'Organization cannot be purged while it '
+                                      'still has datasets'})
             pkg_table = model.package_table
             # using Core SQLA instead of the ORM should be faster
             model.Session.execute(
@@ -725,7 +735,8 @@ def unfollow_dataset(context: Context, data_dict: DataDict) -> None:
             context['model'].UserFollowingDataset)
 
 
-def _group_or_org_member_delete(context: Context, data_dict: DataDict=None) -> None:
+def _group_or_org_member_delete(context: Context,
+                                data_dict: DataDict = None) -> None:
     model = context['model']
     user = context['user']
     session = context['session']
@@ -739,11 +750,11 @@ def _group_or_org_member_delete(context: Context, data_dict: DataDict=None) -> N
         'object': user_id,
         'object_type': 'user',
     }
-    member_context = {
+    member_context = cast(Context, {
         'model': model,
         'user': user,
         'session': session
-    }
+    })
     _get_action('member_delete')(member_context, member_dict)
 
 
@@ -761,7 +772,9 @@ def group_member_delete(context: Context, data_dict: DataDict=None) -> None:
     _check_access('group_member_delete',context, data_dict)
     return _group_or_org_member_delete(context, data_dict)
 
-def organization_member_delete(context: Context, data_dict: DataDict=None) -> None:
+
+def organization_member_delete(context: Context,
+                               data_dict: DataDict = None) -> None:
     '''Remove a user from an organization.
 
     You must be authorized to edit the organization.
@@ -838,7 +851,8 @@ def api_token_revoke(context: Context, data_dict: DataDict) -> None:
     """Delete API Token.
 
     :param string token: Token to remove(required if `jti` not specified).
-    :param string jti: Id of the token to remove(overrides `token` if specified).
+    :param string jti: Id of the token to remove(overrides `token` if
+        specified).
 
     .. versionadded:: 3.0
     """

@@ -47,7 +47,7 @@ class DomainObject(object):
         return cls.Session.query(cls).count()
 
     @classmethod
-    def by_name(cls: Type[T], name: str, autoflush: bool=True, for_update: bool=False) -> Optional[T]:
+    def by_name(cls: Type[T], name: Optional[str], autoflush: bool=True, for_update: bool=False) -> Optional[T]:
         q = meta.Session.query(cls).autoflush(autoflush
             ).filter_by(name=name)
         if for_update:
