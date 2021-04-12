@@ -64,7 +64,8 @@ def package_revise(context: Context, data_dict: DataDict) -> AuthResult:
     return authz.is_authorized('package_update', context, data_dict['update'])
 
 
-def package_resource_reorder(context: Context, data_dict: DataDict) -> AuthResult:
+def package_resource_reorder(context: Context,
+                             data_dict: DataDict) -> AuthResult:
     ## the action function runs package update so no need to run it twice
     return {'success': True}
 
@@ -98,7 +99,9 @@ def resource_view_update(context: Context, data_dict: DataDict) -> AuthResult:
 def resource_view_reorder(context: Context, data_dict: DataDict) -> AuthResult:
     return authz.is_authorized('resource_update', context, {'id': data_dict['resource_id']})
 
-def package_relationship_update(context: Context, data_dict: DataDict) -> AuthResult:
+
+def package_relationship_update(context: Context,
+                                data_dict: DataDict) -> AuthResult:
     return authz.is_authorized('package_relationship_create',
                                    context,
                                    data_dict)
@@ -250,7 +253,8 @@ def vocabulary_update(context: Context, data_dict: DataDict) -> AuthResult:
     return {'success': False}
 
 
-def term_translation_update(context: Context, data_dict: DataDict) -> AuthResult:
+def term_translation_update(context: Context,
+                            data_dict: DataDict) -> AuthResult:
     # sysadmins only
     user = context['user']
     return {
@@ -259,18 +263,21 @@ def term_translation_update(context: Context, data_dict: DataDict) -> AuthResult
     }
 
 
-def dashboard_mark_activities_old(context: Context, data_dict: DataDict) -> AuthResult:
+def dashboard_mark_activities_old(context: Context,
+                                  data_dict: DataDict) -> AuthResult:
     return authz.is_authorized('dashboard_activity_list',
                                    context,
                                    data_dict)
 
 
-def send_email_notifications(context: Context, data_dict: DataDict) -> AuthResult:
+def send_email_notifications(context: Context,
+                             data_dict: DataDict) -> AuthResult:
     # Only sysadmins are authorized to send email notifications.
     return {'success': False}
 
 
-def package_owner_org_update(context: Context, data_dict: DataDict) -> AuthResult:
+def package_owner_org_update(context: Context,
+                             data_dict: DataDict) -> AuthResult:
     # sysadmins only
     return {'success': False}
 

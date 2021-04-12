@@ -13,7 +13,10 @@ from ckan.model.domain_object import DomainObject
 from typing import Dict, Mapping
 
 
-def rename_keys(dict_: Dict, key_map: Mapping, reverse: bool=False, destructive: bool=False) -> Dict:
+def rename_keys(dict_: Dict,
+                key_map: Mapping,
+                reverse: bool = False,
+                destructive: bool = False) -> Dict:
     '''Returns a dict that has particular keys renamed,
     according to the key_map.
 

@@ -16,28 +16,37 @@ if TYPE_CHECKING:
 
 
 @overload
-def _get_object(
-        context: Context, data_dict: DataDict, name: str, class_name: Literal['Package']
-) -> 'model_.Package': ...
-@overload
-def _get_object(
-        context: Context, data_dict: DataDict, name: str, class_name: Literal['Resource']
-) -> 'model_.Resource': ...
-@overload
-def _get_object(
-        context: Context, data_dict: DataDict, name: str, class_name: Literal['Group']
-) -> 'model_.Group': ...
-@overload
-def _get_object(
-        context: Context, data_dict: DataDict, name: str, class_name: Literal['Activity']
-) -> 'model_.Activity': ...
-@overload
-def _get_object(
-        context: Context, data_dict: DataDict, name: str, class_name: Literal['User']
-) -> 'model_.User': ...
+def _get_object(context: Context, data_dict: DataDict, name: str,
+                class_name: Literal['Package']) -> 'model_.Package':
+    ...
 
 
-def _get_object(context: Context, data_dict: DataDict, name: str, class_name: str) -> Any:
+@overload
+def _get_object(context: Context, data_dict: DataDict, name: str,
+                class_name: Literal['Resource']) -> 'model_.Resource':
+    ...
+
+
+@overload
+def _get_object(context: Context, data_dict: DataDict, name: str,
+                class_name: Literal['Group']) -> 'model_.Group':
+    ...
+
+
+@overload
+def _get_object(context: Context, data_dict: DataDict, name: str,
+                class_name: Literal['Activity']) -> 'model_.Activity':
+    ...
+
+
+@overload
+def _get_object(context: Context, data_dict: DataDict, name: str,
+                class_name: Literal['User']) -> 'model_.User':
+    ...
+
+
+def _get_object(context: Context, data_dict: DataDict, name: str,
+                class_name: str) -> Any:
     # return the named item if in the context, or get it from model.class_name
     try:
         return context[name]

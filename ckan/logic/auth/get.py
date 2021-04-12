@@ -38,7 +38,8 @@ def package_list(context: Context, data_dict: DataDict) -> AuthResult:
     return {'success': True}
 
 
-def current_package_list_with_resources(context: Context, data_dict: DataDict) -> AuthResult:
+def current_package_list_with_resources(context: Context,
+                                        data_dict: DataDict) -> AuthResult:
     return authz.is_authorized('package_list', context, data_dict)
 
 
@@ -60,7 +61,8 @@ def organization_list(context: Context, data_dict: DataDict) -> AuthResult:
     return {'success': True}
 
 
-def organization_list_for_user(context: Context, data_dict: DataDict) -> AuthResult:
+def organization_list_for_user(context: Context,
+                               data_dict: DataDict) -> AuthResult:
     return {'success': True}
 
 
@@ -90,7 +92,8 @@ def user_list(context: Context, data_dict: DataDict) -> AuthResult:
         return {'success': True}
 
 
-def package_relationships_list(context: Context, data_dict: DataDict) -> AuthResult:
+def package_relationships_list(context: Context,
+                               data_dict: DataDict) -> AuthResult:
     user = context.get('user')
 
     id = data_dict['id']
@@ -210,7 +213,8 @@ def group_autocomplete(context: Context, data_dict: DataDict) -> AuthResult:
     return authz.is_authorized('group_list', context, data_dict)
 
 
-def organization_autocomplete(context: Context, data_dict: DataDict) -> AuthResult:
+def organization_autocomplete(context: Context,
+                              data_dict: DataDict) -> AuthResult:
     return authz.is_authorized('organization_list', context, data_dict)
 
 
@@ -241,7 +245,8 @@ def member_roles_list(context: Context, data_dict: DataDict) -> AuthResult:
     return {'success': True}
 
 
-def dashboard_activity_list(context: Context, data_dict: DataDict) -> AuthResult:
+def dashboard_activity_list(context: Context,
+                            data_dict: DataDict) -> AuthResult:
     # FIXME: context['user'] could be an IP address but that case is not
     # handled here. Maybe add an auth helper function like is_logged_in().
     if context.get('user'):
@@ -251,7 +256,8 @@ def dashboard_activity_list(context: Context, data_dict: DataDict) -> AuthResult
                 'msg': _("You must be logged in to access your dashboard.")}
 
 
-def dashboard_new_activities_count(context: Context, data_dict: DataDict) -> AuthResult:
+def dashboard_new_activities_count(context: Context,
+                                   data_dict: DataDict) -> AuthResult:
     # FIXME: This should go through check_access() not call is_authorized()
     # directly, but wait until 2939-orgs is merged before fixing this.
     # This is so a better not authourized message can be sent.
@@ -303,7 +309,8 @@ def group_activity_list(context: Context, data_dict: DataDict) -> AuthResult:
     return activity_list(context, data_dict)
 
 
-def organization_activity_list(context: Context, data_dict: DataDict) -> AuthResult:
+def organization_activity_list(context: Context,
+                               data_dict: DataDict) -> AuthResult:
     data_dict['object_type'] = 'organization'
     return activity_list(context, data_dict)
 
@@ -359,7 +366,8 @@ def group_follower_list(context: Context, data_dict: DataDict) -> AuthResult:
     return authz.is_authorized('sysadmin', context, data_dict)
 
 
-def organization_follower_list(context: Context, data_dict: DataDict) -> AuthResult:
+def organization_follower_list(context: Context,
+                               data_dict: DataDict) -> AuthResult:
     return authz.is_authorized('sysadmin', context, data_dict)
 
 
@@ -400,7 +408,8 @@ def group_followee_list(context: Context, data_dict: DataDict) -> AuthResult:
 
 
 @logic.auth_audit_exempt
-def organization_followee_list(context: Context, data_dict: DataDict) -> AuthResult:
+def organization_followee_list(context: Context,
+                               data_dict: DataDict) -> AuthResult:
     return _followee_list(context, data_dict)
 
 
@@ -445,7 +454,8 @@ def api_token_list(context: Context, data_dict: DataDict) -> AuthResult:
     return {u'success': success}
 
 
-def package_collaborator_list(context: Context, data_dict: DataDict) -> AuthResult:
+def package_collaborator_list(context: Context,
+                              data_dict: DataDict) -> AuthResult:
     '''Checks if a user is allowed to list the collaborators from a dataset
 
     See :py:func:`~ckan.authz.can_manage_collaborators` for details
@@ -464,7 +474,8 @@ def package_collaborator_list(context: Context, data_dict: DataDict) -> AuthResu
     return {'success': True}
 
 
-def package_collaborator_list_for_user(context: Context, data_dict: DataDict) -> AuthResult:
+def package_collaborator_list_for_user(context: Context,
+                                       data_dict: DataDict) -> AuthResult:
     '''Checks if a user is allowed to list all datasets a user is a collaborator in
 
     The current implementation restricts to the own users themselves.
