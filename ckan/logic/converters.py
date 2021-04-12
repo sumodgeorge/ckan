@@ -14,7 +14,8 @@ from typing import Any, Dict
 from ckan.types import Context, DataValidator, TuplizedErrorDict, TuplizedKey
 
 
-def convert_to_extras(key: TuplizedKey, data: Dict[TuplizedKey, Any], errors: TuplizedErrorDict, context: Context) -> Any:
+def convert_to_extras(key: TuplizedKey, data: Dict[TuplizedKey, Any],
+                      errors: TuplizedErrorDict, context: Context) -> Any:
 
     # Get the current extras index
     current_indexes = [k[1] for k in data.keys()
@@ -26,7 +27,8 @@ def convert_to_extras(key: TuplizedKey, data: Dict[TuplizedKey, Any], errors: Tu
     data[('extras', new_index, 'value')] = data[key]
 
 
-def convert_from_extras(key: TuplizedKey, data: Dict[TuplizedKey, Any], errors: TuplizedErrorDict, context: Context) -> Any:
+def convert_from_extras(key: TuplizedKey, data: Dict[TuplizedKey, Any],
+                        errors: TuplizedErrorDict, context: Context) -> Any:
 
     def remove_from_extras(data, key):
         to_remove = []
@@ -52,7 +54,9 @@ def extras_unicode_convert(extras, context):
         extras[extra] = text_type(extras[extra])
     return extras
 
-def free_tags_only(key: TuplizedKey, data: Dict[TuplizedKey, Any], errors: TuplizedErrorDict, context: Context) -> Any:
+
+def free_tags_only(key: TuplizedKey, data: Dict[TuplizedKey, Any],
+                   errors: TuplizedErrorDict, context: Context) -> Any:
     tag_number = key[1]
     if not data.get(('tags', tag_number, 'vocabulary_id')):
         return
@@ -102,7 +106,9 @@ def convert_from_tags(vocab: Any) -> DataValidator:
         data[key] = tags
     return func
 
-def convert_user_name_or_id_to_id(user_name_or_id: Any, context: Context) -> Any:
+
+def convert_user_name_or_id_to_id(user_name_or_id: Any,
+                                  context: Context) -> Any:
     '''Return the user id for the given user name or id.
 
     The point of this function is to convert user names to ids. If you have
@@ -126,7 +132,9 @@ def convert_user_name_or_id_to_id(user_name_or_id: Any, context: Context) -> Any
         raise df.Invalid('%s: %s' % (_('Not found'), _('User')))
     return result.id
 
-def convert_package_name_or_id_to_id(package_name_or_id: Any, context: Context) -> Any:
+
+def convert_package_name_or_id_to_id(package_name_or_id: Any,
+                                     context: Context) -> Any:
     '''Return the package id for the given package name or id.
 
     The point of this function is to convert package names to ids. If you have
@@ -151,7 +159,9 @@ def convert_package_name_or_id_to_id(package_name_or_id: Any, context: Context) 
         raise df.Invalid('%s: %s' % (_('Not found'), _('Dataset')))
     return result.id
 
-def convert_group_name_or_id_to_id(group_name_or_id: Any, context: Context) -> Any:
+
+def convert_group_name_or_id_to_id(group_name_or_id: Any,
+                                   context: Context) -> Any:
     '''Return the group id for the given group name or id.
 
     The point of this function is to convert group names to ids. If you have

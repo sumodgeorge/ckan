@@ -20,7 +20,8 @@ import ckan.plugins as p
 
 from ckan.common import _, c
 
-from ckan.types import Action, AuthFunction, ErrorDict, Context, Schema, Validator
+from ckan.types import (Action, AuthFunction, ErrorDict, Context, Schema,
+                        Validator)
 
 Decorated = TypeVar("Decorated")
 
@@ -77,7 +78,11 @@ class ValidationError(ActionError):
 
     '''
     error_dict: ErrorDict
-    def __init__(self, error_dict: ErrorDict, error_summary: Optional[Dict[str, str]]=None, extra_msg: Optional[str]=None) -> None:
+
+    def __init__(self,
+                 error_dict: ErrorDict,
+                 error_summary: Optional[Dict[str, str]] = None,
+                 extra_msg: Optional[str] = None) -> None:
         if not isinstance(error_dict, dict):
             error_dict = {'message': error_dict}
         # tags errors are a mess so let's clean them up
@@ -137,7 +142,10 @@ class ValidationError(ActionError):
         return ' - '.join([str(err_msg) for err_msg in err_msgs if err_msg])
 
 
-def parse_params(params: MultiDict, ignore_keys: Optional[Container]=None) -> Dict[str, Union[str, List[str]]]:
+def parse_params(
+    params: MultiDict,
+    ignore_keys: Optional[Container] = None
+) -> Dict[str, Union[str, List[str]]]:
     '''Takes a dict and returns it with some values standardised.
     This is done on a dict before calling tuplize_dict on it.
     '''
@@ -237,7 +245,7 @@ def flatten_to_string_key(dict: Dict[str, Any]) -> Dict[str, Any]:
 def _prepopulate_context(context: Optional[Context]) -> Context:
     if context is None:
         context = {}
-    context.setdefault('model', model)
+    context.setdefault('model', model)  # type: ignore
     context.setdefault('session', model.Session)
     try:
         context.setdefault('user', c.user)
@@ -253,7 +261,9 @@ def _prepopulate_context(context: Optional[Context]) -> Context:
     return context
 
 
-def check_access(action: str, context: Context, data_dict: Optional[Dict]=None) -> Literal[True]:
+def check_access(action: str,
+                 context: Context,
+                 data_dict: Optional[Dict] = None) -> Literal[True]:
     '''Calls the authorization function for the provided action
 
     This is the only function that should be called to determine whether a
@@ -522,7 +532,9 @@ def get_or_bust(data_dict: Dict, keys: str) -> Any: ...
 @overload
 def get_or_bust(data_dict: Dict, keys: Iterable[str]) -> Tuple[Any, ...]: ...
 
-def get_or_bust(data_dict: Dict, keys: Union[str, List[str]]) -> Union[Any, Tuple]:
+
+def get_or_bust(data_dict: Dict, keys: Union[str,
+                                             List[str]]) -> Union[Any, Tuple]:
     '''Return the value(s) from the given data_dict for the given key(s).
 
     Usage::
@@ -561,7 +573,8 @@ def get_or_bust(data_dict: Dict, keys: Union[str, List[str]]) -> Union[Any, Tupl
     return tuple(values)
 
 
-def validate(schema_func: Callable[[], Schema], can_skip_validator: bool=False) -> Callable[[Action], Action]:
+def validate(schema_func: Callable[[], Schema],
+             can_skip_validator: bool = False) -> Callable[[Action], Action]:
     ''' A decorator that validates an action function against a given schema
     '''
     def action_decorator(action):

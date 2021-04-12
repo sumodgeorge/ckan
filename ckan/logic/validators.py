@@ -1,4 +1,3 @@
-
 # encoding: utf-8
 
 import collections
@@ -33,7 +32,8 @@ Missing = df.Missing
 missing = df.missing
 
 
-def owner_org_validator(key: TuplizedKey, data: Dict[TuplizedKey, Any], errors: TuplizedErrorDict, context: Context) -> Any:
+def owner_org_validator(key: TuplizedKey, data: Dict[TuplizedKey, Any],
+                        errors: TuplizedErrorDict, context: Context) -> Any:
 
     value = data.get(key)
 
@@ -318,7 +318,10 @@ object_id_validators = {
     'follow group' : group_id_exists,
     }
 
-def object_id_validator(key: TuplizedKey, activity_dict: Dict[TuplizedKey, Any], errors: TuplizedErrorDict, context: Context) -> Any:
+
+def object_id_validator(key: TuplizedKey, activity_dict: Dict[TuplizedKey,
+                                                              Any],
+                        errors: TuplizedErrorDict, context: Context) -> Any:
     '''Validate the 'object_id' value of an activity_dict.
 
     Uses the object_id_validators dict (above) to find and call an 'object_id'
@@ -375,7 +378,9 @@ def name_validator(value: Any, context: Context) -> Any:
                         '(ascii) characters and these symbols: -_'))
     return value
 
-def package_name_validator(key: TuplizedKey, data: Dict[TuplizedKey, Any], errors: TuplizedErrorDict, context: Context) -> Any:
+
+def package_name_validator(key: TuplizedKey, data: Dict[TuplizedKey, Any],
+                           errors: TuplizedErrorDict, context: Context) -> Any:
     model = context['model']
     session = context['session']
     package = context.get('package')
@@ -408,7 +413,9 @@ def package_version_validator(value: Any, context: Context) -> Any:
                       PACKAGE_VERSION_MAX_LENGTH)
     return value
 
-def duplicate_extras_key(key: TuplizedKey, data: Dict[TuplizedKey, Any], errors: TuplizedErrorDict, context: Context) -> Any:
+
+def duplicate_extras_key(key: TuplizedKey, data: Dict[TuplizedKey, Any],
+                         errors: TuplizedErrorDict, context: Context) -> Any:
 
     unflattened = df.unflatten(data)
     extras = unflattened.get('extras', [])
@@ -424,7 +431,9 @@ def duplicate_extras_key(key: TuplizedKey, data: Dict[TuplizedKey, Any], errors:
         assert key_ not in errors
         errors[key_] = [_('Duplicate key "%s"') % extras_keys[0]]
 
-def group_name_validator(key: TuplizedKey, data: Dict[TuplizedKey, Any], errors: TuplizedErrorDict, context: Context) -> Any:
+
+def group_name_validator(key: TuplizedKey, data: Dict[TuplizedKey, Any],
+                         errors: TuplizedErrorDict, context: Context) -> Any:
     model = context['model']
     session = context['session']
     group = context.get('group')
@@ -468,7 +477,9 @@ def tag_not_uppercase(value: Any, context: Context) -> Any:
         raise Invalid(_('Tag "%s" must not be uppercase' % (value)))
     return value
 
-def tag_string_convert(key: TuplizedKey, data: Dict[TuplizedKey, Any], errors: TuplizedErrorDict, context: Context) -> Any:
+
+def tag_string_convert(key: TuplizedKey, data: Dict[TuplizedKey, Any],
+                       errors: TuplizedErrorDict, context: Context) -> Any:
     '''Takes a list of tags that is a comma-separated string (in data[key])
     and parses tag names. These are added to the data dict, enumerated. They
     are also validated.'''
@@ -489,11 +500,16 @@ def tag_string_convert(key: TuplizedKey, data: Dict[TuplizedKey, Any], errors: T
         tag_length_validator(tag, context)
         tag_name_validator(tag, context)
 
-def ignore_not_admin(key: TuplizedKey, data: Dict[TuplizedKey, Any], errors: TuplizedErrorDict, context: Context) -> Any:
+
+def ignore_not_admin(key: TuplizedKey, data: Dict[TuplizedKey, Any],
+                     errors: TuplizedErrorDict, context: Context) -> Any:
     # Deprecated in favour of ignore_not_package_admin
     return ignore_not_package_admin(key, data, errors, context)
 
-def ignore_not_package_admin(key: TuplizedKey, data: Dict[TuplizedKey, Any], errors: TuplizedErrorDict, context: Context) -> Any:
+
+def ignore_not_package_admin(key: TuplizedKey, data: Dict[TuplizedKey, Any],
+                             errors: TuplizedErrorDict,
+                             context: Context) -> Any:
     '''Ignore if the user is not allowed to administer the package specified.'''
 
     model = context['model']
@@ -524,7 +540,8 @@ def ignore_not_package_admin(key: TuplizedKey, data: Dict[TuplizedKey, Any], err
     data.pop(key)
 
 
-def ignore_not_sysadmin(key: TuplizedKey, data: Dict[TuplizedKey, Any], errors: TuplizedErrorDict, context: Context) -> Any:
+def ignore_not_sysadmin(key: TuplizedKey, data: Dict[TuplizedKey, Any],
+                        errors: TuplizedErrorDict, context: Context) -> Any:
     '''Ignore the field if user not sysadmin or ignore_auth in context.'''
 
     user = context.get('user')
@@ -535,7 +552,8 @@ def ignore_not_sysadmin(key: TuplizedKey, data: Dict[TuplizedKey, Any], errors: 
     data.pop(key)
 
 
-def ignore_not_group_admin(key: TuplizedKey, data: Dict[TuplizedKey, Any], errors: TuplizedErrorDict, context: Context) -> Any:
+def ignore_not_group_admin(key: TuplizedKey, data: Dict[TuplizedKey, Any],
+                           errors: TuplizedErrorDict, context: Context) -> Any:
     '''Ignore if the user is not allowed to administer for the group specified.'''
 
     model = context['model']
@@ -558,7 +576,9 @@ def ignore_not_group_admin(key: TuplizedKey, data: Dict[TuplizedKey, Any], error
 
     data.pop(key)
 
-def user_name_validator(key: TuplizedKey, data: Dict[TuplizedKey, Any], errors: TuplizedErrorDict, context: Context) -> Any:
+
+def user_name_validator(key: TuplizedKey, data: Dict[TuplizedKey, Any],
+                        errors: TuplizedErrorDict, context: Context) -> Any:
     '''Validate a new user name.
 
     Append an error message to ``errors[key]`` if a user named ``data[key]``
@@ -596,7 +616,10 @@ def user_name_validator(key: TuplizedKey, data: Dict[TuplizedKey, Any], errors: 
         else:
             return
 
-def user_both_passwords_entered(key: TuplizedKey, data: Dict[TuplizedKey, Any], errors: TuplizedErrorDict, context: Context) -> Any:
+
+def user_both_passwords_entered(key: TuplizedKey, data: Dict[TuplizedKey, Any],
+                                errors: TuplizedErrorDict,
+                                context: Context) -> Any:
 
     password1 = data.get(('password1',),None)
     password2 = data.get(('password2',),None)
@@ -605,7 +628,10 @@ def user_both_passwords_entered(key: TuplizedKey, data: Dict[TuplizedKey, Any], 
        password2 is None or password2 == '':
         errors[('password',)].append(_('Please enter both passwords'))
 
-def user_password_validator(key: TuplizedKey, data: Dict[TuplizedKey, Any], errors: TuplizedErrorDict, context: Context) -> Any:
+
+def user_password_validator(key: TuplizedKey, data: Dict[TuplizedKey, Any],
+                            errors: TuplizedErrorDict,
+                            context: Context) -> Any:
     value = data[key]
 
     if isinstance(value, Missing):
@@ -618,7 +644,9 @@ def user_password_validator(key: TuplizedKey, data: Dict[TuplizedKey, Any], erro
         errors[('password',)].append(_('Your password must be 8 characters or '
                                        'longer'))
 
-def user_passwords_match(key: TuplizedKey, data: Dict[TuplizedKey, Any], errors: TuplizedErrorDict, context: Context) -> Any:
+
+def user_passwords_match(key: TuplizedKey, data: Dict[TuplizedKey, Any],
+                         errors: TuplizedErrorDict, context: Context) -> Any:
 
     password1 = data.get(('password1',),None)
     password2 = data.get(('password2',),None)
@@ -629,7 +657,10 @@ def user_passwords_match(key: TuplizedKey, data: Dict[TuplizedKey, Any], errors:
         #Set correct password
         data[('password',)] = password1
 
-def user_password_not_empty(key: TuplizedKey, data: Dict[TuplizedKey, Any], errors: TuplizedErrorDict, context: Context) -> Any:
+
+def user_password_not_empty(key: TuplizedKey, data: Dict[TuplizedKey, Any],
+                            errors: TuplizedErrorDict,
+                            context: Context) -> Any:
     '''Only check if password is present if the user is created via action API.
        If not, user_both_passwords_entered will handle the validation'''
     # sysadmin may provide password_hash directly for importing users
@@ -692,7 +723,9 @@ def tag_in_vocabulary_validator(value: Any, context: Context) -> Any:
             raise Invalid(_('Tag %s does not belong to vocabulary %s') % (value, vocabulary.name))
     return value
 
-def tag_not_in_vocabulary(key: TuplizedKey, tag_dict: Dict[TuplizedKey, Any], errors: TuplizedErrorDict, context: Context) -> Any:
+
+def tag_not_in_vocabulary(key: TuplizedKey, tag_dict: Dict[TuplizedKey, Any],
+                          errors: TuplizedErrorDict, context: Context) -> Any:
     tag_name = tag_dict[('name',)]
     if not tag_name:
         raise Invalid(_('No tag name'))
@@ -713,7 +746,9 @@ def tag_not_in_vocabulary(key: TuplizedKey, tag_dict: Dict[TuplizedKey, Any], er
     else:
         return
 
-def url_validator(key: TuplizedKey, data: Dict[TuplizedKey, Any], errors: TuplizedErrorDict, context: Context) -> Any:
+
+def url_validator(key: TuplizedKey, data: Dict[TuplizedKey, Any],
+                  errors: TuplizedErrorDict, context: Context) -> Any:
     ''' Checks that the provided value (if it is present) is a valid URL '''
 
     url = data.get(key, None)
@@ -725,7 +760,7 @@ def url_validator(key: TuplizedKey, data: Dict[TuplizedKey, Any], errors: Tupliz
         if all([pieces.scheme, pieces.netloc]) and \
            set(pieces.netloc) <= set(string.ascii_letters + string.digits + '-.') and \
            pieces.scheme in ['http', 'https']:
-           return
+            return
     except ValueError:
         # url is invalid
         pass
@@ -748,8 +783,11 @@ def role_exists(role: str, context: Context) -> Any:
     return role
 
 
-def datasets_with_no_organization_cannot_be_private(key: TuplizedKey, data: Dict[TuplizedKey, Any], errors: TuplizedErrorDict,
-        context: Context) -> Any:
+def datasets_with_no_organization_cannot_be_private(key: TuplizedKey,
+                                                    data: Dict[TuplizedKey,
+                                                               Any],
+                                                    errors: TuplizedErrorDict,
+                                                    context: Context) -> Any:
 
     dataset_id = data.get(('id',))
     owner_org = data.get(('owner_org',))
@@ -776,7 +814,8 @@ def datasets_with_no_organization_cannot_be_private(key: TuplizedKey, data: Dict
                 _("Datasets with no organization can't be private."))
 
 
-def list_of_strings(key: TuplizedKey, data: Dict[TuplizedKey, Any], errors: TuplizedErrorDict, context: Context) -> Any:
+def list_of_strings(key: TuplizedKey, data: Dict[TuplizedKey, Any],
+                    errors: TuplizedErrorDict, context: Context) -> Any:
     value = data.get(key)
     if not isinstance(value, list):
         raise Invalid(_('Not a list'))
@@ -784,7 +823,9 @@ def list_of_strings(key: TuplizedKey, data: Dict[TuplizedKey, Any], errors: Tupl
         if not isinstance(x, string_types):
             raise Invalid('%s: %s' % (_('Not a string'), x))
 
-def if_empty_guess_format(key: TuplizedKey, data: Dict[TuplizedKey, Any], errors: TuplizedErrorDict, context: Context) -> Any:
+
+def if_empty_guess_format(key: TuplizedKey, data: Dict[TuplizedKey, Any],
+                          errors: TuplizedErrorDict, context: Context) -> Any:
     value = data[key]
     resource_id = data.get(key[:-1] + ('id',))
 
@@ -794,7 +835,8 @@ def if_empty_guess_format(key: TuplizedKey, data: Dict[TuplizedKey, Any], errors
         if not url:
             return
 
-        # Uploaded files have only the filename as url, so check scheme to determine if it's an actual url
+        # Uploaded files have only the filename as url, so check scheme to
+        # determine if it's an actual url
         parsed = urlparse(url)
         if parsed.scheme and not parsed.path:
             return
@@ -806,7 +848,9 @@ def if_empty_guess_format(key: TuplizedKey, data: Dict[TuplizedKey, Any], errors
 def clean_format(format):
     return h.unified_resource_format(format)
 
-def no_loops_in_hierarchy(key: TuplizedKey, data: Dict[TuplizedKey, Any], errors: TuplizedErrorDict, context: Context) -> Any:
+
+def no_loops_in_hierarchy(key: TuplizedKey, data: Dict[TuplizedKey, Any],
+                          errors: TuplizedErrorDict, context: Context) -> Any:
     '''Checks that the parent groups specified in the data would not cause
     a loop in the group hierarchy, and therefore cause the recursion up/down
     the hierarchy to get into an infinite loop.
@@ -825,7 +869,11 @@ def no_loops_in_hierarchy(key: TuplizedKey, data: Dict[TuplizedKey, Any], errors
                         'hierarchy'))
 
 
-def filter_fields_and_values_should_have_same_length(key: TuplizedKey, data: Dict[TuplizedKey, Any], errors: TuplizedErrorDict, context: Context) -> Any:
+def filter_fields_and_values_should_have_same_length(key: TuplizedKey,
+                                                     data: Dict[TuplizedKey,
+                                                                Any],
+                                                     errors: TuplizedErrorDict,
+                                                     context: Context) -> Any:
     convert_to_list_if_string = logic.converters.convert_to_list_if_string  # type: ignore
     fields = convert_to_list_if_string(data.get(('filter_fields',), []))
     values = convert_to_list_if_string(data.get(('filter_values',), []))
@@ -836,7 +884,10 @@ def filter_fields_and_values_should_have_same_length(key: TuplizedKey, data: Dic
         errors[('filter_values',)].append(msg)
 
 
-def filter_fields_and_values_exist_and_are_valid(key: TuplizedKey, data: Dict[TuplizedKey, Any], errors: TuplizedErrorDict, context: Context) -> Any:
+def filter_fields_and_values_exist_and_are_valid(key: TuplizedKey,
+                                                 data: Dict[TuplizedKey, Any],
+                                                 errors: TuplizedErrorDict,
+                                                 context: Context) -> Any:
     convert_to_list_if_string = logic.converters.convert_to_list_if_string  # type: ignore
     fields = convert_to_list_if_string(data.get(('filter_fields',)))
     values = convert_to_list_if_string(data.get(('filter_values',)))
@@ -855,14 +906,18 @@ def filter_fields_and_values_exist_and_are_valid(key: TuplizedKey, data: Dict[Tu
     data[('filters',)] = dict(filters)
 
 
-def extra_key_not_in_root_schema(key: TuplizedKey, data: Dict[TuplizedKey, Any], errors: TuplizedErrorDict, context: Context) -> Any:
+def extra_key_not_in_root_schema(key: TuplizedKey, data: Dict[TuplizedKey,
+                                                              Any],
+                                 errors: TuplizedErrorDict,
+                                 context: Context) -> Any:
 
     for schema_key in context.get('schema_keys', []):
         if schema_key == data[key]:
             raise Invalid(_('There is a schema field with the same name'))
 
 
-def empty_if_not_sysadmin(key: TuplizedKey, data: Dict[TuplizedKey, Any], errors: TuplizedErrorDict, context: Context) -> Any:
+def empty_if_not_sysadmin(key: TuplizedKey, data: Dict[TuplizedKey, Any],
+                          errors: TuplizedErrorDict, context: Context) -> Any:
     '''Only sysadmins may pass this value'''
     from ckan.lib.navl.validators import empty
 
@@ -932,7 +987,9 @@ def dict_only(value: Any):
         raise Invalid(_('Must be a dict'))
     return value
 
-def email_is_unique(key: TuplizedKey, data: Dict[TuplizedKey, Any], errors: TuplizedErrorDict, context: Context) -> Any:
+
+def email_is_unique(key: TuplizedKey, data: Dict[TuplizedKey, Any],
+                    errors: TuplizedErrorDict, context: Context) -> Any:
     '''Validate email is unique'''
     model = context['model']
     session = context['session']

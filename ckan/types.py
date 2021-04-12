@@ -37,7 +37,7 @@ class Context(TypedDict, total=False):
 
     __auth_user_obj_checked: bool
     __auth_audit: List[Tuple[str, int]]
-    auth_user_obj: 'model_.User'
+    auth_user_obj: Optional['model_.User']
     user_obj: 'model_.User'
 
     id: str
