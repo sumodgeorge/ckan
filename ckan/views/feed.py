@@ -136,8 +136,9 @@ class CKANFeed(FeedGenerator):
             getattr(entry, key)(value)
 
 
-def output_feed(results: List[Dict], feed_title: str, feed_description: str, feed_link: str, feed_url: str,
-                navigation_urls: Dict[str, str], feed_guid: str) -> Response:
+def output_feed(results: List[Dict], feed_title: str, feed_description: str,
+                feed_link: str, feed_url: str, navigation_urls: Dict[str, str],
+                feed_guid: str) -> Response:
     author_name = config.get(u'ckan.feeds.author_name', u'').strip() or \
         config.get(u'ckan.site_id', u'').strip()
 
@@ -426,7 +427,8 @@ def _feed_url(query: Dict[str, Any], controller: str, action: str, **kwargs) -> 
     return h.url_for(controller=controller, action=action, **kwargs)
 
 
-def _navigation_urls(query: Dict[str, Any], controller: str, action: str, item_count: int, limit: int, **kwargs) -> Dict[str, Any]:
+def _navigation_urls(query: Dict[str, Any], controller: str, action: str,
+                     item_count: int, limit: int, **kwargs) -> Dict[str, Any]:
     """
     Constructs and returns first, last, prev and next links for paging
     """
@@ -471,7 +473,9 @@ def _navigation_urls(query: Dict[str, Any], controller: str, action: str, item_c
     return urls
 
 
-def _create_atom_id(resource_path: str, authority_name: Optional[str]=None, date_string: Optional[str]=None) -> str:
+def _create_atom_id(resource_path: str,
+                    authority_name: Optional[str] = None,
+                    date_string: Optional[str] = None) -> str:
     """
     Helper method that creates an atom id for a feed or entry.
 

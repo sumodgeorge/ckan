@@ -3,7 +3,7 @@ import cgi
 from ckan.types import Context
 import json
 import logging
-from typing import Dict, Tuple
+from typing import Dict, Tuple, cast
 
 import flask
 from flask.views import MethodView
@@ -155,17 +155,20 @@ def read(package_type: str, id: str, resource_id: str) -> str:
     return base.render(template, extra_vars)
 
 
-def download(package_type: str, id: str, resource_id: str, filename: Optional[str]=None) -> Response:
+def download(package_type: str,
+             id: str,
+             resource_id: str,
+             filename: Optional[str] = None) -> Response:
     """
     Provides a direct download by either redirecting the user to the url
     stored or downloading an uploaded file directly.
     """
-    context = {
+    context = cast(Context, {
         u'model': model,
         u'session': model.Session,
         u'user': g.user,
         u'auth_user_obj': g.userobj
-    }
+    })
 
     try:
         rsc = get_action(u'resource_show')(context, {u'id': resource_id})
@@ -289,9 +292,12 @@ class CreateView(MethodView):
                 id=id
             )
 
-    def get(
-        self, package_type: str, id: str, data: Optional[Dict]=None, errors: Optional[Dict]=None, error_summary: Optional[Dict]=None
-    ) -> str:
+    def get(self,
+            package_type: str,
+            id: str,
+            data: Optional[Dict] = None,
+            errors: Optional[Dict] = None,
+            error_summary: Optional[Dict] = None) -> str:
         # get resources for sidebar
         context: Context = {
             u'model': model,
@@ -572,7 +578,10 @@ def views(package_type: str, id: str, resource_id: str) -> str:
     )
 
 
-def view(package_type: str, id: str, resource_id: str, view_id: Optional[str]=None) -> str:
+def view(package_type: str,
+         id: str,
+         resource_id: str,
+         view_id: Optional[str] = None) -> str:
     """
     Embedded page for a resource view.
 
@@ -667,7 +676,11 @@ class EditResourceViewView(MethodView):
         )
         return context, extra_vars
 
-    def post(self, package_type: str, id: str, resource_id: str, view_id: Optional[str]=None) -> Union[str, Response]:
+    def post(self,
+             package_type: str,
+             id: str,
+             resource_id: str,
+             view_id: Optional[str] = None) -> Union[str, Response]:
         context, extra_vars = self._prepare(id, resource_id)
         data = clean_dict(
             dict_fns.unflatten(
@@ -713,9 +726,12 @@ class EditResourceViewView(MethodView):
         extra_vars[u'to_preview'] = to_preview
         return self.get(package_type, id, resource_id, view_id, extra_vars)
 
-    def get(
-        self, package_type: str, id: str, resource_id: str, view_id: Optional[str]=None, post_extra: Optional[Dict]=None
-    ) -> str:
+    def get(self,
+            package_type: str,
+            id: str,
+            resource_id: str,
+            view_id: Optional[str] = None,
+            post_extra: Optional[Dict] = None) -> str:
         context, extra_vars = self._prepare(id, resource_id)
         to_preview = extra_vars[u'to_preview']
         if post_extra:
@@ -824,7 +840,11 @@ def _parse_recline_state(params):
     return recline_state
 
 
-def embedded_dataviewer(package_type: str, id: str, resource_id: str, width: int=500, height: int=500) -> str:
+def embedded_dataviewer(package_type: str,
+                        id: str,
+                        resource_id: str,
+                        width: int = 500,
+                        height: int = 500) -> str:
     """
     Embedded page for a read-only resource dataview. Allows
     for width and height to be specified as part of the

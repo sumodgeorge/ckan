@@ -55,7 +55,8 @@ def _new_form_to_db_schema() -> Schema:
     return schema.user_new_form_schema()
 
 
-def _extra_template_variables(context: Context, data_dict: Dict[str, Any]) -> Dict[str, Any]:
+def _extra_template_variables(context: Context,
+                              data_dict: Dict[str, Any]) -> Dict[str, Any]:
     is_sysadmin = authz.is_sysadmin(g.user)
     try:
         user_dict = logic.get_action(u'user_show')(context, data_dict)
@@ -327,7 +328,11 @@ class EditView(MethodView):
             set_repoze_user(data_dict[u'name'], resp)
         return resp
 
-    def get(self, id: Optional[str]=None, data: Optional[Dict]=None, errors: Optional[Dict]=None, error_summary: Optional[Dict]=None) -> str:
+    def get(self,
+            id: Optional[str] = None,
+            data: Optional[Dict] = None,
+            errors: Optional[Dict] = None,
+            error_summary: Optional[Dict] = None) -> str:
         context, id = self._prepare(id)
         data_dict = {u'id': id}
         try:
@@ -432,7 +437,10 @@ class RegisterView(MethodView):
         set_repoze_user(data_dict[u'name'], resp)
         return resp
 
-    def get(self, data: Optional[Dict]=None, errors: Optional[Dict]=None, error_summary: Optional[Dict]=None) -> str:
+    def get(self,
+            data: Optional[Dict] = None,
+            errors: Optional[Dict] = None,
+            error_summary: Optional[Dict] = None) -> str:
         self._prepare()
 
         if g.user and not data and not authz.is_sysadmin(g.user):

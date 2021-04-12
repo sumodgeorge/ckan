@@ -40,8 +40,10 @@ API_MAX_VERSION = 3
 api = Blueprint(u'api', __name__, url_prefix=u'/api')
 
 
-def _finish(status_int: int, response_data: Any=None,
-            content_type: str=u'text', headers: Optional[Dict[str, Any]]=None) -> Response:
+def _finish(status_int: int,
+            response_data: Any = None,
+            content_type: str = u'text',
+            headers: Optional[Dict[str, Any]] = None) -> Response:
     u'''When a controller method has completed, call this method
     to prepare the response.
 
@@ -448,7 +450,9 @@ def snippet(snippet_path: str, ver: int=API_REST_DEFAULT_VERSION) -> str:
     return render(snippet_path, extra_vars=extra_vars)
 
 
-def i18n_js_translations(lang: str, ver: int=API_REST_DEFAULT_VERSION) -> Union[str, Response]:
+def i18n_js_translations(
+        lang: str,
+        ver: int = API_REST_DEFAULT_VERSION) -> Union[str, Response]:
     ckan_path = os.path.join(os.path.dirname(__file__), u'..')
     source = os.path.abspath(os.path.join(ckan_path, u'public',
                              u'base', u'i18n', u'{0}.js'.format(lang)))

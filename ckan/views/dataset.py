@@ -27,7 +27,7 @@ from ckan.lib.plugins import lookup_package_plugin
 from ckan.lib.render import TemplateNotFound
 from ckan.lib.search import SearchError, SearchQueryError, SearchIndexError
 from ckan.views import LazyView
-from typing import Any, Dict, Iterable, List, Optional, Sequence, Tuple, Union
+from typing import Any, Dict, Iterable, List, Optional, Tuple, Union
 from flask.blueprints import Blueprint
 from flask.wrappers import Response
 
@@ -52,7 +52,9 @@ dataset = Blueprint(
 )
 
 
-def _setup_template_variables(context:Context, data_dict:Dict, package_type:Optional[str]=None) -> None:
+def _setup_template_variables(context: Context,
+                              data_dict: Dict,
+                              package_type: Optional[str] = None) -> None:
     return lookup_package_plugin(package_type).setup_template_variables(
         context, data_dict
     )
@@ -97,7 +99,10 @@ def drill_down_url(alternative_url: str=None, **by: Dict) -> str:
     )
 
 
-def remove_field(package_type: Optional[str], key: str, value: Optional[str]=None, replace: Optional[str]=None):
+def remove_field(package_type: Optional[str],
+                 key: str,
+                 value: Optional[str] = None,
+                 replace: Optional[str] = None):
     if not package_type:
         package_type = u'dataset'
     url = h.url_for(u'{0}.search'.format(package_type))
@@ -109,7 +114,8 @@ def remove_field(package_type: Optional[str], key: str, value: Optional[str]=Non
     )
 
 
-def _sort_by(params_nosort: Params, package_type: str, fields: Iterable[Tuple[str, str]]) -> str:
+def _sort_by(params_nosort: Params, package_type: str,
+             fields: Iterable[Tuple[str, str]]) -> str:
     """Sort by the given list of fields.
 
     Each entry in the list is a 2-tuple: (fieldname, sort_order)
@@ -141,7 +147,9 @@ def _tag_string_to_list(tag_string: str) -> List[Dict[str, str]]:
     return out
 
 
-def _form_save_redirect(pkg_name: str, action: str, package_type: Optional[str]=None) -> Response:
+def _form_save_redirect(pkg_name: str,
+                        action: str,
+                        package_type: Optional[str] = None) -> Response:
     """This redirects the user to the CKAN package/read page,
     unless there is request parameter giving an alternate location,
     perhaps an external website.
@@ -645,7 +653,11 @@ class CreateView(MethodView):
             data_dict[u'state'] = u'none'
             return self.get(package_type, data_dict, errors, error_summary)
 
-    def get(self, package_type: str, data: Optional[Dict]=None, errors: Optional[Dict]=None, error_summary: Optional[Dict]=None) -> str:
+    def get(self,
+            package_type: str,
+            data: Optional[Dict] = None,
+            errors: Optional[Dict] = None,
+            error_summary: Optional[Dict] = None) -> str:
         context = self._prepare()
         if data and u'type' in data:
             package_type = data[u'type']
@@ -768,9 +780,12 @@ class EditView(MethodView):
             error_summary = e.error_summary
             return self.get(package_type, id, data_dict, errors, error_summary)
 
-    def get(
-        self, package_type: str, id: str, data: Optional[Dict]=None, errors: Optional[Dict]=None, error_summary: Optional[Dict]=None
-    ) -> Union[Response, str]:
+    def get(self,
+            package_type: str,
+            id: str,
+            data: Optional[Dict] = None,
+            errors: Optional[Dict] = None,
+            error_summary: Optional[Dict] = None) -> Union[Response, str]:
         context = self._prepare()
         package_type = _get_package_type(id) or package_type
         try:
@@ -968,7 +983,8 @@ def unfollow(package_type: str, id: str) -> Response:
     return h.redirect_to(u'{}.read'.format(package_type), id=id)
 
 
-def followers(package_type: str, id: Optional[str]=None) -> Union[Response, str]:
+def followers(package_type: str,
+              id: Optional[str] = None) -> Union[Response, str]:
     context: Context = {
         u'model': model,
         u'session': model.Session,

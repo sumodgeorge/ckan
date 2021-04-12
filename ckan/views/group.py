@@ -46,7 +46,8 @@ lookup_group_controller = lib_plugins.lookup_group_controller
 is_org = False
 
 
-def _get_group_template(template_type: str, group_type: Optional[str]=None) -> str:
+def _get_group_template(template_type: str,
+                        group_type: Optional[str] = None) -> str:
     group_plugin = lookup_group_plugin(group_type)
     method = getattr(group_plugin, template_type)
     try:
@@ -63,7 +64,9 @@ def _db_to_form_schema(group_type=None) -> Schema:
     return lookup_group_plugin(group_type).db_to_form_schema()
 
 
-def _setup_template_variables(context: Context, data_dict: DataDict, group_type: Optional[str]=None) -> None:
+def _setup_template_variables(context: Context,
+                              data_dict: DataDict,
+                              group_type: Optional[str] = None) -> None:
     if u'type' not in data_dict:
         data_dict[u'type'] = group_type
     return lookup_group_plugin(group_type).\
@@ -405,7 +408,10 @@ def _get_group_dict(id: str, group_type: str) -> Dict[str, Any]:
         base.abort(404, _(u'Group not found'))
 
 
-def read(group_type: str, is_organization: bool, id: Optional[str]=None, limit: int=20) -> Union[str, Response]:
+def read(group_type: str,
+         is_organization: bool,
+         id: Optional[str] = None,
+         limit: int = 20) -> Union[str, Response]:
     extra_vars = {}
     set_org(is_organization)
     context: Context = {
@@ -880,8 +886,12 @@ class CreateGroupView(MethodView):
 
         return h.redirect_to(cast(str, group['type']) + u'.read', id=group['name'])
 
-    def get(self, group_type: str, is_organization: bool,
-            data: Optional[Dict]=None, errors: Optional[Dict]=None, error_summary: Optional[Dict]=None) -> str:
+    def get(self,
+            group_type: str,
+            is_organization: bool,
+            data: Optional[Dict] = None,
+            errors: Optional[Dict] = None,
+            error_summary: Optional[Dict] = None) -> str:
         extra_vars = {}
         set_org(is_organization)
         context = self._prepare()
@@ -945,7 +955,10 @@ class EditGroupView(MethodView):
 
         return context
 
-    def post(self, group_type: str, is_organization: bool, id: Optional[str]=None) -> Union[Response, str]:
+    def post(self,
+             group_type: str,
+             is_organization: bool,
+             id: Optional[str] = None) -> Union[Response, str]:
         set_org(is_organization)
         context = self._prepare(id)
         try:
@@ -973,8 +986,13 @@ class EditGroupView(MethodView):
                             data_dict, errors, error_summary)
         return h.redirect_to(cast(str, group[u'type']) + u'.read', id=group[u'name'])
 
-    def get(self, id: str, group_type: str, is_organization: bool,
-            data: Optional[Dict]=None, errors: Optional[Dict]=None, error_summary: Optional[Dict]=None) -> str:
+    def get(self,
+            id: str,
+            group_type: str,
+            is_organization: bool,
+            data: Optional[Dict] = None,
+            errors: Optional[Dict] = None,
+            error_summary: Optional[Dict] = None) -> str:
         extra_vars = {}
         set_org(is_organization)
         context = self._prepare(id)
@@ -1085,7 +1103,10 @@ class MembersGroupView(MethodView):
 
         return context
 
-    def post(self, group_type: str, is_organization: bool, id: Optional[str]=None) -> Response:
+    def post(self,
+             group_type: str,
+             is_organization: bool,
+             id: Optional[str] = None) -> Response:
         set_org(is_organization)
         context = self._prepare(id)
         data_dict = clean_dict(
@@ -1119,7 +1140,10 @@ class MembersGroupView(MethodView):
 
         return h.redirect_to(u'{}.members'.format(group_type), id=id)
 
-    def get(self, group_type: str, is_organization: bool, id: Optional[str]=None) -> str:
+    def get(self,
+            group_type: str,
+            is_organization: bool,
+            id: Optional[str] = None) -> str:
         extra_vars = {}
         set_org(is_organization)
         context = self._prepare(id)

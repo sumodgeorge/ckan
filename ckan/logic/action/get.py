@@ -1428,17 +1428,18 @@ def user_show(context: Context, data_dict: DataDict) -> Dict:
     provided_user = data_dict.get('user_obj', None)
     if id:
         user_obj = model.User.get(id)
-        assert user_obj
-        context['user_obj'] = user_obj
     elif provided_user:
-        context['user_obj'] = user_obj = provided_user
+        user_obj = provided_user
     else:
+        user_obj = None
+
+    if not user_obj:
         raise NotFound
+
+    context['user_obj'] = user_obj
 
     _check_access('user_show', context, data_dict)
 
-    if not bool(user_obj):
-        raise NotFound
 
     # include private and draft datasets?
     requester = context.get('user')
