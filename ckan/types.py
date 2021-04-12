@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+
 import datetime
 from functools import partial
 from types import ModuleType

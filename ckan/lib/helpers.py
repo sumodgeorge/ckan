@@ -1787,8 +1787,8 @@ def date_str_to_datetime(date_str: str) -> datetime.datetime:
         if not m:
             raise ValueError('Unable to parse %s as seconds.microseconds' %
                              time_tuple[5])
-        seconds = int(m.groupdict().get('seconds', 0))
-        microseconds = int((str(m.groupdict().get('microseconds', '0')) +
+        seconds = int(m.groupdict('0')['seconds'])
+        microseconds = int((str(m.groupdict('0')['microseconds']) +
                             '00000')[0:6])
         time_tuple = time_tuple[:5] + [seconds, microseconds]
 

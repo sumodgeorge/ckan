@@ -20,7 +20,9 @@ from flask_babel import (gettext as flask_ugettext,
                          ngettext as flask_ungettext)
 
 import simplejson as json
-from typing import Any, Dict, Iterable, Iterator, List, Optional, Sequence, Tuple, TypeVar, Union, overload
+from typing import (
+    Any, Dict, Iterable, List, Optional,
+    Tuple, TypeVar, overload)
 
 if six.PY2:
     import pylons  # type: ignore

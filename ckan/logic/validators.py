@@ -817,13 +817,12 @@ def no_loops_in_hierarchy(key: TuplizedKey, data: Dict[TuplizedKey, Any], errors
     group = context['model'].Group.get(data[('id',)])
     allowable_parents = group.\
                         groups_allowed_to_be_its_parent(type=group.type)
-    for parent in data[('groups', )]:
-        parent_name = parent['name']
-        # a blank name signifies top level, which is always allowed
-        if parent_name and context['model'].Group.get(parent_name) \
-                not in allowable_parents:
-            raise Invalid(_('This parent would create a loop in the '
-                            'hierarchy'))
+    parent_name = data[key]
+    # a blank name signifies top level, which is always allowed
+    if parent_name and context['model'].Group.get(parent_name) \
+            not in allowable_parents:
+        raise Invalid(_('This parent would create a loop in the '
+                        'hierarchy'))
 
 
 def filter_fields_and_values_should_have_same_length(key: TuplizedKey, data: Dict[TuplizedKey, Any], errors: TuplizedErrorDict, context: Context) -> Any:
