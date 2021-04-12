@@ -135,6 +135,9 @@ class SearchQuery(object):
     A query is ... when you ask the search engine things. SearchQuery is intended
     to be used for only one query, i.e. it sets state. Definitely not thread-safe.
     """
+    count: int
+    results: List[Dict[str, Any]]
+    facets: Dict[str, Any]
 
     def __init__(self) -> None:
         self.results = []
@@ -159,7 +162,7 @@ class SearchQuery(object):
         """
         return []
 
-    def run(self, query: Optional[str]=None, terms: List[str]=[], fields: Dict={}, facet_by: List[str]=[], options: Optional[QueryOptions]=None, **kwargs: Any) -> NoReturn:
+    def run(self, query: Optional[Union[str, Dict]]=None, terms: List[str]=[], fields: Dict={}, facet_by: List[str]=[], options: Optional[QueryOptions]=None, **kwargs: Any) -> NoReturn:
         raise SearchError("SearchQuery.run() not implemented!")
 
     # convenience, allows to query(..)
@@ -252,7 +255,6 @@ class ResourceSearchQuery(SearchQuery):
 
 
 class PackageSearchQuery(SearchQuery):
-    facets: Dict
 
     def get_all_entity_ids(self, max_results: int=1000) -> List[str]:
         """

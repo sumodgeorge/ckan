@@ -11,7 +11,8 @@ def group_create(context, data_dict=None):
 
     # Get a list of the members of the 'curators' group.
     members = toolkit.get_action('member_list')(
-        data_dict={'id': 'curators', 'object_type': 'user'})
+        {},
+        {'id': 'curators', 'object_type': 'user'})
 
     # 'members' is a list of (user_id, object_type, capacity) tuples, we're
     # only interested in the user_ids.

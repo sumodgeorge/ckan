@@ -141,7 +141,9 @@ class Package(core.StatefulObjectMixin,
         )
 
     @classmethod
-    def get(cls, reference: str, for_update: bool=False) -> Optional["Package"]:
+    def get(cls,
+            reference: Optional[str],
+            for_update: bool = False) -> Optional["Package"]:
         '''Returns a package object referenced by its id or name.'''
         if not reference:
             return None

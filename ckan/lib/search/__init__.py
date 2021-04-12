@@ -28,7 +28,7 @@ from ckan.lib.search.query import (
     QueryOptions, convert_legacy_parameters_to_solr
 )
 from ckan.lib.search.index import SearchIndex
-from typing import Container, Dict, List, Any, Optional, Type, TypeVar, Union
+from typing import Container, Dict, List, Any, Optional, Type, TypeVar, Union, overload
 
 
 log = logging.getLogger(__name__)
@@ -89,6 +89,13 @@ def index_for(_type: Any) -> SearchIndex:
         log.warn("Unknown search type: %s" % _type)
         return NoopSearchIndex()
 
+
+@overload
+def query_for(_type: Type[model.Package]) -> PackageSearchQuery: ...
+@overload
+def query_for(_type: Type[model.Resource]) -> ResourceSearchQuery: ...
+@overload
+def query_for(_type: Type[model.Tag]) -> TagSearchQuery: ...
 
 def query_for(_type: Any) -> SearchQuery:
     """ Get a SearchQuery instance sub-class suitable for the specified

@@ -13,6 +13,7 @@ import sqlalchemy
 from sqlalchemy import text
 from six import string_types, text_type
 
+import ckan
 import ckan.lib.dictization
 import ckan.logic as logic
 import ckan.logic.action
@@ -24,13 +25,15 @@ import ckan.model as model
 import ckan.model.misc as misc
 import ckan.plugins as plugins
 import ckan.lib.search as search
+from ckan.lib.search.query import solr_literal
+
 import ckan.lib.plugins as lib_plugins
 import ckan.lib.datapreview as datapreview
 import ckan.authz as authz
 
 from ckan.common import _
-from typing import Dict, List, Optional, Tuple, Union, Any
-from ckan.types import Context, DataDict
+from typing import Dict, List, Optional, Tuple, Union, Any, cast
+from ckan.types import Context, DataDict, Query
 
 log = logging.getLogger('ckan.logic')
 
@@ -55,22 +58,6 @@ _case = sqlalchemy.case
 _text = sqlalchemy.text
 
 
-def _activity_stream_get_filtered_users():
-    '''
-    Get the list of users from the :ref:`ckan.hide_activity_from_users` config
-    option and return a list of their ids. If the config is not specified,
-    returns the id of the site user.
-    '''
-    users = config.get('ckan.hide_activity_from_users')
-    if users:
-        users_list: List[str] = users.split()
-    else:
-        context: Context = {'model': model, 'ignore_auth': True}
-        site_user = logic.get_action('get_site_user')(context, {})
-        users_list = [site_user.get('name', '')]
-    return model.User.user_ids_for_name_or_id(users_list)
-
-
 def site_read(context: Context, data_dict: Optional[DataDict]=None) -> bool:
     '''Return ``True``.
 
@@ -80,7 +67,7 @@ def site_read(context: Context, data_dict: Optional[DataDict]=None) -> bool:
     return True
 
 
-@logic.validate(logic.schema.default_pagination_schema)
+@logic.validate(ckan.logic.schema.default_pagination_schema)
 def package_list(context: Context, data_dict: DataDict) -> List[str]:
     '''Return a list of the names of the site's datasets (packages).
 
@@ -122,8 +109,9 @@ def package_list(context: Context, data_dict: DataDict) -> List[str]:
     return [r[0] for r in query.execute()]
 
 
-@logic.validate(logic.schema.default_package_list_schema)
-def current_package_list_with_resources(context: Context, data_dict: DataDict) -> List[Dict]:
+@logic.validate(ckan.logic.schema.default_package_list_schema)
+def current_package_list_with_resources(context: Context,
+                                        data_dict: DataDict) -> List[Dict]:
     '''Return a list of the site's datasets (packages) and their resources.
 
     The list is sorted most-recently-modified first.
@@ -142,7 +130,6 @@ def current_package_list_with_resources(context: Context, data_dict: DataDict) -
     :rtype: list of dictionaries
 
     '''
-    model = context["model"]
     limit = data_dict.get('limit')
     offset = data_dict.get('offset', 0)
     user = context['user']
@@ -164,7 +151,7 @@ def current_package_list_with_resources(context: Context, data_dict: DataDict) -
     return search.get('results', [])
 
 
-def member_list(context: Context, data_dict: Optional[DataDict]=None) -> List[Tuple]:
+def member_list(context: Context, data_dict: DataDict) -> List[Tuple]:
     '''Return the members of a group.
 
     The user must have permission to 'get' the group.
@@ -217,7 +204,8 @@ def member_list(context: Context, data_dict: Optional[DataDict]=None) -> List[Tu
             for m in q.all()]
 
 
-def package_collaborator_list(context: Context, data_dict: DataDict) -> List[Dict]:
+def package_collaborator_list(context: Context,
+                              data_dict: DataDict) -> List[Dict]:
     '''Return the list of all collaborators for a given package.
 
     Currently you must be an Admin on the package owner organization to
@@ -249,15 +237,17 @@ def package_collaborator_list(context: Context, data_dict: DataDict) -> List[Dic
     _check_access('package_collaborator_list', context, data_dict)
 
     if not authz.check_config_permission('allow_dataset_collaborators'):
-        raise ValidationError(_('Dataset collaborators not enabled'))
+        raise ValidationError({
+            'message': _('Dataset collaborators not enabled')
+        })
 
     capacity = data_dict.get('capacity')
 
     allowed_capacities = authz.get_collaborator_capacities()
     if capacity and capacity not in allowed_capacities:
         raise ValidationError(
-            _('Capacity must be one of "{}"').format(', '.join(
-                allowed_capacities)))
+            {'message': _('Capacity must be one of "{}"').format(', '.join(
+                allowed_capacities))})
     q = model.Session.query(model.PackageMember).\
         filter(model.PackageMember.package_id == package.id)
 
@@ -269,7 +259,8 @@ def package_collaborator_list(context: Context, data_dict: DataDict) -> List[Dic
     return [collaborator.as_dict() for collaborator in collaborators]
 
 
-def package_collaborator_list_for_user(context: Context, data_dict: DataDict) -> List[Dict]:
+def package_collaborator_list_for_user(context: Context,
+                                       data_dict: DataDict) -> List[Dict]:
     '''Return a list of all package the user is a collaborator in
 
     Note: This action requires the collaborators feature to be enabled with
@@ -292,7 +283,8 @@ def package_collaborator_list_for_user(context: Context, data_dict: DataDict) ->
     user_id = _get_or_bust(data_dict, 'id')
 
     if not authz.check_config_permission('allow_dataset_collaborators'):
-        raise ValidationError(_('Dataset collaborators not enabled'))
+        raise ValidationError({
+            'message': _('Dataset collaborators not enabled')})
 
     _check_access('package_collaborator_list_for_user', context, data_dict)
 
@@ -304,8 +296,8 @@ def package_collaborator_list_for_user(context: Context, data_dict: DataDict) ->
     allowed_capacities = authz.get_collaborator_capacities()
     if capacity and capacity not in allowed_capacities:
         raise ValidationError(
-            _('Capacity must be one of "{}"').format(', '.join(
-                allowed_capacities)))
+            {'message': _('Capacity must be one of "{}"').format(', '.join(
+            allowed_capacities))})
 
     q = model.Session.query(model.PackageMember).\
         filter(model.PackageMember.user_id == user.id)
@@ -341,10 +333,11 @@ def _group_or_org_list(context, data_dict, is_org=False):
         pagination_dict['offset'] = data_dict['offset']
     if pagination_dict:
         pagination_dict, errors = _validate(
-            data_dict, logic.schema.default_pagination_schema(), context)
+            data_dict, ckan.logic.schema.default_pagination_schema(), context)
         if errors:
             raise ValidationError(errors)
-    sort = data_dict.get('sort') or config.get('ckan.default_group_sort') or 'title'
+    sort = data_dict.get('sort') or config.get('ckan.default_group_sort') \
+        or 'title'
     q = data_dict.get('q')
 
     all_fields = asbool(data_dict.get('all_fields', None))
@@ -358,7 +351,8 @@ def _group_or_org_list(context, data_dict, is_org=False):
             max_limit = 25
     else:
         try:
-            max_limit = int(config.get('ckan.group_and_organization_list_max', 1000))
+            max_limit = int(
+                config.get('ckan.group_and_organization_list_max', 1000))
         except ValueError:
             max_limit = 1000
 
@@ -414,9 +408,9 @@ def _group_or_org_list(context, data_dict, is_org=False):
     if sort_info:
         sort_field = sort_info[0][0]
         sort_direction = sort_info[0][1]
+        sort_model_field = sqlalchemy.func.count(model.Group.id)
         if sort_field == 'package_count':
             query = query.group_by(model.Group.id, model.Group.name)
-            sort_model_field = sqlalchemy.func.count(model.Group.id)
         elif sort_field == 'name':
             sort_model_field = model.Group.name
         elif sort_field == 'title':
@@ -597,11 +591,13 @@ def group_list_authz(context: Context, data_dict: DataDict) -> List[Dict]:
     if not user_id:
         return []
 
+    group_ids = []
     if not sysadmin or am_member:
         q = model.Session.query(model.Member) \
             .filter(model.Member.table_name == 'user') \
-            .filter(model.Member.capacity.in_(roles)) \
-            .filter(model.Member.table_id == user_id) \
+            .filter(
+                model.Member.capacity.in_(roles)  # type: ignore
+            ).filter(model.Member.table_id == user_id) \
             .filter(model.Member.state == 'active')
         group_ids = []
         for row in q.all():
@@ -615,7 +611,7 @@ def group_list_authz(context: Context, data_dict: DataDict) -> List[Dict]:
         .filter(model.Group.state == 'active')
 
     if not sysadmin or am_member:
-        q = q.filter(model.Group.id.in_(group_ids))
+        q = q.filter(model.Group.id.in_(group_ids))  # type: ignore
 
     groups = q.all()
 
@@ -628,7 +624,8 @@ def group_list_authz(context: Context, data_dict: DataDict) -> List[Dict]:
     return group_list
 
 
-def organization_list_for_user(context: Context, data_dict: DataDict) -> List[Dict]:
+def organization_list_for_user(context: Context,
+                               data_dict: DataDict) -> List[Dict]:
     '''Return the organizations that the user has a given permission for.
 
     Specifically it returns the list of organizations that the currently
@@ -704,7 +701,9 @@ def organization_list_for_user(context: Context, data_dict: DataDict) -> List[Di
 
         q = model.Session.query(model.Member, model.Group) \
             .filter(model.Member.table_name == 'user') \
-            .filter(model.Member.capacity.in_(roles)) \
+            .filter(
+                model.Member.capacity.in_(roles)  # type: ignore
+            ) \
             .filter(model.Member.table_id == user_id) \
             .filter(model.Member.state == 'active') \
             .join(model.Group)
@@ -712,7 +711,7 @@ def organization_list_for_user(context: Context, data_dict: DataDict) -> List[Di
         group_ids = set()
         roles_that_cascade = \
             authz.check_config_permission('roles_that_cascade_to_sub_groups')
-        group_ids_to_capacities = {}
+        group_ids_to_capacities: Dict[str, str] = {}
         for member, group in q.all():
             if member.capacity in roles_that_cascade:
                 children_group_ids = [
@@ -729,7 +728,7 @@ def organization_list_for_user(context: Context, data_dict: DataDict) -> List[Di
         if not group_ids:
             return []
 
-        orgs_q = orgs_q.filter(model.Group.id.in_(group_ids))
+        orgs_q = orgs_q.filter(model.Group.id.in_(group_ids))  # type: ignore
         orgs_and_capacities = [
             (org, group_ids_to_capacities[org.id]) for org in orgs_q.all()]
 
@@ -755,7 +754,8 @@ def license_list(context: Context, data_dict: DataDict) -> List[Dict]:
     return licenses
 
 
-def tag_list(context: Context, data_dict: DataDict) -> Union[List[Dict], List[str]]:
+def tag_list(context: Context,
+             data_dict: DataDict) -> Union[List[Dict], List[str]]:
     '''Return a list of the site's tags.
 
     By default only free tags (tags that don't belong to a vocabulary) are
@@ -801,7 +801,9 @@ def tag_list(context: Context, data_dict: DataDict) -> Union[List[Dict], List[st
     return tag_list
 
 
-def user_list(context: Context, data_dict: DataDict) -> Union[List[Dict], List[str]]:
+def user_list(
+        context: Context, data_dict: DataDict
+) -> Union[List[Dict], List[str], 'Query[model.User]']:
     '''Return a list of the site's user accounts.
 
     :param q: filter the users returned to those whose names contain a string
@@ -834,13 +836,13 @@ def user_list(context: Context, data_dict: DataDict) -> Union[List[Dict], List[s
     all_fields = asbool(data_dict.get('all_fields', True))
 
     if all_fields:
-        query = model.Session.query(
+        query: 'Query[Any]' = model.Session.query(
             model.User,
-            model.User.name.label('name'),
-            model.User.fullname.label('fullname'),
-            model.User.about.label('about'),
-            model.User.about.label('email'),
-            model.User.created.label('created'),
+            model.User.name.label('name'),  # type: ignore
+            model.User.fullname.label('fullname'),  # type: ignore
+            model.User.about.label('about'),  # type: ignore
+            model.User.about.label('email'),  # type: ignore
+            model.User.created.label('created'),  # type: ignore
             _select([_func.count(model.Package.id)],
                     _and_(
                         model.Package.creator_user_id == model.User.id,
@@ -858,7 +860,9 @@ def user_list(context: Context, data_dict: DataDict) -> Union[List[Dict], List[s
 
     order_by_field = None
     if order_by == 'edits':
-        raise ValidationError('order_by=edits is no longer supported')
+        raise ValidationError({
+            'message': 'order_by=edits is no longer supported'
+        })
     elif order_by == 'number_created_packages':
         order_by_field = order_by
     elif order_by != 'display_name':
@@ -879,8 +883,9 @@ def user_list(context: Context, data_dict: DataDict) -> Union[List[Dict], List[s
                 else_=model.User.fullname
             )
         )
-    elif order_by_field == 'number_created_packages' or order_by_field == 'fullname' \
-            or order_by_field == 'about' or order_by_field == 'sysadmin':
+    elif order_by_field == 'number_created_packages' \
+         or order_by_field == 'fullname' \
+         or order_by_field == 'about' or order_by_field == 'sysadmin':
         query = query.order_by(order_by_field, model.User.name)
     else:
         query = query.order_by(order_by_field)
@@ -905,7 +910,8 @@ def user_list(context: Context, data_dict: DataDict) -> Union[List[Dict], List[s
     return users_list
 
 
-def package_relationships_list(context: Context, data_dict: DataDict) -> List[Dict]:
+def package_relationships_list(context: Context,
+                               data_dict: DataDict) -> List[Dict]:
     '''Return a dataset (package)'s relationships.
 
     :param id: the id or name of the first package
@@ -991,6 +997,8 @@ def package_show(context: Context, data_dict: DataDict) -> Dict:
 
     package_dict = None
     use_cache = (context.get('use_cache', True))
+    package_dict_validated = False
+
     if use_cache:
         try:
             search_result = search.show(name_or_id)
@@ -1078,7 +1086,7 @@ def resource_show(context: Context, data_dict: DataDict) -> Dict:
     id = _get_or_bust(data_dict, 'id')
 
     resource = model.Resource.get(id)
-    resource_context = dict(context, resource=resource)
+    resource_context = cast(Context, dict(context, resource=resource))
 
     if not resource:
         raise NotFound
@@ -1086,7 +1094,7 @@ def resource_show(context: Context, data_dict: DataDict) -> Dict:
     _check_access('resource_show', resource_context, data_dict)
 
     pkg_dict = logic.get_action('package_show')(
-        dict(context),
+        context.copy(),
         {'id': resource.package.id,
         'include_tracking': asbool(data_dict.get('include_tracking', False))})
 
@@ -1118,7 +1126,10 @@ def resource_view_show(context: Context, data_dict: DataDict) -> Dict:
         raise NotFound
 
     context['resource_view'] = resource_view
-    context['resource'] = model.Resource.get(resource_view.resource_id)
+    resource = model.Resource.get(resource_view.resource_id)
+    if not resource:
+        raise NotFound
+    context['resource'] = resource
 
     _check_access('resource_view_show', context, data_dict)
     return model_dictize.resource_view_dictize(resource_view, context)
@@ -1174,7 +1185,9 @@ def _group_or_org_show(context, data_dict, is_org=False):
         include_extras = asbool(data_dict.get('include_extras', True))
         include_followers = asbool(data_dict.get('include_followers', True))
     except ValueError:
-        raise logic.ValidationError(_('Parameter is not an bool'))
+        raise logic.ValidationError({
+            'message': _('Parameter is not an bool')
+        })
 
     if group is None:
         raise NotFound
@@ -1220,7 +1233,7 @@ def _group_or_org_show(context, data_dict, is_org=False):
         group_dict['num_followers'] = 0
 
     if schema is None:
-        schema = logic.schema.default_show_group_schema()
+        schema = ckan.logic.schema.default_show_group_schema()
     group_dict, errors = lib_plugins.plugin_validate(
         group_plugin, context, group_dict, schema,
         'organization_show' if is_org else 'group_show')
@@ -1242,8 +1255,8 @@ def group_show(context: Context, data_dict: DataDict) -> Dict:
          (optional, default: ``True``)
     :type include_extras: bool
     :param include_users: include the group's users
-         (optional, default: ``True`` if ``ckan.auth.public_user_details`` is ``True``
-         otherwise ``False``)
+         (optional, default: ``True`` if ``ckan.auth.public_user_details``
+         is ``True`` otherwise ``False``)
     :type include_users: bool
     :param include_groups: include the group's sub groups
          (optional, default: ``True``)
@@ -1278,8 +1291,8 @@ def organization_show(context: Context, data_dict: DataDict) -> Dict:
          (optional, default: ``True``)
     :type include_extras: bool
     :param include_users: include the organization's users
-         (optional, default: ``True`` if ``ckan.auth.public_user_details`` is ``True``
-         otherwise ``False``)
+         (optional, default: ``True`` if ``ckan.auth.public_user_details``
+         is ``True`` otherwise ``False``)
     :type include_users: bool
     :param include_groups: include the organization's sub groups
          (optional, default: ``True``)
@@ -1314,19 +1327,22 @@ def group_package_show(context: Context, data_dict: DataDict) -> List[Dict]:
     model = context['model']
     group_id = _get_or_bust(data_dict, 'id')
 
-    limit = data_dict.get('limit')
+    limit = data_dict.get('limit', '')
     if limit:
         try:
-            limit = int(data_dict.get('limit'))
+            limit = int(limit)
             if limit < 0:
-                raise logic.ValidationError('Limit must be a positive integer')
+                raise logic.ValidationError({
+                    'message': 'Limit must be a positive integer'
+                })
         except ValueError:
-            raise logic.ValidationError('Limit must be a positive integer')
+            raise logic.ValidationError({
+                'message': 'Limit must be a positive integer'})
 
     group = model.Group.get(group_id)
-    context['group'] = group
     if group is None:
         raise NotFound
+    context['group'] = group
 
     _check_access('group_show', context, data_dict)
 
@@ -1363,10 +1379,10 @@ def tag_show(context: Context, data_dict: DataDict) -> Dict:
     include_datasets = asbool(data_dict.get('include_datasets', False))
 
     tag = model.Tag.get(id, vocab_id_or_name=data_dict.get('vocabulary_id'))
-    context['tag'] = tag
-
     if tag is None:
         raise NotFound
+
+    context['tag'] = tag
 
     _check_access('tag_show', context, data_dict)
     return model_dictize.tag_dictize(tag, context,
@@ -1412,6 +1428,7 @@ def user_show(context: Context, data_dict: DataDict) -> Dict:
     provided_user = data_dict.get('user_obj', None)
     if id:
         user_obj = model.User.get(id)
+        assert user_obj
         context['user_obj'] = user_obj
     elif provided_user:
         context['user_obj'] = user_obj = provided_user
@@ -1455,7 +1472,7 @@ def user_show(context: Context, data_dict: DataDict) -> Dict:
 
         fq = "+creator_user_id:{0}".format(user_dict['id'])
 
-        search_dict = {'rows': 50}
+        search_dict: Dict[str, Any] = {'rows': 50}
 
         if include_private_and_draft_datasets:
             search_dict.update({
@@ -1465,8 +1482,7 @@ def user_show(context: Context, data_dict: DataDict) -> Dict:
         search_dict.update({'fq': fq})
 
         user_dict['datasets'] = \
-            logic.get_action('package_search')(context=context,
-                                               data_dict=search_dict) \
+            logic.get_action('package_search')(context, search_dict) \
             .get('results')
 
     if asbool(data_dict.get('include_num_followers', False)):
@@ -1477,7 +1493,7 @@ def user_show(context: Context, data_dict: DataDict) -> Dict:
     return user_dict
 
 
-@logic.validate(logic.schema.default_autocomplete_schema)
+@logic.validate(ckan.logic.schema.default_autocomplete_schema)
 def package_autocomplete(context: Context, data_dict: DataDict) -> List[Dict]:
     '''Return a list of datasets (packages) that match a string.
 
@@ -1513,7 +1529,7 @@ def package_autocomplete(context: Context, data_dict: DataDict) -> List[Dict]:
             'title_ngram:{0}',
             'name:{0}',
             'title:{0}',
-        ]).format(search.query.solr_literal(q)),
+        ]).format(solr_literal(q)),
         'fl': 'name,title',
         'rows': limit
     }
@@ -1540,7 +1556,7 @@ def package_autocomplete(context: Context, data_dict: DataDict) -> List[Dict]:
     return pkg_list
 
 
-@logic.validate(logic.schema.default_autocomplete_schema)
+@logic.validate(ckan.logic.schema.default_autocomplete_schema)
 def format_autocomplete(context: Context, data_dict: DataDict) -> List[str]:
     '''Return a list of resource formats whose names contain a string.
 
@@ -1569,7 +1585,7 @@ def format_autocomplete(context: Context, data_dict: DataDict) -> List[str]:
         .filter(_and_(
             model.Resource.state == 'active',
         ))
-        .filter(model.Resource.format.ilike(like_q))
+        .filter(model.Resource.format.ilike(like_q))  # type: ignore
         .group_by(model.Resource.format)
         .order_by(text('total DESC'))
         .limit(limit))
@@ -1577,7 +1593,7 @@ def format_autocomplete(context: Context, data_dict: DataDict) -> List[str]:
     return [resource.format.lower() for resource in query]
 
 
-@logic.validate(logic.schema.default_autocomplete_schema)
+@logic.validate(ckan.logic.schema.default_autocomplete_schema)
 def user_autocomplete(context: Context, data_dict: DataDict) -> List[Dict]:
     '''Return a list of user names that contain a string.
 
@@ -1657,7 +1673,8 @@ def group_autocomplete(context: Context, data_dict: DataDict) -> List[Dict]:
     return _group_or_org_autocomplete(context, data_dict, is_org=False)
 
 
-def organization_autocomplete(context: Context, data_dict: DataDict) -> List[Dict]:
+def organization_autocomplete(context: Context,
+                              data_dict: DataDict) -> List[Dict]:
     '''
     Return a list of organization names that contain a string.
 
@@ -1676,7 +1693,7 @@ def organization_autocomplete(context: Context, data_dict: DataDict) -> List[Dic
     return _group_or_org_autocomplete(context, data_dict, is_org=True)
 
 
-def package_search(context: Context, data_dict: DataDict) -> List[Dict]:
+def package_search(context: Context, data_dict: DataDict) -> Dict:
     '''
     Searches for packages satisfying a given search criteria.
 
@@ -1800,12 +1817,13 @@ def package_search(context: Context, data_dict: DataDict) -> List[Dict]:
     fl
         The parameter that controls which fields are returned in the solr
         query.
-        fl can be  None or a list of result fields, such as ['id', 'extras_custom_field'].
+        fl can be  None or a list of result fields, such as
+        ['id', 'extras_custom_field'].
         if fl = None, datasets are returned as a list of full dictionary.
     '''
     # sometimes context['schema'] is None
     schema = (context.get('schema') or
-              logic.schema.default_package_search_schema())
+              ckan.logic.schema.default_package_search_schema())
     data_dict, errors = _validate(data_dict, schema, context)
     # put the extras back into the data_dict so that the search can
     # report needless parameters
@@ -1838,7 +1856,8 @@ def package_search(context: Context, data_dict: DataDict) -> List[Dict]:
     abort = data_dict.get('abort_search', False)
 
     if data_dict.get('sort') in (None, 'rank'):
-        data_dict['sort'] = config.get('ckan.search.default_package_sort') or 'score desc, metadata_modified desc'
+        data_dict['sort'] = config.get('ckan.search.default_package_sort') \
+            or 'score desc, metadata_modified desc'
 
     results = []
     if not abort:
@@ -1924,7 +1943,7 @@ def package_search(context: Context, data_dict: DataDict) -> List[Dict]:
         group_names.extend(facets.get(field_name, {}).keys())
 
     groups = (session.query(model.Group.name, model.Group.title)
-                    .filter(model.Group.name.in_(group_names))
+                    .filter(model.Group.name.in_(group_names))  # type: ignore
                     .all()
               if group_names else [])
     group_titles_by_name = dict(groups)
@@ -1941,7 +1960,8 @@ def package_search(context: Context, data_dict: DataDict) -> List[Dict]:
             new_facet_dict['name'] = key_
             if key in ('groups', 'organization'):
                 display_name = group_titles_by_name.get(key_, key_)
-                display_name = display_name if display_name and display_name.strip() else key_
+                display_name = display_name \
+                    if display_name and display_name.strip() else key_
                 new_facet_dict['display_name'] = display_name
             elif key == 'license_id':
                 license = model.Package.get_license_register().get(key_)
@@ -1969,7 +1989,7 @@ def package_search(context: Context, data_dict: DataDict) -> List[Dict]:
     return search_results
 
 
-@logic.validate(logic.schema.default_resource_search_schema)
+@logic.validate(ckan.logic.schema.default_resource_search_schema)
 def resource_search(context: Context, data_dict: DataDict) -> Dict:
     '''
     Searches for resources satisfying a given search criteria.
@@ -2048,7 +2068,7 @@ def resource_search(context: Context, data_dict: DataDict) -> Dict:
     # The result of all this gumpf is to populate the local `fields` variable
     # with mappings from field names to list of search terms, or a single
     # search-term string.
-    query = data_dict.get('query')
+    query: Optional[Union[str, List[str]]] = data_dict.get('query')
     fields = data_dict.get('fields')
 
     if query is None and fields is None:
@@ -2062,7 +2082,7 @@ def resource_search(context: Context, data_dict: DataDict) -> Dict:
         if isinstance(query, string_types):
             query = [query]
         try:
-            fields = dict(pair.split(":", 1) for pair in query)
+            fields = dict(pair.split(":", 1) for pair in query)  # type: ignore
         except ValueError:
             raise ValidationError(
                 {'query': _('Must be <field>:<value> pair(s)')})
@@ -2317,12 +2337,10 @@ def task_status_show(context: Context, data_dict: DataDict) -> Dict:
             ))
         task_status = query.first()
 
-    context['task_status'] = task_status
-
-    _check_access('task_status_show', context, data_dict)
-
     if task_status is None:
         raise NotFound
+    context['task_status'] = task_status
+    _check_access('task_status_show', context, data_dict)
 
     task_status_dict = model_dictize.task_status_dictize(task_status, context)
     return task_status_dict
@@ -2467,7 +2485,7 @@ def vocabulary_show(context: Context, data_dict: DataDict) -> Dict:
     return vocabulary_dict
 
 
-@logic.validate(logic.schema.default_activity_list_schema)
+@logic.validate(ckan.logic.schema.default_activity_list_schema)
 def user_activity_list(context: Context, data_dict: DataDict) -> List[Dict]:
     '''Return a user's public activity stream.
 
@@ -2511,7 +2529,7 @@ def user_activity_list(context: Context, data_dict: DataDict) -> List[Dict]:
         include_data=data_dict['include_data'])
 
 
-@logic.validate(logic.schema.default_activity_list_schema)
+@logic.validate(ckan.logic.schema.default_activity_list_schema)
 def package_activity_list(context: Context, data_dict: DataDict) -> List[Dict]:
     '''Return a package's activity stream (not including detail)
 
@@ -2564,7 +2582,7 @@ def package_activity_list(context: Context, data_dict: DataDict) -> List[Dict]:
         activity_objects, context, include_data=data_dict['include_data'])
 
 
-@logic.validate(logic.schema.default_activity_list_schema)
+@logic.validate(ckan.logic.schema.default_activity_list_schema)
 def group_activity_list(context: Context, data_dict: DataDict) -> List[Dict]:
     '''Return a group's activity stream.
 
@@ -2617,8 +2635,9 @@ def group_activity_list(context: Context, data_dict: DataDict) -> List[Dict]:
         include_data=data_dict['include_data'])
 
 
-@logic.validate(logic.schema.default_activity_list_schema)
-def organization_activity_list(context: Context, data_dict: DataDict) -> List[Dict]:
+@logic.validate(ckan.logic.schema.default_activity_list_schema)
+def organization_activity_list(context: Context,
+                               data_dict: DataDict) -> List[Dict]:
     '''Return a organization's activity stream.
 
     :param id: the id or name of the organization
@@ -2668,8 +2687,9 @@ def organization_activity_list(context: Context, data_dict: DataDict) -> List[Di
         include_data=data_dict['include_data'])
 
 
-@logic.validate(logic.schema.default_dashboard_activity_list_schema)
-def recently_changed_packages_activity_list(context: Context, data_dict: DataDict) -> List[Dict]:
+@logic.validate(ckan.logic.schema.default_dashboard_activity_list_schema)
+def recently_changed_packages_activity_list(context: Context,
+                                            data_dict: DataDict) -> List[Dict]:
     '''Return the activity stream of all recently added or changed packages.
 
     :param offset: where to start getting activity items from
@@ -2832,7 +2852,8 @@ def group_follower_list(context: Context, data_dict: DataDict) -> List[Dict]:
         context['model'].UserFollowingGroup)
 
 
-def organization_follower_list(context: Context, data_dict: DataDict) -> List[Dict]:
+def organization_follower_list(context: Context,
+                               data_dict: DataDict) -> List[Dict]:
     '''Return the list of users that are following the given organization.
 
     :param id: the id or name of the organization
@@ -2992,7 +3013,7 @@ def group_followee_count(context: Context, data_dict: DataDict) -> int:
         context['model'].UserFollowingGroup)
 
 
-@logic.validate(logic.schema.default_follow_user_schema)
+@logic.validate(ckan.logic.schema.default_follow_user_schema)
 def followee_list(context: Context, data_dict: DataDict) -> List[Dict]:
     '''Return the list of objects that are followed by the given user.
 
@@ -3135,7 +3156,8 @@ def group_followee_list(context: Context, data_dict: DataDict) -> List[Dict]:
     return _group_or_org_followee_list(context, data_dict, is_org=False)
 
 
-def organization_followee_list(context: Context, data_dict: DataDict) -> List[Dict]:
+def organization_followee_list(context: Context,
+                               data_dict: DataDict) -> List[Dict]:
     '''Return the list of organizations that are followed by the given user.
 
     :param id: the id or name of the user
@@ -3173,8 +3195,9 @@ def _group_or_org_followee_list(context, data_dict, is_org=False):
     return [model_dictize.group_dictize(group, context) for group in groups]
 
 
-@logic.validate(logic.schema.default_dashboard_activity_list_schema)
-def dashboard_activity_list(context: Context, data_dict: DataDict) -> List[Dict]:
+@logic.validate(ckan.logic.schema.default_dashboard_activity_list_schema)
+def dashboard_activity_list(context: Context,
+                            data_dict: DataDict) -> List[Dict]:
     '''Return the authorized (via login or API key) user's dashboard activity
        stream.
 
@@ -3227,7 +3250,8 @@ def dashboard_activity_list(context: Context, data_dict: DataDict) -> List[Dict]
     return activity_dicts
 
 
-def dashboard_new_activities_count(context: Context, data_dict: DataDict) -> int:
+def dashboard_new_activities_count(context: Context,
+                                   data_dict: DataDict) -> int:
     '''Return the number of new activities in the user's dashboard.
 
     Return the number of new activities in the authorized user's dashboard
@@ -3289,7 +3313,6 @@ def activity_data_show(context: Context, data_dict: DataDict) -> Dict:
     :rtype: dictionary
     '''
     model = context['model']
-    user = context['user']
     activity_id = _get_or_bust(data_dict, 'id')
     object_type = data_dict.get('object_type')
 
@@ -3326,10 +3349,8 @@ def activity_diff(context: Context, data_dict: DataDict) -> Dict:
     :type diff_type: string
     '''
     import difflib
-    from pprint import pformat
 
     model = context['model']
-    user = context['user']
     activity_id = _get_or_bust(data_dict, 'id')
     object_type = _get_or_bust(data_dict, 'object_type')
     diff_type = data_dict.get('diff_type', 'unified')
@@ -3342,8 +3363,9 @@ def activity_diff(context: Context, data_dict: DataDict) -> Dict:
     prev_activity = model.Session.query(model.Activity) \
         .filter_by(object_id=activity.object_id) \
         .filter(model.Activity.timestamp < activity.timestamp) \
-        .order_by(model.Activity.timestamp.desc()) \
-        .first()
+        .order_by(
+            model.Activity.timestamp.desc()  # type: ignore
+        ).first()
     if prev_activity is None:
         raise NotFound('Previous activity for this object not found')
     activity_objs = [prev_activity, activity]
@@ -3359,10 +3381,10 @@ def activity_diff(context: Context, data_dict: DataDict) -> Dict:
 
     # do the diff
     if diff_type == 'unified':
-        diff_generator = difflib.unified_diff(*obj_lines)
+        diff_generator = difflib.unified_diff(*obj_lines)  # type: ignore
         diff = '\n'.join(line for line in diff_generator)
     elif diff_type == 'context':
-        diff_generator = difflib.context_diff(*obj_lines)
+        diff_generator = difflib.context_diff(*obj_lines)  # type: ignore
         diff = '\n'.join(line for line in diff_generator)
     elif diff_type == 'html':
         # word-wrap lines. Otherwise you get scroll bars for most datasets.
@@ -3372,9 +3394,9 @@ def activity_diff(context: Context, data_dict: DataDict) -> Dict:
             for line in obj_lines[obj_index]:
                 wrapped_obj_lines.extend(re.findall(r'.{1,70}(?:\s+|$)', line))
             obj_lines[obj_index] = wrapped_obj_lines
-        diff = difflib.HtmlDiff().make_table(*obj_lines)
+        diff = difflib.HtmlDiff().make_table(*obj_lines)  # type: ignore
     else:
-        raise ValidationError('diff_type not recognized')
+        raise ValidationError({'message': 'diff_type not recognized'})
 
     activities = [model_dictize.activity_dictize(activity_obj, context,
                                                  include_data=True)
@@ -3403,9 +3425,11 @@ def _unpick_search(sort, allowed_fields=None, total=None):
             order = 'asc'
         if allowed_fields:
             if field not in allowed_fields:
-                raise ValidationError('Cannot sort by field `%s`' % field)
+                raise ValidationError({
+                    'message': 'Cannot sort by field `%s`' % field})
         if order not in ['asc', 'desc']:
-            raise ValidationError('Invalid sort direction `%s`' % order)
+            raise ValidationError({
+                'message': 'Invalid sort direction `%s`' % order})
         sorts.append((field, order))
     if total and len(sorts) > total:
         raise ValidationError(
@@ -3435,7 +3459,7 @@ def member_roles_list(context: Context, data_dict: DataDict) -> List[Dict]:
     return roles_list
 
 
-def help_show(context: Context, data_dict: DataDict) -> List[Dict]:
+def help_show(context: Context, data_dict: DataDict) -> Optional[str]:
     '''Return the help string for a particular API action.
 
     :param name: Action function name (eg `user_create`, `package_search`)
@@ -3464,7 +3488,8 @@ def config_option_show(context: Context, data_dict: DataDict) -> Any:
     '''Show the current value of a particular configuration option.
 
     Only returns runtime-editable config options (the ones returned by
-    :py:func:`~ckan.logic.action.get.config_option_list`), which can be updated with the
+    :py:func:`~ckan.logic.action.get.config_option_list`), which can be
+        updated with the
     :py:func:`~ckan.logic.action.update.config_option_update` action.
 
     :param key: The configuration option key
@@ -3486,8 +3511,9 @@ def config_option_show(context: Context, data_dict: DataDict) -> Any:
 
     # Only return whitelisted keys
     if key not in schema:
-        raise ValidationError(
-            'Configuration option \'{0}\' can not be shown'.format(key))
+        raise ValidationError({
+            'message': f"Configuration option '{key}' can not be shown"})
+
 
     # return the value from config
     return config.get(key, None)
@@ -3508,7 +3534,7 @@ def config_option_list(context: Context, data_dict: DataDict) -> List[str]:
     return list(schema.keys())
 
 
-@logic.validate(logic.schema.job_list_schema)
+@logic.validate(ckan.logic.schema.job_list_schema)
 def job_list(context: Context, data_dict: DataDict) -> List[Dict]:
     '''List enqueued background jobs.
 

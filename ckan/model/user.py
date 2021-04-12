@@ -60,7 +60,7 @@ class User(core.StatefulObjectMixin,
     # password: str
     fullname: Optional[str]
     email: str
-    api_key: Optional[str]
+    apikey: Optional[str]
     created: datetime.datetime
     reset_key: str
     about: str
@@ -81,7 +81,7 @@ class User(core.StatefulObjectMixin,
         return meta.Session.query(cls).filter_by(email=email).all()
 
     @classmethod
-    def get(cls, user_reference: str) -> Optional["User"]:
+    def get(cls, user_reference: Optional[str]) -> Optional["User"]:
         query = meta.Session.query(cls).autoflush(False)
         query = query.filter(or_(cls.name == user_reference,
                                  cls.id == user_reference))

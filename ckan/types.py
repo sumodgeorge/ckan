@@ -64,11 +64,15 @@ class Context(TypedDict, total=False):
 
     keep_email: bool
     keep_apikey: bool
+    skip_validation: bool
+    count_private_and_draft_datasets: bool
 
     schema: 'Schema'
     group: 'model_.Group'
     package: 'model_.Package'
 
+    tag: 'model_.Tag'
+    activity: 'model_.Activity'
     task_status: 'model_.TaskStatus'
     resource: 'model_.Resource'
     resource_view: 'model_.ResourceView'

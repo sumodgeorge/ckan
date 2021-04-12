@@ -132,9 +132,14 @@ from ckan.model.api_token import (
 
 import ckan.migration
 from ckan.common import config
+from . import (
+    activity,
+    vocabulary
+)
 from typing import Any, Callable, Collection, Dict, List, Optional, Tuple
 from sqlalchemy.engine import Engine
 from ckan.types import AlchemySession
+
 
 log = logging.getLogger(__name__)
 

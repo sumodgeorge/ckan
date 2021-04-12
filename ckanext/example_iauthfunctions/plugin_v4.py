@@ -11,7 +11,8 @@ def group_create(context, data_dict=None):
     # Get a list of the members of the 'curators' group.
     try:
         members = toolkit.get_action('member_list')(
-            data_dict={'id': 'curators', 'object_type': 'user'})
+            {},
+            {'id': 'curators', 'object_type': 'user'})
     except toolkit.ObjectNotFound:
         # The curators group doesn't exist.
         return {'success': False,

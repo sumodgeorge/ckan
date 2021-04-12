@@ -20,7 +20,7 @@ from ckan.common import config
 import ckan.model
 from ckan.model import meta
 from ckan.model import domain_object, types as _types
-from ckan.types import Query
+from ckan.types import Context, Query
 
 
 __all__ = ['Activity', 'activity_table',
@@ -493,8 +493,8 @@ def _activity_stream_get_filtered_users() -> List[str]:
         users_list = users.split()
     else:
         from ckan.logic import get_action
-        context = {'ignore_auth': True}
-        site_user = get_action('get_site_user')(context)
+        context: Context = {'ignore_auth': True}
+        site_user = get_action('get_site_user')(context, {})
         users_list = [site_user.get('name')]
 
     return ckan.model.User.user_ids_for_name_or_id(users_list)

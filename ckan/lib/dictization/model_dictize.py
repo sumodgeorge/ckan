@@ -14,7 +14,7 @@ which builds the dictionary by iterating over the table columns.
 import copy
 import six
 
-from typing import Any, Callable, Dict, Iterable, List, Tuple, Union
+from typing import Any, Callable, Dict, Iterable, List, Optional, Tuple, Union
 from six.moves.urllib.parse import urlsplit  # type: ignore
 
 from ckan.common import config
@@ -32,7 +32,7 @@ from ckan.types import Context
 
 ## package save
 
-def group_list_dictize(obj_list: List[Union[model.Group, Tuple[model.Group, str]]], context: Context,
+def group_list_dictize(obj_list: Union[Iterable[model.Group], Iterable[Tuple[model.Group, str]]], context: Context,
                        sort_key: Callable=lambda x: x['display_name'], reverse: bool=False,
                        with_package_counts: bool=True,
                        include_groups: bool=False,
@@ -280,7 +280,7 @@ def group_dictize(group: model.Group, context: Context,
                   include_tags: bool=True,
                   include_users: bool=True,
                   include_extras: bool=True,
-                  packages_field: str='datasets',
+                  packages_field: Optional[str]='datasets',
                   **kw: Any) -> Dict:
     '''
     Turns a Group object and related into a dictionary. The related objects
@@ -398,7 +398,7 @@ def group_dictize(group: model.Group, context: Context,
         )
     return result_dict
 
-def tag_list_dictize(tag_list: Union[List[model.Tag], List[Tuple[model.Tag, str]]], context: Context) -> List[Dict]:
+def tag_list_dictize(tag_list: Union[Iterable[model.Tag], Iterable[Tuple[model.Tag, str]]], context: Context) -> List[Dict]:
 
     result_list = []
     for tag in tag_list:
@@ -739,7 +739,7 @@ def api_token_dictize(api_token: model.ApiToken, context: Context) -> Dict:
     return result_dict
 
 
-def api_token_list_dictize(tokens: List[model.ApiToken], context: Context) -> List[Dict]:
+def api_token_list_dictize(tokens: Iterable[model.ApiToken], context: Context) -> List[Dict]:
     token_dicts = []
     for token in tokens:
         token_dicts.append(api_token_dictize(token, context))
