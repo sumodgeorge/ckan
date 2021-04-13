@@ -27,7 +27,7 @@ from ckan.lib.plugins import lookup_package_plugin
 from ckan.lib.render import TemplateNotFound
 from ckan.lib.search import SearchError, SearchQueryError, SearchIndexError
 from ckan.views import LazyView
-from typing import Any, Dict, Iterable, List, Optional, Tuple, Union
+from typing import Any, Dict, Iterable, List, Optional, Tuple, Union, cast
 from flask.blueprints import Blueprint
 from flask.wrappers import Response
 
@@ -60,7 +60,8 @@ def _setup_template_variables(context: Context,
     )
 
 
-def _get_pkg_template(template_type:str, package_type:Optional[str]=None) -> str:
+def _get_pkg_template(template_type: str,
+                      package_type: Optional[str] = None) -> str:
     pkg_plugin = lookup_package_plugin(package_type)
     method = getattr(pkg_plugin, template_type)
     try:
@@ -83,14 +84,14 @@ def url_with_params(url: str, params: Params) -> str:
     return url + u'?' + urlencode(params)
 
 
-def search_url(params: Params, package_type: str=None) -> str:
+def search_url(params: Params, package_type: str = None) -> str:
     if not package_type:
         package_type = u'dataset'
     url = h.url_for(u'{0}.search'.format(package_type))
     return url_with_params(url, params)
 
 
-def drill_down_url(alternative_url: str=None, **by: Dict) -> str:
+def drill_down_url(alternative_url: str = None, **by: Dict) -> str:
     return h.add_url_param(
         alternative_url=alternative_url,
         controller=u'dataset',
@@ -130,7 +131,10 @@ def _sort_by(params_nosort: Params, package_type: str,
     return search_url(params, package_type)
 
 
-def _pager_url(params_nopage: Params, package_type: str, q=None, page=None) -> str:
+def _pager_url(params_nopage: Params,
+               package_type: str,
+               q=None,
+               page=None) -> str:
     params = list(params_nopage)
     params.append((u'page', page))
     return search_url(params, package_type)
@@ -219,11 +223,11 @@ def search(package_type: str) -> str:
     extra_vars = {}
 
     try:
-        context = {
+        context = cast(Context, {
             u'model': model,
             u'user': g.user,
             u'auth_user_obj': g.userobj
-        }
+        })
         check_access(u'site_read', context)
     except NotAuthorized:
         base.abort(403, _(u'Not authorized to see this page'))
@@ -264,13 +268,13 @@ def search(package_type: str) -> str:
     fq = details[u'fq']
     search_extras = details[u'search_extras']
 
-    context = {
+    context = cast(Context, {
         u'model': model,
         u'session': model.Session,
         u'user': g.user,
         u'for_view': True,
         u'auth_user_obj': g.userobj
-    }
+    })
 
     # Unless changed via config options, don't show other dataset
     # types any search page. Potential alternatives are do show them
@@ -401,13 +405,13 @@ def search(package_type: str) -> str:
 
 
 def resources(package_type: str, id: str) -> Union[Response, str]:
-    context: Context = {
+    context = cast(Context, {
         u'model': model,
         u'session': model.Session,
         u'user': g.user,
         u'for_view': True,
         u'auth_user_obj': g.userobj
-    }
+    })
     data_dict = {u'id': id, u'include_tracking': True}
 
     try:
@@ -443,13 +447,13 @@ def resources(package_type: str, id: str) -> Union[Response, str]:
 
 
 def read(package_type: str, id: str) -> Union[Response, str]:
-    context: Context = {
+    context = cast(Context, {
         u'model': model,
         u'session': model.Session,
         u'user': g.user,
         u'for_view': True,
         u'auth_user_obj': g.userobj
-    }
+    })
     data_dict = {u'id': id, u'include_tracking': True}
     activity_id = request.params.get(u'activity_id')
 
@@ -546,13 +550,13 @@ class CreateView(MethodView):
 
     def _prepare(self) -> Context:
 
-        context: Context = {
+        context = cast(Context, {
             u'model': model,
             u'session': model.Session,
             u'user': g.user,
             u'auth_user_obj': g.userobj,
             u'save': self._is_save()
-        }
+        })
         try:
             check_access(u'package_create', context)
         except NotAuthorized:
@@ -726,13 +730,13 @@ class CreateView(MethodView):
 
 class EditView(MethodView):
     def _prepare(self) -> Context:
-        context: Context = {
+        context = cast(Context, {
             u'model': model,
             u'session': model.Session,
             u'user': g.user,
             u'auth_user_obj': g.userobj,
             u'save': u'save' in request.form
-        }
+        })
         return context
 
     def post(self, package_type: str, id: str) -> Union[Response, str]:
@@ -790,7 +794,7 @@ class EditView(MethodView):
         package_type = _get_package_type(id) or package_type
         try:
             pkg_dict = get_action(u'package_show')(
-                dict(context, for_view=True), {
+                Context(**context, for_view=True), {
                     u'id': id
                 }
             )
@@ -876,12 +880,12 @@ class EditView(MethodView):
 
 class DeleteView(MethodView):
     def _prepare(self) -> Context:
-        context: Context = {
+        context = cast(Context, {
             u'model': model,
             u'session': model.Session,
             u'user': g.user,
             u'auth_user_obj': g.userobj
-        }
+        })
         return context
 
     def post(self, package_type: str, id: str) -> Response:
@@ -929,12 +933,12 @@ class DeleteView(MethodView):
 def follow(package_type: str, id: str) -> Response:
     """Start following this dataset.
     """
-    context: Context = {
+    context = cast(Context, {
         u'model': model,
         u'session': model.Session,
         u'user': g.user,
         u'auth_user_obj': g.userobj
-    }
+    })
     data_dict = {u'id': id}
     try:
         get_action(u'follow_dataset')(context, data_dict)
@@ -956,12 +960,12 @@ def follow(package_type: str, id: str) -> Response:
 def unfollow(package_type: str, id: str) -> Response:
     """Stop following this dataset.
     """
-    context = {
+    context = cast(Context, {
         u'model': model,
         u'session': model.Session,
         u'user': g.user,
         u'auth_user_obj': g.userobj
-    }
+    })
     data_dict = {u'id': id}
     try:
         get_action(u'unfollow_dataset')(context, data_dict)
@@ -985,13 +989,13 @@ def unfollow(package_type: str, id: str) -> Response:
 
 def followers(package_type: str,
               id: Optional[str] = None) -> Union[Response, str]:
-    context: Context = {
+    context = cast(Context, {
         u'model': model,
         u'session': model.Session,
         u'user': g.user,
         u'for_view': True,
         u'auth_user_obj': g.userobj
-    }
+    })
 
     data_dict = {u'id': id}
     try:
@@ -1026,14 +1030,14 @@ def followers(package_type: str,
 
 class GroupView(MethodView):
     def _prepare(self, id) -> Tuple[Context, Dict[str, Any]]:
-        context: Context = {
+        context = cast(Context, {
             u'model': model,
             u'session': model.Session,
             u'user': g.user,
             u'for_view': True,
             u'auth_user_obj': g.userobj,
             u'use_cache': False
-        }
+        })
 
         try:
             pkg_dict = get_action(u'package_show')(context, {u'id': id})
@@ -1109,13 +1113,13 @@ class GroupView(MethodView):
 def activity(package_type: str, id: str) -> Union[Response, str]:
     """Render this package's public activity stream page.
     """
-    context: Context = {
+    context = cast(Context, {
         u'model': model,
         u'session': model.Session,
         u'user': g.user,
         u'for_view': True,
         u'auth_user_obj': g.userobj
-    }
+    })
     data_dict = {u'id': id}
     try:
         pkg_dict = get_action(u'package_show')(context, data_dict)
@@ -1144,15 +1148,16 @@ def activity(package_type: str, id: str) -> Union[Response, str]:
     )
 
 
-def changes(id: str, package_type: Optional[str]=None) -> Union[Response, str]:
+def changes(id: str,
+            package_type: Optional[str] = None) -> Union[Response, str]:
     '''
     Shows the changes to a dataset in one particular activity stream item.
     '''
     activity_id = id
-    context: Context = {
+    context = cast(Context, {
         u'model': model, u'session': model.Session,
         u'user': g.user, u'auth_user_obj': g.userobj
-    }
+    })
     try:
         activity_diff = get_action(u'activity_diff')(
             context, {u'id': activity_id, u'object_type': u'package',
@@ -1185,7 +1190,8 @@ def changes(id: str, package_type: Optional[str]=None) -> Union[Response, str]:
     )
 
 
-def changes_multiple(package_type: Optional[str]=None) -> Union[Response, str]:
+def changes_multiple(
+        package_type: Optional[str] = None) -> Union[Response, str]:
     '''
     Called when a user specifies a range of versions they want to look at
     changes between. Verifies that the range is valid and finds the set of
@@ -1196,10 +1202,10 @@ def changes_multiple(package_type: Optional[str]=None) -> Union[Response, str]:
     new_id = h.get_request_param(u'new_id')
     old_id = h.get_request_param(u'old_id')
 
-    context = {
+    context = cast(Context, {
         u'model': model, u'session': model.Session,
         u'user': g.user, u'auth_user_obj': g.userobj
-    }
+    })
 
     # check to ensure that the old activity is actually older than
     # the new activity
@@ -1268,7 +1274,7 @@ def changes_multiple(package_type: Optional[str]=None) -> Union[Response, str]:
 
 
 def collaborators_read(package_type: str, id: str) -> Union[Response, str]:
-    context: Context = {u'model': model, u'user': g.user}
+    context = cast(Context, {u'model': model, u'user': g.user})
     data_dict = {u'id': id}
 
     try:
@@ -1286,7 +1292,7 @@ def collaborators_read(package_type: str, id: str) -> Union[Response, str]:
 
 
 def collaborator_delete(package_type: str, id: str, user_id) -> Response:
-    context: Context = {u'model': model, u'user': g.user}
+    context = cast(Context, {u'model': model, u'user': g.user})
 
     try:
         get_action(u'package_collaborator_delete')(context, {
@@ -1307,7 +1313,7 @@ def collaborator_delete(package_type: str, id: str, user_id) -> Response:
 class CollaboratorEditView(MethodView):
 
     def post(self, package_type: str, id: str) -> Response:
-        context: Context = {u'model': model, u'user': g.user}
+        context = cast(Context, {u'model': model, u'user': g.user})
 
         try:
             form_dict = logic.clean_dict(
@@ -1345,7 +1351,7 @@ class CollaboratorEditView(MethodView):
         return h.redirect_to(u'dataset.collaborators_read', id=id)
 
     def get(self, package_type: str, id) -> Union[Response, str]:
-        context: Context = {u'model': model, u'user': g.user}
+        context = cast(Context, {u'model': model, u'user': g.user})
         data_dict = {u'id': id}
 
         try:

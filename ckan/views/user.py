@@ -20,7 +20,7 @@ import ckan.model as model
 import ckan.plugins as plugins
 from ckan import authz
 from ckan.common import _, config, g, request
-from typing import Any, Dict, Optional, Tuple, Union
+from typing import Any, Dict, Optional, Tuple, Union, cast
 from flask.wrappers import Response
 
 log = logging.getLogger(__name__)
@@ -79,11 +79,11 @@ def _extra_template_variables(context: Context,
 @user.before_request
 def before_request() -> None:
     try:
-        context: Context = {
+        context = cast(Context, {
             "model": model,
             "user": g.user,
             "auth_user_obj": g.userobj
-        }
+        })
         logic.check_access(u'site_read', context)
     except logic.NotAuthorized:
         action = plugins.toolkit.get_endpoint()[1]
@@ -136,13 +136,13 @@ def me() -> Response:
 
 
 def read(id: str) -> Union[Response, str]:
-    context: Context = {
+    context = cast(Context, {
         u'model': model,
         u'session': model.Session,
         u'user': g.user,
         u'auth_user_obj': g.userobj,
         u'for_view': True
-    }
+    })
     data_dict = {
         u'id': id,
         u'user_obj': g.userobj,
@@ -160,15 +160,19 @@ def read(id: str) -> Union[Response, str]:
 
 
 class ApiTokenView(MethodView):
-    def get(self, id: str, data: Optional[Dict]=None, errors: Optional[Dict]=None, error_summary: Optional[Dict]=None) -> Union[Response, str]:
-        context: Context = {
+    def get(self,
+            id: str,
+            data: Optional[Dict] = None,
+            errors: Optional[Dict] = None,
+            error_summary: Optional[Dict] = None) -> Union[Response, str]:
+        context = cast(Context, {
             u'model': model,
             u'session': model.Session,
             u'user': g.user,
             u'auth_user_obj': g.userobj,
             u'for_view': True,
             u'include_plugin_extras': True
-        }
+        })
         try:
             tokens = logic.get_action(u'api_token_list')(
                 context, {u'user': id}
@@ -195,7 +199,7 @@ class ApiTokenView(MethodView):
         return base.render(u'user/api_tokens.html', extra_vars)
 
     def post(self, id: str) -> Union[Response, str]:
-        context: Context = {u'model': model}
+        context = cast(Context, {u'model': model})
 
         data_dict = logic.clean_dict(
             dictization_functions.unflatten(
@@ -235,7 +239,7 @@ class ApiTokenView(MethodView):
 
 
 def api_token_revoke(id, jti: str) -> Response:
-    context: Context = {u'model': model}
+    context = cast(Context, {u'model': model})
     try:
         logic.get_action(u'api_token_revoke')(context, {u'jti': jti})
     except logic.NotAuthorized:
@@ -245,19 +249,20 @@ def api_token_revoke(id, jti: str) -> Response:
 
 class EditView(MethodView):
     def _prepare(self, id: Optional[str]) -> Tuple[Context, str]:
-        context: Context = {
+        context = cast(Context, {
             u'save': u'save' in request.form,
             u'schema': _edit_form_to_db_schema(),
             u'model': model,
             u'session': model.Session,
             u'user': g.user,
             u'auth_user_obj': g.userobj
-        }
+        })
         if id is None:
             if g.userobj:
                 id = g.userobj.id
             else:
                 base.abort(400, _(u'No user specified'))
+        assert id
         data_dict = {u'id': id}
 
         try:
@@ -355,11 +360,11 @@ class EditView(MethodView):
             u'error_summary': error_summary
         }
 
-        extra_vars = _extra_template_variables({
+        extra_vars = _extra_template_variables(cast(Context, {
             u'model': model,
             u'session': model.Session,
             u'user': g.user
-        }, data_dict)
+        }), data_dict)
 
         extra_vars[u'show_email_notifications'] = asbool(
             config.get(u'ckan.activity_streams_email_notifications'))
@@ -371,14 +376,14 @@ class EditView(MethodView):
 
 class RegisterView(MethodView):
     def _prepare(self):
-        context: Context = {
+        context = cast(Context, {
             u'model': model,
             u'session': model.Session,
             u'user': g.user,
             u'auth_user_obj': g.userobj,
             u'schema': _new_form_to_db_schema(),
             u'save': u'save' in request.form
-        }
+        })
         try:
             logic.check_access(u'user_create', context)
         except logic.NotAuthorized:
@@ -520,12 +525,12 @@ def logged_out_page() -> str:
 
 def delete(id: str) -> Response:
     u'''Delete user with id passed as parameter'''
-    context: Context = {
+    context = cast(Context, {
         u'model': model,
         u'session': model.Session,
         u'user': g.user,
         u'auth_user_obj': g.userobj
-    }
+    })
     data_dict = {u'id': id}
 
     try:
@@ -543,12 +548,12 @@ def delete(id: str) -> Response:
 
 def generate_apikey(id: Optional[str]=None) -> Response:
     u'''Cycle the API key of a user'''
-    context: Context = {
+    context = cast(Context, {
         u'model': model,
         u'session': model.Session,
         u'user': g.user,
         u'auth_user_obj': g.userobj,
-    }
+    })
     if id is None:
         if g.userobj:
             id = g.userobj.id
@@ -570,13 +575,13 @@ def generate_apikey(id: Optional[str]=None) -> Response:
 def activity(id: str, offset: int=0) -> str:
     u'''Render this user's public activity stream page.'''
 
-    context: Context = {
+    context = cast(Context, {
         u'model': model,
         u'session': model.Session,
         u'user': g.user,
         u'auth_user_obj': g.userobj,
         u'for_view': True
-    }
+    })
     data_dict = {
         u'id': id,
         u'user_obj': g.userobj,
@@ -605,12 +610,12 @@ def activity(id: str, offset: int=0) -> str:
 
 class RequestResetView(MethodView):
     def _prepare(self):
-        context: Context = {
+        context = cast(Context, {
             u'model': model,
             u'session': model.Session,
             u'user': g.user,
             u'auth_user_obj': g.userobj
-        }
+        })
         try:
             logic.check_access(u'request_reset', context)
         except logic.NotAuthorized:
@@ -624,7 +629,8 @@ class RequestResetView(MethodView):
             return h.redirect_to(u'/user/reset')
         log.info(u'Password reset requested for user "{}"'.format(id))
 
-        context = {u'model': model, u'user': g.user, u'ignore_auth': True}
+        context = cast(
+            Context, {u'model': model, u'user': g.user, u'ignore_auth': True})
         user_objs = []
 
         # Usernames cannot contain '@' symbols
@@ -692,12 +698,12 @@ class RequestResetView(MethodView):
 class PerformResetView(MethodView):
     def _prepare(self, id):
         # FIXME 403 error for invalid key is a non helpful page
-        context: Context = {
+        context = cast(Context, {
             u'model': model,
             u'session': model.Session,
             u'user': id,
             u'keep_email': True
-        }
+        })
 
         try:
             logic.check_access(u'user_reset', context)
@@ -775,12 +781,12 @@ class PerformResetView(MethodView):
 
 def follow(id: str) -> Response:
     u'''Start following this user.'''
-    context: Context = {
+    context = cast(Context, {
         u'model': model,
         u'session': model.Session,
         u'user': g.user,
         u'auth_user_obj': g.userobj
-    }
+    })
     data_dict = {u'id': id, u'include_num_followers': True}
     try:
         logic.get_action(u'follow_user')(context, data_dict)
@@ -797,12 +803,12 @@ def follow(id: str) -> Response:
 
 def unfollow(id: str) -> Response:
     u'''Stop following this user.'''
-    context: Context = {
+    context = cast(Context, {
         u'model': model,
         u'session': model.Session,
         u'user': g.user,
         u'auth_user_obj': g.userobj
-    }
+    })
     data_dict = {u'id': id, u'include_num_followers': True}
     try:
         logic.get_action(u'unfollow_user')(context, data_dict)
@@ -819,7 +825,8 @@ def unfollow(id: str) -> Response:
 
 
 def followers(id: str) -> str:
-    context: Context = {u'for_view': True, u'user': g.user, u'auth_user_obj': g.userobj}
+    context: Context = {
+        u'for_view': True, u'user': g.user, u'auth_user_obj': g.userobj}
     data_dict = {
         u'id': id,
         u'user_obj': g.userobj,
@@ -841,12 +848,12 @@ def sysadmin() -> Response:
     status = asbool(request.form.get(u'status'))
 
     try:
-        context: Context = {
+        context = cast(Context, {
             u'model': model,
             u'session': model.Session,
             u'user': g.user,
             u'auth_user_obj': g.userobj,
-        }
+        })
         data_dict = {u'id': username, u'sysadmin': status}
         user = logic.get_action(u'user_patch')(context, data_dict)
     except logic.NotAuthorized:

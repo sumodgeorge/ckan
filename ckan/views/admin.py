@@ -1,7 +1,7 @@
 # encoding: utf-8
 
 import logging
-from typing import Dict, List, Union
+from typing import Dict, List, Union, cast
 
 from ckan.views.home import CACHE_PARAMETERS
 from flask import Blueprint
@@ -59,7 +59,10 @@ def _get_config_items() -> List[str]:
 @admin.before_request
 def before_request() -> None:
     try:
-        context: Context = {"model": model, "user": g.user, "auth_user_obj": g.userobj}
+        context = cast(
+            Context,
+            {"model": model, "user": g.user, "auth_user_obj": g.userobj}
+        )
         logic.check_access(u'sysadmin', context)
     except logic.NotAuthorized:
         base.abort(403, _(u'Need to be system administrator to administer'))

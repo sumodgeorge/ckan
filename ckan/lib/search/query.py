@@ -20,7 +20,7 @@ from typing import Any, Dict, List, NoReturn, Optional, Union, cast
 
 log = logging.getLogger(__name__)
 
-_open_licenses = None
+_open_licenses: Optional[List[str]] = None
 
 VALID_SOLR_PARAMETERS = set([
     'q', 'fl', 'fq', 'rows', 'sort', 'start', 'wt', 'qf', 'bf', 'boost',
@@ -38,7 +38,9 @@ def escape_legacy_argument(val: str) -> str:
     # escape special chars \+-&|!(){}[]^"~*?:
     return solr_regex.sub(r'\\\1', val)
 
-def convert_legacy_parameters_to_solr(legacy_params: Dict) -> Dict:
+
+def convert_legacy_parameters_to_solr(
+        legacy_params: Dict[str, Any]) -> Dict[str, Any]:
     '''API v1 and v2 allowed search params that the SOLR syntax does not
     support, so use this function to convert those to SOLR syntax.
     See tests for examples.
@@ -48,7 +50,7 @@ def convert_legacy_parameters_to_solr(legacy_params: Dict) -> Dict:
     options = QueryOptions(**legacy_params)
     options.validate()
     solr_params = legacy_params.copy()
-    solr_q_list = []
+    solr_q_list: List[str] = []
     if solr_params.get('q'):
         solr_q_list.append(solr_params['q'].replace('+', ' '))
     non_solr_params = set(legacy_params.keys()) - VALID_SOLR_PARAMETERS
@@ -98,6 +100,14 @@ class QueryOptions(dict):
     INTEGER_OPTIONS = ['offset', 'limit']
     UNSUPPORTED_OPTIONS = ['filter_by_downloadable', 'filter_by_openness']
 
+    limit: int
+    offset: int
+    order_by: str
+    return_objects: bool
+    ref_entity_with_attr: str
+    all_fields: bool
+    search_tags: bool
+
     def __init__(self, **kwargs) -> None:
         from ckan.lib.search import DEFAULT_OPTIONS
 
@@ -121,7 +131,7 @@ class QueryOptions(dict):
                 except ValueError:
                     raise SearchQueryError('Value for search option %r must be an integer but received %r' % (key, value))
             elif key in self.UNSUPPORTED_OPTIONS:
-                    raise SearchQueryError('Search option %r is not supported' % key)
+                raise SearchQueryError('Search option %r is not supported' % key)
             self[key] = value
 
     def __getattr__(self, name):
@@ -157,16 +167,16 @@ class SearchQuery(object):
                     _open_licenses.append(license.id)
         return _open_licenses
 
-    def get_all_entity_ids(self, max_results: int=1000):
+    def get_all_entity_ids(self, max_results: int=1000) -> List[str]:
         """
         Return a list of the IDs of all indexed packages.
         """
         return []
 
     def run(self,
-            query: Optional[Union[str, Dict]] = None,
+            query: Optional[Union[str, Dict[str, Any]]] = None,
             terms: List[str] = [],
-            fields: Dict = {},
+            fields: Dict[str, Any] = {},
             facet_by: List[str] = [],
             options: Optional[QueryOptions] = None,
             **kwargs: Any) -> NoReturn:
@@ -180,9 +190,9 @@ class TagSearchQuery(SearchQuery):
     """Search for tags."""
     def run(self,
             query: Optional[Union[str, List[str]]] = None,
-            fields: Optional[Dict] = None,
+            fields: Optional[Dict[str, Any]] = None,
             options: Optional[QueryOptions] = None,
-            **kwargs: Any) -> Dict:
+            **kwargs: Any) -> Dict[str, Any]:
         query = [] if query is None else query
         fields = {} if fields is None else fields
 
@@ -223,9 +233,9 @@ class TagSearchQuery(SearchQuery):
 class ResourceSearchQuery(SearchQuery):
     """Search for resources."""
     def run(self,
-            fields: Dict = {},
+            fields: Dict[str, Any] = {},
             options: Optional[QueryOptions] = None,
-            **kwargs: Any) -> Dict:
+            **kwargs: Any) -> Dict[str, Any]:
         if options is None:
             options = QueryOptions(**kwargs)
         else:
@@ -239,7 +249,7 @@ class ResourceSearchQuery(SearchQuery):
 
         # Transform fields into structure required by the resource_search
         # action.
-        query = []
+        query: List[str] = []
 
         for field, terms in fields.items():
             if isinstance(terms, six.string_types):

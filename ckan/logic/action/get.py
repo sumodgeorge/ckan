@@ -110,8 +110,8 @@ def package_list(context: Context, data_dict: DataDict) -> List[str]:
 
 
 @logic.validate(ckan.logic.schema.default_package_list_schema)
-def current_package_list_with_resources(context: Context,
-                                        data_dict: DataDict) -> List[Dict]:
+def current_package_list_with_resources(
+        context: Context, data_dict: DataDict) -> List[Dict[str, Any]]:
     '''Return a list of the site's datasets (packages) and their resources.
 
     The list is sorted most-recently-modified first.
@@ -205,7 +205,7 @@ def member_list(context: Context, data_dict: DataDict) -> List[Tuple]:
 
 
 def package_collaborator_list(context: Context,
-                              data_dict: DataDict) -> List[Dict]:
+                              data_dict: DataDict) -> List[Dict[str, Any]]:
     '''Return the list of all collaborators for a given package.
 
     Currently you must be an Admin on the package owner organization to
@@ -259,8 +259,8 @@ def package_collaborator_list(context: Context,
     return [collaborator.as_dict() for collaborator in collaborators]
 
 
-def package_collaborator_list_for_user(context: Context,
-                                       data_dict: DataDict) -> List[Dict]:
+def package_collaborator_list_for_user(
+        context: Context, data_dict: DataDict) -> List[Dict[str, Any]]:
     '''Return a list of all package the user is a collaborator in
 
     Note: This action requires the collaborators feature to be enabled with
@@ -445,7 +445,7 @@ def _group_or_org_list(context, data_dict, is_org=False):
     return group_list
 
 
-def group_list(context: Context, data_dict: DataDict) -> List[Dict]:
+def group_list(context: Context, data_dict: DataDict) -> List[Dict[str, Any]]:
     '''Return a list of the names of the site's groups.
 
     :param type: the type of group to list (optional, default: ``'group'``),
@@ -499,7 +499,8 @@ def group_list(context: Context, data_dict: DataDict) -> List[Dict]:
     return _group_or_org_list(context, data_dict)
 
 
-def organization_list(context: Context, data_dict: DataDict) -> List[Dict]:
+def organization_list(context: Context,
+                      data_dict: DataDict) -> List[Dict[str, Any]]:
     '''Return a list of the names of the site's organizations.
 
     :param type: the type of organization to list (optional,
@@ -559,7 +560,8 @@ def organization_list(context: Context, data_dict: DataDict) -> List[Dict]:
     return _group_or_org_list(context, data_dict, is_org=True)
 
 
-def group_list_authz(context: Context, data_dict: DataDict) -> List[Dict]:
+def group_list_authz(context: Context,
+                     data_dict: DataDict) -> List[Dict[str, Any]]:
     '''Return the list of groups that the user is authorized to edit.
 
     :param available_only: remove the existing groups in the package
@@ -625,7 +627,7 @@ def group_list_authz(context: Context, data_dict: DataDict) -> List[Dict]:
 
 
 def organization_list_for_user(context: Context,
-                               data_dict: DataDict) -> List[Dict]:
+                               data_dict: DataDict) -> List[Dict[str, Any]]:
     '''Return the organizations that the user has a given permission for.
 
     Specifically it returns the list of organizations that the currently
@@ -738,7 +740,7 @@ def organization_list_for_user(context: Context,
     return orgs_list
 
 
-def license_list(context: Context, data_dict: DataDict) -> List[Dict]:
+def license_list(context: Context, data_dict: DataDict) -> List[Dict[str, Any]]:
     '''Return the list of licenses available for datasets on the site.
 
     :rtype: list of dictionaries
@@ -755,7 +757,7 @@ def license_list(context: Context, data_dict: DataDict) -> List[Dict]:
 
 
 def tag_list(context: Context,
-             data_dict: DataDict) -> Union[List[Dict], List[str]]:
+             data_dict: DataDict) -> Union[List[Dict[str, Any]], List[str]]:
     '''Return a list of the site's tags.
 
     By default only free tags (tags that don't belong to a vocabulary) are
@@ -803,7 +805,7 @@ def tag_list(context: Context,
 
 def user_list(
         context: Context, data_dict: DataDict
-) -> Union[List[Dict], List[str], 'Query[model.User]']:
+) -> Union[List[Dict[str, Any]], List[str], 'Query[model.User]']:
     '''Return a list of the site's user accounts.
 
     :param q: filter the users returned to those whose names contain a string
@@ -911,7 +913,7 @@ def user_list(
 
 
 def package_relationships_list(context: Context,
-                               data_dict: DataDict) -> List[Dict]:
+                               data_dict: DataDict) -> List[Dict[str, Any]]:
     '''Return a dataset (package)'s relationships.
 
     :param id: the id or name of the first package
@@ -962,7 +964,7 @@ def package_relationships_list(context: Context,
     return relationship_dicts
 
 
-def package_show(context: Context, data_dict: DataDict) -> Dict:
+def package_show(context: Context, data_dict: DataDict) -> Dict[str, Any]:
     '''Return the metadata of a dataset (package) and its resources.
 
     :param id: the id or name of the dataset
@@ -1070,7 +1072,7 @@ def _add_tracking_summary_to_resource_dict(resource_dict, model):
     resource_dict['tracking_summary'] = tracking_summary
 
 
-def resource_show(context: Context, data_dict: DataDict) -> Dict:
+def resource_show(context: Context, data_dict: DataDict) -> Dict[str, Any]:
     '''Return the metadata of a resource.
 
     :param id: the id of the resource
@@ -1108,7 +1110,7 @@ def resource_show(context: Context, data_dict: DataDict) -> Dict:
     return resource_dict
 
 
-def resource_view_show(context: Context, data_dict: DataDict) -> Dict:
+def resource_view_show(context: Context, data_dict: DataDict) -> Dict[str, Any]:
     '''
     Return the metadata of a resource_view.
 
@@ -1135,7 +1137,8 @@ def resource_view_show(context: Context, data_dict: DataDict) -> Dict:
     return model_dictize.resource_view_dictize(resource_view, context)
 
 
-def resource_view_list(context: Context, data_dict: DataDict) -> List[Dict]:
+def resource_view_list(context: Context,
+                       data_dict: DataDict) -> List[Dict[str, Any]]:
     '''
     Return the list of resource views for a particular resource.
 
@@ -1240,7 +1243,7 @@ def _group_or_org_show(context, data_dict, is_org=False):
     return group_dict
 
 
-def group_show(context: Context, data_dict: DataDict) -> Dict:
+def group_show(context: Context, data_dict: DataDict) -> Dict[str, Any]:
     '''Return the details of a group.
 
     :param id: the id or name of the group
@@ -1276,7 +1279,7 @@ def group_show(context: Context, data_dict: DataDict) -> Dict:
     return _group_or_org_show(context, data_dict)
 
 
-def organization_show(context: Context, data_dict: DataDict) -> Dict:
+def organization_show(context: Context, data_dict: DataDict) -> Dict[str, Any]:
     '''Return the details of a organization.
 
     :param id: the id or name of the organization
@@ -1312,7 +1315,8 @@ def organization_show(context: Context, data_dict: DataDict) -> Dict:
     return _group_or_org_show(context, data_dict, is_org=True)
 
 
-def group_package_show(context: Context, data_dict: DataDict) -> List[Dict]:
+def group_package_show(context: Context,
+                       data_dict: DataDict) -> List[Dict[str, Any]]:
     '''Return the datasets (packages) of a group.
 
     :param id: the id or name of the group
@@ -1354,7 +1358,7 @@ def group_package_show(context: Context, data_dict: DataDict) -> List[Dict]:
     return result['results']
 
 
-def tag_show(context: Context, data_dict: DataDict) -> Dict:
+def tag_show(context: Context, data_dict: DataDict) -> Dict[str, Any]:
     '''Return the details of a tag and all its datasets.
 
     :param id: the name or id of the tag
@@ -2236,7 +2240,7 @@ def _tag_search(context, data_dict):
     return q.all(), count
 
 
-def tag_search(context: Context, data_dict: DataDict) -> Dict:
+def tag_search(context: Context, data_dict: DataDict) -> Dict[str, Any]:
     '''Return a list of tags whose names contain a given string.
 
     By default only free tags (tags that don't belong to any vocabulary) are

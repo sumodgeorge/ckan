@@ -1,5 +1,6 @@
 # encoding: utf-8
 
+from typing import cast
 from ckan.types import Context
 from flask import Blueprint, abort
 
@@ -21,10 +22,10 @@ home = Blueprint(u'home', __name__)
 def before_request() -> None:
     u'''set context and check authorization'''
     try:
-        context: Context = {
+        context = cast(Context, {
             u'model': model,
             u'user': g.user,
-            u'auth_user_obj': g.userobj}
+            u'auth_user_obj': g.userobj})
         logic.check_access(u'site_read', context)
     except logic.NotAuthorized:
         abort(403)
@@ -33,8 +34,8 @@ def before_request() -> None:
 def index() -> str:
     u'''display home page'''
     try:
-        context: Context = {u'model': model, u'session': model.Session,
-                   u'user': g.user, u'auth_user_obj': g.userobj}
+        context = cast(Context, {u'model': model, u'session': model.Session,
+                   u'user': g.user, u'auth_user_obj': g.userobj})
         data_dict = {u'q': u'*:*',
                      u'facet.field': h.facets(),
                      u'rows': 4,

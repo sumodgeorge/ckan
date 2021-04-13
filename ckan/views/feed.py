@@ -2,7 +2,7 @@
 
 from ckan.types import Context, DataDict
 import logging
-from typing import Dict, Optional, Tuple
+from typing import Dict, Optional, Tuple, cast
 
 from six.moves.urllib.parse import urlparse  # type: ignore
 from flask import Blueprint, make_response
@@ -36,12 +36,12 @@ def _package_search(data_dict: DataDict) -> Tuple[int, List[Dict[str, Any]]]:
      * unless overridden, sorts results by metadata_modified date
      * unless overridden, sets a default item limit
     """
-    context = {
+    context = cast(Context, {
         u'model': model,
         u'session': model.Session,
         u'user': g.user,
         u'auth_user_obj': g.userobj
-    }
+    })
     if u'sort' not in data_dict or not data_dict['sort']:
         data_dict['sort'] = u'metadata_modified desc'
 
@@ -193,12 +193,12 @@ def output_feed(results: List[Dict], feed_title: str, feed_description: str,
 
 def group(id: str) -> Response:
     try:
-        context: Context = {
+        context = cast(Context, {
             u'model': model,
             u'session': model.Session,
             u'user': g.user,
             u'auth_user_obj': g.userobj
-        }
+        })
         group_dict = logic.get_action(u'group_show')(context, {u'id': id})
     except logic.NotFound:
         base.abort(404, _(u'Group not found'))
@@ -208,12 +208,12 @@ def group(id: str) -> Response:
 
 def organization(id: str) -> Response:
     try:
-        context: Context = {
+        context = cast(Context, {
             u'model': model,
             u'session': model.Session,
             u'user': g.user,
             u'auth_user_obj': g.userobj
-        }
+        })
         group_dict = logic.get_action(u'organization_show')(context, {
             u'id': id
         })
@@ -417,7 +417,8 @@ def _alternate_url(params: Dict[str, Any], **kwargs) -> str:
     return _feed_url(search_params, controller=u'dataset', action=u'search')
 
 
-def _feed_url(query: Dict[str, Any], controller: str, action: str, **kwargs) -> str:
+def _feed_url(query: Dict[str, Any], controller: str, action: str,
+              **kwargs) -> str:
     """
     Constructs the url for the given action.  Encoding the query
     parameters.

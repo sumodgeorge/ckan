@@ -53,13 +53,13 @@ prefixed_resource = Blueprint(
 
 
 def read(package_type: str, id: str, resource_id: str) -> str:
-    context = {
+    context = cast(Context, {
         u'model': model,
         u'session': model.Session,
         u'user': g.user,
         u'auth_user_obj': g.userobj,
         u'for_view': True
-    }
+    })
 
     try:
         package = get_action(u'package_show')(context, {u'id': id})
@@ -203,12 +203,12 @@ class CreateView(MethodView):
         del data[u'save']
         resource_id = data.pop(u'id')
 
-        context = {
+        context = cast(Context, {
             u'model': model,
             u'session': model.Session,
             u'user': g.user,
             u'auth_user_obj': g.userobj
-        }
+        })
 
         # see if we have any data that we are trying to save
         data_provided = False
@@ -245,7 +245,7 @@ class CreateView(MethodView):
             # XXX race condition if another user edits/deletes
             data_dict = get_action(u'package_show')(context, {u'id': id})
             get_action(u'package_update')(
-                dict(context, allow_state_change=True),
+                cast(Context, dict(context, allow_state_change=True)),
                 dict(data_dict, state=u'active')
             )
             return h.redirect_to(u'{}.read'.format(package_type), id=id)
@@ -275,7 +275,7 @@ class CreateView(MethodView):
             # XXX race condition if another user edits/deletes
             data_dict = get_action(u'package_show')(context, {u'id': id})
             get_action(u'package_update')(
-                dict(context, allow_state_change=True),
+                cast(Context, dict(context, allow_state_change=True)),
                 dict(data_dict, state=u'active')
             )
             return h.redirect_to(u'{}.read'.format(package_type), id=id)
@@ -299,12 +299,12 @@ class CreateView(MethodView):
             errors: Optional[Dict] = None,
             error_summary: Optional[Dict] = None) -> str:
         # get resources for sidebar
-        context: Context = {
+        context = cast(Context, {
             u'model': model,
             u'session': model.Session,
             u'user': g.user,
             u'auth_user_obj': g.userobj
-        }
+        })
         try:
             pkg_dict = get_action(u'package_show')(context, {u'id': id})
         except NotFound:
@@ -345,14 +345,14 @@ class CreateView(MethodView):
 
 class EditView(MethodView):
     def _prepare(self, id):
-        context: Context = {
+        context = cast(Context, {
             u'model': model,
             u'session': model.Session,
             u'api_version': 3,
             u'for_edit': True,
             u'user': g.user,
             u'auth_user_obj': g.userobj
-        }
+        })
         try:
             check_access(u'package_update', context, {u'id': id})
         except NotAuthorized:
@@ -362,7 +362,8 @@ class EditView(MethodView):
             )
         return context
 
-    def post(self, package_type: str, id: str, resource_id: str) -> Union[str, Response]:
+    def post(self, package_type: str, id: str,
+             resource_id: str) -> Union[str, Response]:
         context = self._prepare(id)
         data = clean_dict(
             dict_fns.unflatten(tuplize_dict(parse_params(request.form)))
@@ -450,12 +451,12 @@ class EditView(MethodView):
 
 class DeleteView(MethodView):
     def _prepare(self, id):
-        context: Context = {
+        context = cast(Context, {
             u'model': model,
             u'session': model.Session,
             u'user': g.user,
             u'auth_user_obj': g.userobj
-        }
+        })
         try:
             check_access(u'package_delete', context, {u'id': id})
         except NotAuthorized:
@@ -476,7 +477,7 @@ class DeleteView(MethodView):
         try:
             get_action(u'resource_delete')(context, {u'id': resource_id})
             h.flash_notice(_(u'Resource has been deleted.'))
-            pkg_dict = get_action(u'package_show')(None, {u'id': id})
+            pkg_dict = get_action(u'package_show')({}, {u'id': id})
             if pkg_dict[u'state'].startswith(u'draft'):
                 return h.redirect_to(
                     u'{}_resource.new'.format(package_type),
@@ -524,13 +525,13 @@ class DeleteView(MethodView):
 
 def views(package_type: str, id: str, resource_id: str) -> str:
     package_type = _get_package_type(id)
-    context: Context = {
+    context = cast(Context, {
         u'model': model,
         u'session': model.Session,
         u'user': g.user,
         u'for_view': True,
         u'auth_user_obj': g.userobj
-    }
+    })
     data_dict = {u'id': id}
 
     try:
@@ -589,12 +590,12 @@ def view(package_type: str,
     img tag where the image is loaded directly or an iframe that embeds a
     webpage or a recline preview.
     """
-    context = {
+    context = cast(Context, {
         u'model': model,
         u'session': model.Session,
         u'user': g.user,
         u'auth_user_obj': g.userobj
-    }
+    })
 
     try:
         package = get_action(u'package_show')(context, {u'id': id})
@@ -627,13 +628,13 @@ def view(package_type: str,
 # FIXME: could anyone think about better name?
 class EditResourceViewView(MethodView):
     def _prepare(self, id, resource_id) -> Tuple[Context, Dict]:
-        context: Context = {
+        context = cast(Context, {
             u'model': model,
             u'session': model.Session,
             u'user': g.user,
             u'for_view': True,
             u'auth_user_obj': g.userobj
-        }
+        })
 
         # update resource should tell us early if the user has privilages.
         try:
@@ -850,12 +851,12 @@ def embedded_dataviewer(package_type: str,
     for width and height to be specified as part of the
     querystring (as well as accepting them via routes).
     """
-    context = {
+    context = cast(Context, {
         u'model': model,
         u'session': model.Session,
         u'user': g.user,
         u'auth_user_obj': g.userobj
-    }
+    })
 
     try:
         resource = get_action(u'resource_show')(context, {u'id': resource_id})
@@ -918,12 +919,12 @@ def datapreview(package_type: str, id: str, resource_id: str) -> str:
     img tag where the image is loaded directly or an iframe that embeds a
     webpage, or a recline preview.
     """
-    context: Context = {
+    context = cast(Context, {
         u'model': model,
         u'session': model.Session,
         u'user': g.user,
         u'auth_user_obj': g.userobj
-    }
+    })
 
     try:
         resource = get_action(u'resource_show')(context, {u'id': resource_id})

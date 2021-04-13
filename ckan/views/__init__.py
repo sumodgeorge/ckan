@@ -244,7 +244,7 @@ def set_controller_and_action() -> None:
     g.controller, g.action = p.toolkit.get_endpoint()
 
 
-def handle_i18n(environ: Optional[Any]=None) -> None:
+def handle_i18n(environ: Optional[Any] = None) -> None:
     u'''
     Strips the locale code from the requested url
     (eg '/sk/about' -> '/about') and sets environ variables for the

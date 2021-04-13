@@ -1,9 +1,10 @@
 # encoding: utf-8
 
+from ckan.types import Context
 import os
 import logging
 import html
-from typing import Any, Callable, Dict, List, Optional, Tuple
+from typing import Any, Callable, Dict, List, Optional, Tuple, cast
 
 from flask import Blueprint, make_response
 import six
@@ -225,8 +226,10 @@ def action(logic_function: str, ver: int=API_DEFAULT_VERSION) -> Response:
         log.info(msg)
         return _finish_bad_request(msg)
 
-    context = {u'model': model, u'session': model.Session, u'user': g.user,
-               u'api_version': ver, u'auth_user_obj': g.userobj}
+    context = cast(
+        Context,
+        {u'model': model, u'session': model.Session, u'user': g.user,
+         u'api_version': ver, u'auth_user_obj': g.userobj})
     model.Session()._context = context
 
     return_dict: Dict[str, Any] = {
@@ -260,7 +263,7 @@ def action(logic_function: str, ver: int=API_DEFAULT_VERSION) -> Response:
         del request_data[u'callback']
         g.user = None
         g.userobj = None
-        context[u'user'] = None
+        context[u'user'] = ''
         context[u'auth_user_obj'] = None
 
     # Call the action function, catch any exception
@@ -343,8 +346,10 @@ def dataset_autocomplete(ver: int=API_REST_DEFAULT_VERSION) -> Response:
     limit = request.args.get(u'limit', 10)
     package_dicts = []
     if q:
-        context = {u'model': model, u'session': model.Session,
-                   u'user': g.user, u'auth_user_obj': g.userobj}
+        context = cast(
+            Context,
+            {u'model': model, u'session': model.Session,
+             u'user': g.user, u'auth_user_obj': g.userobj})
 
         data_dict = {u'q': q, u'limit': limit}
 
@@ -361,8 +366,10 @@ def tag_autocomplete(ver: int=API_REST_DEFAULT_VERSION) -> Response:
     vocab = request.args.get(u'vocabulary_id', u'')
     tag_names = []
     if q:
-        context = {u'model': model, u'session': model.Session,
-                   u'user': g.user, u'auth_user_obj': g.userobj}
+        context = cast(
+            Context,
+            {u'model': model, u'session': model.Session,
+             u'user': g.user, u'auth_user_obj': g.userobj})
 
         data_dict = {u'q': q, u'limit': limit}
         if vocab != u'':
@@ -383,8 +390,10 @@ def format_autocomplete(ver: int=API_REST_DEFAULT_VERSION) -> Response:
     limit = request.args.get(u'limit', 5)
     formats = []
     if q:
-        context = {u'model': model, u'session': model.Session,
-                   u'user': g.user, u'auth_user_obj': g.userobj}
+        context = cast(
+            Context,
+            {u'model': model, u'session': model.Session,
+             u'user': g.user, u'auth_user_obj': g.userobj})
         data_dict = {u'q': q, u'limit': limit}
         formats = get_action(u'format_autocomplete')(context, data_dict)
 
@@ -402,8 +411,10 @@ def user_autocomplete(ver: int=API_REST_DEFAULT_VERSION) -> Response:
     ignore_self = request.args.get(u'ignore_self', False)
     user_list = []
     if q:
-        context = {u'model': model, u'session': model.Session,
-                   u'user': g.user, u'auth_user_obj': g.userobj}
+        context = cast(
+            Context,
+            {u'model': model, u'session': model.Session,
+             u'user': g.user, u'auth_user_obj': g.userobj})
 
         data_dict = {u'q': q, u'limit': limit, u'ignore_self': ignore_self}
 
@@ -417,7 +428,9 @@ def group_autocomplete(ver: int=API_REST_DEFAULT_VERSION) -> Response:
     group_list = []
 
     if q:
-        context = {u'user': g.user, u'model': model}
+        context = cast(
+            Context, {u'user': g.user, u'model': model}
+        )
         data_dict = {u'q': q, u'limit': limit}
         group_list = get_action(u'group_autocomplete')(context, data_dict)
     return _finish_ok(group_list)
@@ -429,7 +442,7 @@ def organization_autocomplete(ver: int=API_REST_DEFAULT_VERSION) -> Response:
     organization_list = []
 
     if q:
-        context = {u'user': g.user, u'model': model}
+        context = cast(Context, {u'user': g.user, u'model': model})
         data_dict = {u'q': q, u'limit': limit}
         organization_list = get_action(
             u'organization_autocomplete')(context, data_dict)

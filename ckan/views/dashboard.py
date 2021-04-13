@@ -1,7 +1,7 @@
 # encoding: utf-8
 from ckan.types import Context
 import logging
-from typing import Optional
+from typing import Optional, cast
 
 from flask import Blueprint
 from flask.wrappers import Response
@@ -25,9 +25,9 @@ def before_request() -> Optional[Response]:
         return h.redirect_to(u'user.login')
 
     try:
-        context: Context = {
+        context = cast(Context, {
             "model": model, "user": g.user, "auth_user_obj": g.userobj
-        }
+        })
         logic.check_access(u'site_read', context)
     except logic.NotAuthorized:
         base.abort(403, _(u'Not authorized to see this page'))
@@ -45,13 +45,13 @@ def _get_dashboard_context(filter_type=None, filter_id=None, q=None):
         return display_name or fullname or title or name
 
     if (filter_type and filter_id):
-        context = {
+        context = cast(Context, {
             u'model': model,
             u'session': model.Session,
             u'user': g.user,
             u'auth_user_obj': g.userobj,
             u'for_view': True
-        }
+        })
         data_dict = {u'id': filter_id, u'include_num_followers': True}
         followee = None
 
@@ -90,13 +90,13 @@ def _get_dashboard_context(filter_type=None, filter_id=None, q=None):
 
 
 def index(offset: int=0) -> str:
-    context: Context = {
+    context = cast(Context, {
         u'model': model,
         u'session': model.Session,
         u'user': g.user,
         u'auth_user_obj': g.userobj,
         u'for_view': True
-    }
+    })
     data_dict = {u'user_obj': g.userobj, u'offset': offset}
     extra_vars = _extra_template_variables(context, data_dict)
 
@@ -122,21 +122,24 @@ def index(offset: int=0) -> str:
 
 
 def datasets() -> str:
-    context: Context = {u'for_view': True, u'user': g.user, u'auth_user_obj': g.userobj}
+    context: Context = {
+        u'for_view': True, u'user': g.user, u'auth_user_obj': g.userobj}
     data_dict = {u'user_obj': g.userobj, u'include_datasets': True}
     extra_vars = _extra_template_variables(context, data_dict)
     return base.render(u'user/dashboard_datasets.html', extra_vars)
 
 
 def organizations() -> str:
-    context: Context = {u'for_view': True, u'user': g.user, u'auth_user_obj': g.userobj}
+    context: Context = {
+        u'for_view': True, u'user': g.user, u'auth_user_obj': g.userobj}
     data_dict = {u'user_obj': g.userobj}
     extra_vars = _extra_template_variables(context, data_dict)
     return base.render(u'user/dashboard_organizations.html', extra_vars)
 
 
 def groups() -> str:
-    context: Context = {u'for_view': True, u'user': g.user, u'auth_user_obj': g.userobj}
+    context: Context = {
+        u'for_view': True, u'user': g.user, u'auth_user_obj': g.userobj}
     data_dict = {u'user_obj': g.userobj}
     extra_vars = _extra_template_variables(context, data_dict)
     return base.render(u'user/dashboard_groups.html', extra_vars)
