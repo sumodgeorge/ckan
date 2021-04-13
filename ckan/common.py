@@ -23,7 +23,7 @@ import simplejson as json
 from typing import (
     Any, Dict, Iterable, List, Optional,
     Tuple, TypeVar, overload)
-
+from typing_extensions import Literal
 if six.PY2:
     import pylons  # type: ignore
     from pylons.i18n import (ugettext as pylons_ugettext,  # type: ignore
@@ -33,7 +33,7 @@ if six.PY2:
 current_app = flask.current_app
 
 
-def is_flask_request() -> bool:
+def is_flask_request() -> Literal[True]:
     u'''
     A centralized way to determine whether we are in the context of a
     request being served by Flask or Pylons
@@ -48,7 +48,7 @@ def is_flask_request() -> bool:
 
     return (flask.request and
             (flask.request.environ.get(u'ckan.app') == u'flask_app' or
-             not pylons_request_available))
+             not pylons_request_available))  # type: ignore
 
 
 def streaming_response(data: Iterable[Any],

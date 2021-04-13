@@ -10,7 +10,7 @@ from ckan.common import _
 from ckan.types import ErrorDict
 from ckan import model
 from ckan.model.domain_object import DomainObject
-from typing import Dict, Mapping
+from typing import Dict, List, Mapping, cast
 
 
 def rename_keys(dict_: Dict,
@@ -63,8 +63,8 @@ def error_summary(error_dict: ErrorDict) -> Dict[str, str]:
                             field_name.replace('_', ' ').capitalize())
         return _(field_name.replace('_', ' '))
 
-    summary = {}
-    for key, error in six.iteritems(error_dict):
+    summary: Dict[str, str] = {}
+    for key, error in six.iteritems(cast(Dict[str, List[str]], error_dict)):
         if key == 'resources':
             summary[_('Resources')] = _('Package resource(s) invalid')
         elif key == 'extras':

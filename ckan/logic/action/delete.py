@@ -736,7 +736,7 @@ def unfollow_dataset(context: Context, data_dict: DataDict) -> None:
 
 
 def _group_or_org_member_delete(context: Context,
-                                data_dict: DataDict = None) -> None:
+                                data_dict: DataDict) -> None:
     model = context['model']
     user = context['user']
     session = context['session']
@@ -758,7 +758,7 @@ def _group_or_org_member_delete(context: Context,
     _get_action('member_delete')(member_context, member_dict)
 
 
-def group_member_delete(context: Context, data_dict: DataDict=None) -> None:
+def group_member_delete(context: Context, data_dict: DataDict) -> None:
     '''Remove a user from a group.
 
     You must be authorized to edit the group.
@@ -774,7 +774,7 @@ def group_member_delete(context: Context, data_dict: DataDict=None) -> None:
 
 
 def organization_member_delete(context: Context,
-                               data_dict: DataDict = None) -> None:
+                               data_dict: DataDict) -> None:
     '''Remove a user from an organization.
 
     You must be authorized to edit the organization.

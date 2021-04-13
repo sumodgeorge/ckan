@@ -106,7 +106,7 @@ def package_list(context: Context, data_dict: DataDict) -> List[str]:
         query = query.offset(offset)
 
     ## Returns the first field in each result record
-    return [r[0] for r in query.execute()]
+    return [r[0] for r in query.execute() or []]
 
 
 @logic.validate(ckan.logic.schema.default_package_list_schema)
@@ -593,16 +593,16 @@ def group_list_authz(context: Context,
     if not user_id:
         return []
 
-    group_ids = []
+    group_ids: List[str] = []
     if not sysadmin or am_member:
-        q = model.Session.query(model.Member) \
+        q = model.Session.query(model.Member.group_id) \
             .filter(model.Member.table_name == 'user') \
             .filter(
                 model.Member.capacity.in_(roles)  # type: ignore
             ).filter(model.Member.table_id == user_id) \
             .filter(model.Member.state == 'active')
         group_ids = []
-        for row in q.all():
+        for row in q:
             group_ids.append(row.group_id)
 
         if not group_ids:
@@ -711,8 +711,10 @@ def organization_list_for_user(context: Context,
             .join(model.Group)
 
         group_ids = set()
-        roles_that_cascade = \
+        roles_that_cascade = cast(
+            List[str],
             authz.check_config_permission('roles_that_cascade_to_sub_groups')
+        )
         group_ids_to_capacities: Dict[str, str] = {}
         for member, group in q.all():
             if member.capacity in roles_that_cascade:
@@ -1864,7 +1866,10 @@ def package_search(context: Context, data_dict: DataDict) -> Dict:
         data_dict['sort'] = config.get('ckan.search.default_package_sort') \
             or 'score desc, metadata_modified desc'
 
-    results = []
+    results: List[Dict[str, Any]] = []
+    facets: Dict[str, Any] = {}
+    count = 0
+
     if not abort:
         if asbool(data_dict.get('use_default_schema')):
             data_source = 'data_dict'
@@ -1929,10 +1934,6 @@ def package_search(context: Context, data_dict: DataDict) -> Dict:
 
         count = query.count
         facets = query.facets
-    else:
-        count = 0
-        facets = {}
-        results = []
 
     search_results = {
         'count': count,
@@ -1954,7 +1955,7 @@ def package_search(context: Context, data_dict: DataDict) -> Dict:
     group_titles_by_name = dict(groups)
 
     # Transform facets into a more useful data structure.
-    restructured_facets = {}
+    restructured_facets: Dict[str, Any] = {}
     for key, value in facets.items():
         restructured_facets[key] = {
             'title': key,
@@ -2074,7 +2075,7 @@ def resource_search(context: Context, data_dict: DataDict) -> Dict:
     # with mappings from field names to list of search terms, or a single
     # search-term string.
     query: Optional[Union[str, List[str]]] = data_dict.get('query')
-    fields = data_dict.get('fields')
+    fields: Optional[Dict[str, Any]] = data_dict.get('fields')
 
     if query is None and fields is None:
         raise ValidationError({'query': _('Missing value')})
@@ -2095,10 +2096,10 @@ def resource_search(context: Context, data_dict: DataDict) -> Dict:
     else:
         log.warning('Use of the "fields" parameter in resource_search is '
                     'deprecated.  Use the "query" parameter instead')
-
+        assert fields is not None
         # The legacy fields paramter splits string terms.
         # So maintain that behaviour
-        split_terms = {}
+        split_terms: Dict[str, List[str]] = {}
         for field, terms in fields.items():
             if isinstance(terms, string_types):
                 terms = terms.split()

@@ -50,8 +50,9 @@ class Context(TypedDict, total=False):
     id: str
     user_id: str
     user_is_admin: bool
+    search_query: bool
     return_query: bool
-
+    return_minimal: bool
     return_id_only: bool
     defer_commit: bool
     reset_password: bool
@@ -72,6 +73,7 @@ class Context(TypedDict, total=False):
     keep_email: bool
     keep_apikey: bool
     skip_validation: bool
+    validate: bool
     count_private_and_draft_datasets: bool
 
     schema: "Schema"
