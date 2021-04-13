@@ -152,8 +152,9 @@ def migration(plugin, message):
         raise click.Abort()
     config = CKANAlembicConfig(_resolve_alembic_config(plugin))
     migration_dir = os.path.dirname(config.config_file_name)
-    config.set_main_option(u"sqlalchemy.url",
-                           str(ckan.model.repo.metadata.bind.url))
+    config.set_main_option(
+        u"sqlalchemy.url",
+        str(ckan.model.repo.metadata.bind.url))  # type: ignore
     config.set_main_option(u'script_location', migration_dir)
 
     if not os.path.exists(os.path.join(migration_dir, u'script.py.mako')):
@@ -162,5 +163,6 @@ def migration(plugin, message):
     rev = alembic.command.revision(config, message)
     click.secho(
         u"Revision file created. Now, you need to update it: \n\t{}".format(
-            rev.path),
+            rev.path  # type: ignore
+        ),
         fg=u"green")

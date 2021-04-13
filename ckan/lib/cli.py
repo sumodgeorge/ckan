@@ -125,7 +125,7 @@ def load_config(config, load_site_user=True):
     # We have now loaded the config. Now we can import ckan for the
     # first time.
     from ckan.config.environment import load_environment
-    load_environment(conf)
+    load_environment(conf)  # type: ignore
 
     # Set this internal test request context with the configured environment so
     # it can be used when calling url_for from the CLI.
@@ -155,7 +155,8 @@ def load_config(config, load_site_user=True):
         pylons.c.userobj = model.User.get(site_user['name'])
 
     ## give routes enough information to run url_for
-    parsed = urlparse(conf.get('ckan.site_url', 'http://0.0.0.0'))
+    parsed = urlparse(
+        conf.get('ckan.site_url', 'http://0.0.0.0'))  # type: ignore
     request_config = routes.request_config()
     request_config.host = parsed.netloc + parsed.path
     request_config.protocol = parsed.scheme
@@ -195,8 +196,8 @@ def paster_click_group(summary):
         ctx.obj['config'] = config
 
 
-    cli.summary = summary
-    cli.group_name = u'ckan'
+    cli.summary = summary  # type: ignore
+    cli.group_name = u'ckan'  # type: ignore
     return cli
 
 

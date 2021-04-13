@@ -1,5 +1,6 @@
 # encoding: utf-8
 
+from ckan.types import Context
 import logging
 import pprint
 
@@ -73,7 +74,7 @@ def purge(package):
     name = dataset.name
 
     site_user = logic.get_action(u'get_site_user')({u'ignore_auth': True}, {})
-    context = {u'user': site_user[u'name'], u'ignore_auth': True}
+    context: Context = {u'user': site_user[u'name'], u'ignore_auth': True}
     logic.get_action(u'dataset_purge')(context, {u'id': package})
     click.echo(u'%s purged' % name)
 

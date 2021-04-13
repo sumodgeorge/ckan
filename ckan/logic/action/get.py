@@ -1907,7 +1907,7 @@ def package_search(context: Context, data_dict: DataDict) -> Dict:
             for package in query.results:
                 if isinstance(package, text_type):
                     package = {result_fl[0]: package}
-                extras = package.pop('extras', {})
+                extras = cast(Dict[str, Any], package.pop('extras', {}))
                 package.update(extras)
                 results.append(package)
         else:

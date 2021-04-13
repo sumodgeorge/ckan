@@ -54,9 +54,9 @@ class DomainObjectModificationExtension(plugins.SingletonPlugin):
         for obj in set(changed):
             if isinstance(obj, resource.Resource):
                 method(obj, domain_object.DomainObjectOperation.changed)
-            if getattr(obj, 'url_changed', False):
-                for item in plugins.PluginImplementations(plugins.IResourceUrlChange):
-                    item.notify(obj)
+                if getattr(obj, 'url_changed', False):
+                    for item in plugins.PluginImplementations(plugins.IResourceUrlChange):
+                        item.notify(obj)
 
         changed_pkgs = set(obj for obj in changed
                            if isinstance(obj, _package.Package))

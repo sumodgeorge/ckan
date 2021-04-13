@@ -75,6 +75,7 @@ __version__ = '1.0.0'
 __all__ = ['cssmin']
 
 import re as _re
+from typing import Callable
 
 
 def _make_cssmin(python_only=False):
@@ -197,10 +198,9 @@ def _make_cssmin(python_only=False):
     def main_subber(keep_bang_comments):
         """ Make main subber """
         in_macie5, in_rule, at_media = [0], [0], [0]
-
         if keep_bang_comments:
             space_sub = space_sub_banged
-            def space_subber(match):
+            def space_subber(match):  # type: ignore
                 """ Space|Comment subber """
                 if match.lastindex:
                     group1, group2 = match.group(1, 2)

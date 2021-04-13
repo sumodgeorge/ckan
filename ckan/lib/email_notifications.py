@@ -6,6 +6,7 @@ new activities in your dashboard activity stream) and emailing them to the
 users.
 
 '''
+from ckan.types import Context
 import datetime
 import re
 
@@ -14,7 +15,7 @@ import ckan.logic as logic
 import ckan.lib.base as base
 
 from ckan.common import ungettext, config
-from typing import Any, Dict, List
+from typing import Any, Dict, List, cast
 
 
 def string_to_timedelta(s: str) -> datetime.timedelta:
@@ -122,8 +123,8 @@ def _notifications_from_dashboard_activity_list(user_dict: Dict[str, Any], since
 
     '''
     # Get the user's dashboard activity stream.
-    context = {'model': model, 'session': model.Session,
-            'user': user_dict['id']}
+    context = cast(Context, {'model': model, 'session': model.Session,
+            'user': user_dict['id']})
     activity_list = logic.get_action('dashboard_activity_list')(context, {})
 
     # Filter out the user's own activities., so they don't get an email every
@@ -221,8 +222,9 @@ def get_and_send_notifications_for_user(user: Dict) -> None:
 
 
 def get_and_send_notifications_for_all_users() -> None:
-    context = {'model': model, 'session': model.Session, 'ignore_auth': True,
-            'keep_email': True}
+    context = cast(
+        Context, {'model': model, 'session': model.Session, 'ignore_auth': True,
+                  'keep_email': True})
     users = logic.get_action('user_list')(context, {})
     for user in users:
         get_and_send_notifications_for_user(user)

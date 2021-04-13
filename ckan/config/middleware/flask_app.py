@@ -1,6 +1,6 @@
 # encoding: utf-8
 
-from ckan.types import CKANApp
+from ckan.types import CKANApp, Config
 import os
 import sys
 import re
@@ -120,7 +120,7 @@ class CKANBabel(Babel):
             self._i18n_path_idx += 1
 
 
-def make_flask_stack(conf: CKANConfig) -> CKANApp:
+def make_flask_stack(conf: Union[Config, CKANConfig]) -> CKANApp:
     """ This has to pass the flask app through all the same middleware that
     Pylons used """
 
@@ -240,7 +240,7 @@ def make_flask_stack(conf: CKANConfig) -> CKANApp:
     _ckan_i18n_dir = i18n.get_ckan_i18n_dir()
 
     pairs = [
-        (_ckan_i18n_dir, u'ckan')
+        cast(Tuple[str, str], (_ckan_i18n_dir, u'ckan'))
     ] + [
         (p.i18n_directory(), p.i18n_domain())
         for p in PluginImplementations(ITranslation)
@@ -308,7 +308,7 @@ def make_flask_stack(conf: CKANConfig) -> CKANApp:
 
     # Initialize repoze.who
     who_parser = WhoConfig(conf['here'])
-    who_parser.parse(open(conf['who.config_file']))
+    who_parser.parse(open(cast(str, conf['who.config_file'])))
 
     app = PluggableAuthenticationMiddleware(
         RepozeAdapterMiddleware(app),

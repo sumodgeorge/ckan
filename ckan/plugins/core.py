@@ -79,7 +79,7 @@ def use_plugin(
 
 class PluginImplementations(ExtensionPoint, Generic[TInterface]):
     def __init__(self, interface: Type[TInterface], *args):
-        super().__init__(interface, *args)
+        super().__init__(interface, *args)  # type: ignore
 
     def __iter__(self) -> Iterator[TInterface]:
         '''

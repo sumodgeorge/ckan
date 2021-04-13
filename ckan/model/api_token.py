@@ -48,7 +48,7 @@ class ApiToken(DomainObject):
         self.name = name
 
     @classmethod
-    def get(cls, id: str) -> Optional["ApiToken"]:
+    def get(cls, id: Optional[str]) -> Optional["ApiToken"]:
         if not id:
             return None
 

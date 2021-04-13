@@ -7,7 +7,7 @@ from typing import (
     TYPE_CHECKING,
     Tuple,
     Union,
-    Any,
+    Any, cast,
 )
 
 import datetime
@@ -28,7 +28,7 @@ from ckan.model import (
     extension,
 )
 import ckan.lib.maintain as maintain
-from ckan.types import Query
+from ckan.types import Context, Query
 
 if TYPE_CHECKING:
     from ckan.model import (
@@ -497,15 +497,16 @@ class Package(core.StatefulObjectMixin,
         try:
             # We save the entire rendered package dict so we can support
             # viewing the past packages from the activity feed.
-            dictized_package = ckan.logic.get_action('package_show')({
-                'model': ckan.model,
-                'session': ckan.model.Session,
-                'for_view': False,  # avoid ckanext-multilingual translating it
-                'ignore_auth': True
-            }, {
-                'id': self.id,
-                'include_tracking': False
-            })
+            dictized_package = ckan.logic.get_action('package_show')(
+                cast(Context, {
+                    'model': ckan.model,
+                    'session': ckan.model.Session,
+                    'for_view': False,  # avoid ckanext-multilingual translating it
+                    'ignore_auth': True
+                }), {
+                    'id': self.id,
+                    'include_tracking': False
+                })
         except ckan.logic.NotFound:
             # This happens if this package is being purged and therefore has no
             # current revision.

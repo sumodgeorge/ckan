@@ -14,7 +14,7 @@ which builds the dictionary by iterating over the table columns.
 import copy
 import six
 
-from typing import Any, Callable, Dict, Iterable, List, Optional, Tuple, Union
+from typing import Any, Callable, Dict, Iterable, List, Optional, Tuple, Union, cast
 from six.moves.urllib.parse import urlsplit  # type: ignore
 
 from ckan.common import config
@@ -333,10 +333,11 @@ def group_dictize(group: model.Group, context: Context,
                 else:
                     q['rows'] = packages_limit
 
-            search_context = dict((k, v) for (k, v) in context.items()
-                                  if k != 'schema')
-            search_results = logic.get_action('package_search')(search_context,
-                                                                q)
+            search_context = cast(
+                Context, dict((k, v) for (k, v) in context.items()
+                              if k != 'schema'))
+            search_results = logic.get_action('package_search')(
+                search_context, q)
             return search_results['count'], search_results['results']
 
         if packages_field == 'datasets':

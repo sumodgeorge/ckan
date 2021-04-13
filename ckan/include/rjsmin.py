@@ -62,6 +62,7 @@ __version__ = '1.0.3'
 __all__ = ['jsmin']
 
 import re as _re
+from typing import Match
 from six.moves import map # type: ignore
 
 
@@ -246,7 +247,7 @@ def jsmin_for_posers(script):
     :Return: Minified script
     :Rtype: ``str``
     """
-    def subber(match):
+    def subber(match: Match) -> str:
         """ Substitution callback """
         groups = match.groups()
         return (

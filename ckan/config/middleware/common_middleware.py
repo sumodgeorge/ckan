@@ -4,7 +4,7 @@
 import hashlib
 
 import six
-from six.moves.urllib.parse import unquote, urlparse
+from six.moves.urllib.parse import unquote, urlparse  # type: ignore
 
 import sqlalchemy as sa
 

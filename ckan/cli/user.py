@@ -1,6 +1,8 @@
 # encoding: utf-8
 
+from ckan.types import Context
 import logging
+from typing import cast
 import six
 import click
 from six import text_type
@@ -8,6 +10,7 @@ from six import text_type
 import ckan.logic as logic
 import ckan.plugins as plugin
 import ckan.model as model
+import ckan.lib.helpers as h
 from ckan.cli import error_shout
 from ckan.common import json
 
@@ -52,22 +55,21 @@ def add_user(ctx, username, args):
     if u'fullname' in data_dict:
         data_dict['fullname'] = six.ensure_text(data_dict['fullname'])
 
-    # pprint(u'Creating user: %r' % username)
+    import ckan.logic as logic
+    import ckan.model as model
 
     try:
-        import ckan.logic as logic
-        import ckan.model as model
-        site_user = logic.get_action(u'get_site_user')({
+        site_user = logic.get_action(u'get_site_user')(cast(Context, {
             u'model': model,
-            u'ignore_auth': True},
+            u'ignore_auth': True}),
             {}
         )
-        context = {
+        context = cast(Context, {
             u'model': model,
             u'session': model.Session,
             u'ignore_auth': True,
             u'user': site_user['name'],
-        }
+        })
         flask_app = ctx.meta['flask_app']
         # Current user is tested agains sysadmin role during model
         # dictization, thus we need request context
@@ -106,9 +108,9 @@ def remove_user(ctx, username):
         return
 
     site_user = logic.get_action(u'get_site_user')({u'ignore_auth': True}, {})
-    context = {u'user': site_user[u'name']}
+    context: Context = {u'user': site_user[u'name']}
     with ctx.meta['flask_app'].test_request_context():
-        plugin.toolkit.get_action(u'user_delete')(context, {u'id': username})
+        logic.get_action(u'user_delete')(context, {u'id': username})
         click.secho(u'Deleted user: %s' % username, fg=u'green', bold=True)
 
 
@@ -186,10 +188,10 @@ def add_token(username, token_name, extras, json):
         json[key] = value
     json.update({u"user": username, u"name": token_name})
     try:
-        token = plugin.toolkit.get_action(u"api_token_create")(
+        token = logic.get_action(u"api_token_create")(
             {u"ignore_auth": True}, json
         )
-    except plugin.toolkit.ObjectNotFound as e:
+    except logic.NotFound as e:
         error_shout(e)
         raise click.Abort()
     click.secho(u"API Token created:", fg=u"green")
@@ -212,10 +214,10 @@ def revoke_token(id):
 def list_tokens(username):
     """List all API Tokens for the given user"""
     try:
-        tokens = plugin.toolkit.get_action(u"api_token_list")(
+        tokens = logic.get_action(u"api_token_list")(
             {u"ignore_auth": True}, {u"user": username}
         )
-    except plugin.toolkit.ObjectNotFound as e:
+    except logic.NotFound as e:
         error_shout(e)
         raise click.Abort()
     if not tokens:
@@ -226,7 +228,7 @@ def list_tokens(username):
     for token in tokens:
         last_access = token[u"last_access"]
         if last_access:
-            accessed = plugin.toolkit.h.date_str_to_datetime(
+            accessed = h.date_str_to_datetime(
                 last_access
             ).isoformat(u" ", u"seconds")
 

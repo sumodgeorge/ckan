@@ -256,7 +256,7 @@ class Worker(rq.Worker):
         )
         qs = [get_queue(q) for q in queue_names]
         rq.worker.logger.setLevel(logging.INFO)
-        super(Worker, self).__init__(qs, *args, **kwargs)
+        super(Worker, self).__init__(qs, *args, **kwargs)  # type: ignore
 
     def register_birth(self, *args, **kwargs) -> None:
         result = super(Worker, self).register_birth(*args, **kwargs)

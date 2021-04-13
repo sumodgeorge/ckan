@@ -1,5 +1,6 @@
 # encoding: utf-8
 
+from ckan.types import Context
 import itertools
 
 import click
@@ -53,7 +54,7 @@ def create(ctx, types, dataset, no_default_filters, search, yes):
     if loaded_view_plugins is None:
         return
     site_user = logic.get_action(u"get_site_user")({u"ignore_auth": True}, {})
-    context = {u"user": site_user[u"name"]}
+    context: Context = {u"user": site_user[u"name"]}
 
     page = 1
     while True:
@@ -133,7 +134,7 @@ def clear(types, yes):
 
     site_user = logic.get_action(u"get_site_user")({u"ignore_auth": True}, {})
 
-    context = {u"user": site_user[u"name"]}
+    context: Context = {u"user": site_user[u"name"]}
     logic.get_action(u"resource_view_clear")(context, {u"view_types": types})
 
     click.secho(u"Done", fg=u"green")

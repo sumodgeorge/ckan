@@ -229,7 +229,7 @@ def is_authorized(action: str, context: Context, data_dict: Optional[DataDict]=N
                         else auth_function.func).__name__)
             }
 
-        return auth_function(context, data_dict)
+        return auth_function(context, data_dict or {})
     else:
         raise ValueError(_('Authorization function not found: %s' % action))
 

@@ -184,15 +184,17 @@ def check_po_file(path):
             for function in (
                 simple_conv_specs, mapping_keys, replacement_fields
             ):
-                for key, msgstr in six.iteritems(entry.msgstr_plural):
+                for key, msgstr in six.iteritems(
+                        entry.msgstr_plural):  # type: ignore
                     if key == u'0':
                         error = check_translation(
-                            function, entry.msgid, entry.msgstr_plural[key]
+                            function, entry.msgid,
+                            entry.msgstr_plural[key]  # type: ignore
                         )
                     else:
                         error = check_translation(
                             function, entry.msgid_plural,
-                            entry.msgstr_plural[key]
+                            entry.msgstr_plural[key]  # type: ignore
                         )
                     if error:
                         errors.append(error)

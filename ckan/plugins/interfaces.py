@@ -325,7 +325,7 @@ class IResourceUrlChange(Interface):
     Receives notification of changed URL on a resource.
     '''
 
-    def notify(self, resource: Dict[str, Any]) -> None:
+    def notify(self, resource: 'model.Resource') -> None:
         u'''
         Called when a resource url has changed.
 

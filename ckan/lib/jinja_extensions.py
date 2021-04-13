@@ -13,7 +13,6 @@ from jinja2 import Environment
 from jinja2 import FileSystemBytecodeCache
 
 from six import text_type
-from six.moves import xrange
 
 import ckan.lib.base as base
 import ckan.lib.helpers as h
@@ -31,7 +30,6 @@ def _get_extensions():
             CkanExtend,
             CkanInternationalizationExtension,
             LinkForExtension,
-            ResourceExtension,
             UrlForStaticExtension,
             UrlForExtension,
             AssetExtension]
@@ -65,7 +63,7 @@ def regularise_html(html: Optional[str]) -> Optional[str]:
         return
     html = re.sub('\n', ' ', html)
     matches = re.findall(r'(<[^>]*>|%[^%]\([^)]*\)\w|[^<%]+|%)', html)
-    for i in xrange(len(matches)):
+    for i in range(len(matches)):
         match = matches[i]
         if match.startswith('<') or match.startswith('%'):
             continue
@@ -249,7 +247,10 @@ class BaseExtension(ext.Extension):
                 key = nodes.Const(next(stream).value)
                 stream.skip()
                 value = parser.parse_expression()
-                kwargs.append(nodes.Pair(key, value, lineno=key.lineno))
+                kwargs.append(nodes.Pair(
+                    key, value,
+                    lineno=key.lineno  # type: ignore
+                ))
             else:
                 args.append(parser.parse_expression())
 
@@ -320,23 +321,6 @@ class LinkForExtension(BaseExtension):
     @classmethod
     def _call(cls, args, kwargs):
         return h.nav_link(*args, **kwargs)
-
-class ResourceExtension(BaseExtension):
-    ''' Deprecated. Custom include_resource tag.
-
-    {% resource <resource_name> %}
-
-    see lib.helpers.include_resource() for more details.
-    '''
-
-    tags = set(['resource'])
-
-    @classmethod
-    def _call(cls, args, kwargs):
-        assert len(args) == 1
-        assert len(kwargs) == 0
-        h.include_resource(args[0], **kwargs)
-        return ''
 
 
 class AssetExtension(BaseExtension):

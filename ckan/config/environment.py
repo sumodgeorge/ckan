@@ -27,7 +27,8 @@ from ckan.lib.i18n import build_js_translations
 
 from ckan.common import CKANConfig, _, ungettext, config
 from ckan.exceptions import CkanConfigurationException
-from typing import Dict
+from typing import Dict, Union, cast
+from ckan.types import Config
 
 if six.PY2:
     from pylons import config as pylons_config  # type: ignore
@@ -40,7 +41,7 @@ log = logging.getLogger(__name__)
 warnings.simplefilter('ignore', UserWarning)
 
 
-def load_environment(conf: CKANConfig):
+def load_environment(conf: Union[Config, CKANConfig]):
     """
     Configure the Pylons environment via the ``pylons.config`` object. This
     code should only need to be run once.
@@ -76,13 +77,14 @@ def load_environment(conf: CKANConfig):
         find_controller._old_find_controller = find_controller_generic
         PylonsApp.find_controller = find_controller
 
-    os.environ['CKAN_CONFIG'] = conf['__file__']
+    os.environ['CKAN_CONFIG'] = cast(str, conf['__file__'])
 
     # Pylons paths
     root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
     valid_base_public_folder_names = ['public']
-    static_files = conf.get('ckan.base_public_folder', 'public')
+    static_files: str = cast(
+        str, conf.get('ckan.base_public_folder', 'public'))
     conf['ckan.base_public_folder'] = static_files
 
     if static_files not in valid_base_public_folder_names:
@@ -278,7 +280,7 @@ def update_config() -> None:
             **jinja_extensions.get_jinja_env_options())
         env.install_gettext_callables(_, ungettext, newstyle=True)
         # custom filters
-        env.policies['ext.i18n.trimmed'] = True
+        env.policies['ext.i18n.trimmed'] = True  # type: ignore
         env.filters['empty_and_escape'] = jinja_extensions.empty_and_escape
         config['pylons.app_globals'].jinja_env = env
 
@@ -307,7 +309,7 @@ def update_config() -> None:
 
     # Here we create the site user if they are not already in the database
     try:
-        logic.get_action('get_site_user')({'ignore_auth': True}, None)
+        logic.get_action('get_site_user')({'ignore_auth': True}, {})
     except (sqlalchemy.exc.ProgrammingError, sqlalchemy.exc.OperationalError):
         # (ProgrammingError for Postgres, OperationalError for SQLite)
         # The database is not initialised.  This is a bit dirty.  This occurs

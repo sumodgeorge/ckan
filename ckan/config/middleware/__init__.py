@@ -2,13 +2,13 @@
 
 """WSGI app initialization"""
 
-from ckan.types import CKANApp
 from ckan.common import CKANConfig
+from ckan.types import CKANApp, Config
 import logging
 
 from ckan.config.environment import load_environment
 from ckan.config.middleware.flask_app import make_flask_stack
-from typing import Optional
+from typing import Optional, Union
 
 from flask.ctx import RequestContext
 
@@ -20,7 +20,7 @@ log = logging.getLogger(__name__)
 _internal_test_request_context: Optional[RequestContext] = None
 
 
-def make_app(conf: CKANConfig) -> CKANApp:
+def make_app(conf: Union[Config, CKANConfig]) -> CKANApp:
     '''
     Initialise both the pylons and flask apps, and wrap them in dispatcher
     middleware.

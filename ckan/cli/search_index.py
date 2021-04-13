@@ -110,4 +110,4 @@ def rebuild_fast():
             process.join()
         commit()
     except Exception as e:
-        click.echo(e.message)
+        tk.error_shout(e)

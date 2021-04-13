@@ -30,13 +30,13 @@ def profile(ctx):
 
     """
     if ctx.invoked_subcommand is None:
-        ctx.invoke(profile)
+        ctx.invoke(main)
 
 
-@profile.command(short_help=u"Code speed profiler.",)
+@profile.command('profile', short_help=u"Code speed profiler.",)
 @click.argument(u"url")
 @click.argument(u"user", required=False, default=u"visitor")
-def profile(url, user):
+def main(url, user):
     import cProfile
     from ckan.tests.helpers import _get_test_app
 

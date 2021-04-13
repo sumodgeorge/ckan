@@ -1,6 +1,10 @@
 # encoding: utf-8
 
-from simplejson import loads, RawJSON, dumps
+from typing import Any, Dict, Optional
+from simplejson import (
+    loads,
+    RawJSON,  # type: ignore
+    dumps)
 import six
 from six import text_type
 
@@ -14,11 +18,12 @@ class LazyJSONObject(RawJSON):
     '''
     def __init__(self, json_string):
         assert isinstance(json_string, text_type), json_string
-        self._json_string = json_string
-        self._json_dict = None
+        self._json_string: Optional[str] = json_string
+        self._json_dict: Optional[Dict[str, Any]] = None
 
     def _loads(self):
         if not self._json_dict:
+            assert self._json_string is not None
             self._json_dict = loads(self._json_string)
             self._json_string = None
         return self._json_dict
