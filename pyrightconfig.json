@@ -4,5 +4,9 @@
   "include": [
     "ckan"
   ],
-  "exclude": ["**/tests"]
+  "exclude": [
+    "**/tests",
+    "ckan/migration",
+    "ckan/lib/create_test_data.py"
+  ]
 }

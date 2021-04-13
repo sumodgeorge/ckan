@@ -40,7 +40,7 @@ import dominate.tags as tags
 from markupsafe import Markup
 from six import text_type
 from six.moves import range  # type: ignore
-from typing import Any, Callable, Dict, Iterable, Optional
+from typing import Any, Callable, Dict, Iterable, Optional, Sequence
 
 
 class BasePage(list):
@@ -100,7 +100,7 @@ class BasePage(list):
     """
 
     def __init__(self,
-                 collection: Iterable,
+                 collection: Sequence,
                  page: int = 1,
                  items_per_page: int = 20,
                  item_count: Optional[int] = None,
@@ -218,9 +218,9 @@ class BasePage(list):
 
         # No items available
         else:
-            self.first_page = None
+            self.first_page = 0
             self.page_count = 0
-            self.last_page = None
+            self.last_page = 0
             self.first_item = None
             self.last_item = None
             self.previous_page = None
@@ -467,7 +467,7 @@ class BasePage(list):
         if self.page_count == 0 or (
             self.page_count == 1 and not show_if_single_page
         ):
-            return u""
+            return Markup(u"")
 
         # Replace ~...~ in token format by range of pages
         result = re.sub(u"~(\\d+)~", self._range, format)
@@ -538,7 +538,7 @@ class BasePage(list):
             # Wrap in a SPAN tag if nolink_attr is set
             text = u".."
             if self.dotdot_attr:
-                text = Markup(tags.span(text, **self.dotdot_attr))
+                text = Markup(str(tags.span(text, **self.dotdot_attr)))
             nav_items.append(text)
 
         for thispage in range(leftmost_page, rightmost_page + 1):
@@ -547,7 +547,7 @@ class BasePage(list):
                 text = u"%s" % (thispage,)
                 # Wrap in a SPAN tag if nolink_attr is set
                 if self.curpage_attr:
-                    text = Markup(tags.span(text, **self.curpage_attr))
+                    text = Markup(str(tags.span(text, **self.curpage_attr)))
                 nav_items.append(text)
             # Otherwise create just a link to that page
             else:
@@ -560,7 +560,7 @@ class BasePage(list):
             text = u".."
             # Wrap in a SPAN tag if nolink_attr is set
             if self.dotdot_attr:
-                text = Markup(tags.span(text, **self.dotdot_attr))
+                text = Markup(str(tags.span(text, **self.dotdot_attr)))
             nav_items.append(text)
 
         # Create a link to the very last page (unless we are on the last
@@ -593,7 +593,7 @@ class BasePage(list):
         if self._url_generator is not None:
             url_generator = self._url_generator
         else:
-            from ckan.lib.helpers import pager_url
+            from ckan.lib.helpers import pager_url as url_generator
 
         # Create the URL to load a certain page
         link_url = url_generator(**link_params)

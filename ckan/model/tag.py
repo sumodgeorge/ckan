@@ -49,7 +49,7 @@ class Tag(domain_object.DomainObject):
     vocabulary_id: Optional[str]
 
     package_tags: 'List[PackageTag]'
-    vocabulary: Optional['vocabulary.Vocabulary']
+    vocabulary: Optional['ckan.model.Vocabulary']
 
     def __init__(self, name: str='', vocabulary_id: Optional[str]=None) -> None:
         self.name = name

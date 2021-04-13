@@ -577,6 +577,7 @@ if TYPE_CHECKING:
 
     import ckan.common as converters
 
+    docstring_overrides: Dict[str, str]
     config = common.config
     _ = common._
     ungettext = common.ungettext

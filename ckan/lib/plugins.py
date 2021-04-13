@@ -12,6 +12,7 @@ from ckan.common import c, g
 from ckan import logic
 from ckan import plugins
 import ckan.authz
+import ckan.logic.schema
 import ckan.plugins.toolkit as toolkit
 from ckan.model.user import User
 from ckan.model.package import Package
@@ -345,13 +346,13 @@ class DefaultDatasetForm(object):
 
     '''
     def create_package_schema(self) -> Dict:
-        return logic.schema.default_create_package_schema()
+        return ckan.logic.schema.default_create_package_schema()
 
     def update_package_schema(self) -> Dict:
-        return logic.schema.default_update_package_schema()
+        return ckan.logic.schema.default_update_package_schema()
 
     def show_package_schema(self) -> Dict:
-        return logic.schema.default_show_package_schema()
+        return ckan.logic.schema.default_show_package_schema()
 
     def setup_template_variables(self, context: Dict, data_dict: Dict) -> None:
         data_dict.update({'available_only': True})
@@ -488,13 +489,13 @@ class DefaultGroupForm(object):
             return self.form_to_db_schema()
 
     def form_to_db_schema_api_create(self) -> Dict:
-        return logic.schema.default_group_schema()
+        return ckan.logic.schema.default_group_schema()
 
     def form_to_db_schema_api_update(self) -> Dict:
-        return logic.schema.default_update_group_schema()
+        return ckan.logic.schema.default_update_group_schema()
 
     def form_to_db_schema(self) -> Dict:
-        return logic.schema.group_form_schema()
+        return ckan.logic.schema.group_form_schema()
 
     def db_to_form_schema(self) -> Dict:
         '''This is an interface to manipulate data from the database
@@ -512,7 +513,7 @@ class DefaultGroupForm(object):
             return schema
         return self.db_to_form_schema()
 
-    def check_data_dict(self, data_dict: Dict) -> Dict:
+    def check_data_dict(self, data_dict: Dict) -> None:
         '''Check if the return data is correct, mostly for checking out
         if spammers are submitting only part of the form
 
