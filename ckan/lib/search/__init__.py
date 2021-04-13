@@ -1,10 +1,12 @@
 # encoding: utf-8
 
 from __future__ import print_function
+from ckan.types import Context
 import logging
 import sys
 import cgitb
 import warnings
+import base64
 import xml.dom.minidom
 
 import requests
@@ -28,7 +30,7 @@ from ckan.lib.search.query import (
     QueryOptions, convert_legacy_parameters_to_solr
 )
 from ckan.lib.search.index import SearchIndex
-from typing import Container, Dict, List, Any, Optional, Type, TypeVar, Union, overload
+from typing import Collection, Container, Dict, List, Any, Optional, Type, cast, overload
 
 
 log = logging.getLogger(__name__)
@@ -79,6 +81,12 @@ def _normalize_type(_type: Any) -> str:
     return _type.strip().lower()
 
 
+@overload
+def index_for(_type: Type[model.Package]) -> PackageSearchIndex: ...
+
+@overload
+def index_for(_type: Any) -> SearchIndex: ...
+
 def index_for(_type: Any) -> SearchIndex:
     """ Get a SearchIndex instance sub-class suitable for
         the specified type. """
@@ -91,11 +99,19 @@ def index_for(_type: Any) -> SearchIndex:
 
 
 @overload
-def query_for(_type: Type[model.Package]) -> PackageSearchQuery: ...
+def query_for(_type: Type[model.Package]) -> PackageSearchQuery:
+    ...
+
+
 @overload
-def query_for(_type: Type[model.Resource]) -> ResourceSearchQuery: ...
+def query_for(_type: Type[model.Resource]) -> ResourceSearchQuery:
+    ...
+
+
 @overload
-def query_for(_type: Type[model.Tag]) -> TagSearchQuery: ...
+def query_for(_type: Type[model.Tag]) -> TagSearchQuery:
+    ...
+
 
 def query_for(_type: Any) -> SearchQuery:
     """ Get a SearchQuery instance sub-class suitable for the specified
@@ -107,7 +123,8 @@ def query_for(_type: Any) -> SearchQuery:
         raise SearchError("Unknown search type: %s" % _type)
 
 
-def dispatch_by_operation(entity_type: str, entity: Dict, operation: str) -> None:
+def dispatch_by_operation(entity_type: str, entity: Dict,
+                          operation: str) -> None:
     """Call the appropriate index method for a given notification."""
     try:
         index = index_for(entity_type)
@@ -131,18 +148,19 @@ class SynchronousSearchPlugin(p.SingletonPlugin):
     p.implements(p.IDomainObjectModification, inherit=True)
 
     def notify(self, entity: Any, operation: str) -> None:
-        if (not isinstance(entity, model.Package) or
-                not asbool(config.get('ckan.search.automatic_indexing', True))):
+        if (not isinstance(entity, model.Package) or not asbool(
+                config.get('ckan.search.automatic_indexing', True))):
             return
         if operation != domain_object.DomainObjectOperation.deleted:
             dispatch_by_operation(
                 entity.__class__.__name__,
-                logic.get_action('package_show')(
-                    {'model': model, 'ignore_auth': True, 'validate': False,
-                     'use_cache': False},
-                    {'id': entity.id}),
-                operation
-            )
+                logic.get_action('package_show')(cast(
+                    Context, {
+                        'model': model,
+                        'ignore_auth': True,
+                        'validate': False,
+                        'use_cache': False
+                    }), {'id': entity.id}), operation)
         elif operation == domain_object.DomainObjectOperation.deleted:
             dispatch_by_operation(entity.__class__.__name__,
                                   {'id': entity.id}, operation)
@@ -150,8 +168,13 @@ class SynchronousSearchPlugin(p.SingletonPlugin):
             log.warn("Discarded Sync. indexing for: %s" % entity)
 
 
-def rebuild(package_id: Optional[str]=None, only_missing: bool=False, force: bool=False, refresh: bool=False,
-            defer_commit: bool=False, package_ids: Optional[List[str]]=None, quiet: bool=False):
+def rebuild(package_id: Optional[str] = None,
+            only_missing: bool = False,
+            force: bool = False,
+            refresh: bool = False,
+            defer_commit: bool = False,
+            package_ids: Optional[Collection[str]] = None,
+            quiet: bool = False):
     '''
         Rebuilds the search index.
 
@@ -164,12 +187,17 @@ def rebuild(package_id: Optional[str]=None, only_missing: bool=False, force: boo
     log.info("Rebuilding search index...")
 
     package_index = index_for(model.Package)
-    context = {'model': model, 'ignore_auth': True, 'validate': False,
-        'use_cache': False}
+    context = cast(Context, {
+        'model': model,
+        'ignore_auth': True,
+        'validate': False,
+        'use_cache': False
+    })
 
     if package_id:
-        pkg_dict = logic.get_action('package_show')(context,
-            {'id': package_id})
+        pkg_dict = logic.get_action('package_show')(context, {
+            'id': package_id
+        })
         log.info('Indexing just package %r...', pkg_dict['name'])
         package_index.remove_dict(pkg_dict)
         package_index.insert_dict(pkg_dict)
@@ -180,7 +208,7 @@ def rebuild(package_id: Optional[str]=None, only_missing: bool=False, force: boo
             log.info('Indexing just package %r...', pkg_dict['name'])
             package_index.update_dict(pkg_dict, True)
     else:
-        package_ids: Container = [r[0] for r in model.Session.query(model.Package.id).
+        package_ids = [r[0] for r in model.Session.query(model.Package.id).
                        filter(model.Package.state != 'deleted').all()]
         if only_missing:
             log.info('Indexing only missing packages...')
@@ -269,18 +297,15 @@ def clear_all() -> None:
 def _get_schema_from_solr(file_offset):
     solr_url, solr_user, solr_password = SolrSettings.get()
 
-    http_auth = None
+    headers = {}
     if solr_user is not None and solr_password is not None:
         http_auth = solr_user + ':' + solr_password
-        http_auth = 'Basic ' + http_auth.encode('base64').strip()
+        http_auth = b'Basic ' + base64.encodebytes(
+            bytes(http_auth, 'utf8')).strip()
+        headers['Authorization'] = http_auth
 
     url = solr_url.strip('/') + file_offset
-
-    if http_auth:
-        response = requests.get(
-            url, headers={'Authorization': http_auth})
-    else:
-        response = requests.get(url)
+    response = requests.get(url, headers=headers)
 
     return response
 

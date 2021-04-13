@@ -1,5 +1,6 @@
 # encoding: utf-8
 
+from ckan.types import Context
 import socket
 import string
 import logging
@@ -25,7 +26,7 @@ from ckan.plugins import (PluginImplementations,
 import ckan.logic as logic
 import ckan.lib.plugins as lib_plugins
 import ckan.lib.navl.dictization_functions
-from typing import Any, Dict, NoReturn, Optional
+from typing import Any, Dict, NoReturn, Optional, cast
 
 log = logging.getLogger(__name__)
 
@@ -107,10 +108,14 @@ class PackageSearchIndex(SearchIndex):
     def remove_dict(self, pkg_dict: Dict[str, Any]) -> None:
         self.delete_package(pkg_dict)
 
-    def update_dict(self, pkg_dict: Dict[str, Any], defer_commit: bool=False) -> None:
+    def update_dict(self,
+                    pkg_dict: Dict[str, Any],
+                    defer_commit: bool = False) -> None:
         self.index_package(pkg_dict, defer_commit)
 
-    def index_package(self, pkg_dict: Optional[Dict[str, Any]], defer_commit: bool=False) -> None:
+    def index_package(self,
+                      pkg_dict: Optional[Dict[str, Any]],
+                      defer_commit: bool = False) -> None:
         if pkg_dict is None:
             return
 
@@ -161,7 +166,7 @@ class PackageSearchIndex(SearchIndex):
         # vocab_<tag name> so that they can be used in facets
         non_vocab_tag_names = []
         tags = pkg_dict.pop('tags', [])
-        context = {'model': model}
+        context = cast(Context, {'model': model})
 
         for tag in tags:
             if tag.get('vocabulary_id'):

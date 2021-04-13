@@ -1,5 +1,6 @@
 # encoding: utf-8
 
+from ckan.types import Context
 import re
 import logging
 import six
@@ -15,7 +16,7 @@ from ckan.common import config
 from ckan.lib.search.common import (
     make_connection, SearchError, SearchQueryError
 )
-from typing import Any, Dict, List, NoReturn, Optional, Union
+from typing import Any, Dict, List, NoReturn, Optional, Union, cast
 
 log = logging.getLogger(__name__)
 
@@ -136,7 +137,7 @@ class SearchQuery(object):
     to be used for only one query, i.e. it sets state. Definitely not thread-safe.
     """
     count: int
-    results: List[Dict[str, Any]]
+    results: List[Any]
     facets: Dict[str, Any]
 
     def __init__(self) -> None:
@@ -162,7 +163,13 @@ class SearchQuery(object):
         """
         return []
 
-    def run(self, query: Optional[Union[str, Dict]]=None, terms: List[str]=[], fields: Dict={}, facet_by: List[str]=[], options: Optional[QueryOptions]=None, **kwargs: Any) -> NoReturn:
+    def run(self,
+            query: Optional[Union[str, Dict]] = None,
+            terms: List[str] = [],
+            fields: Dict = {},
+            facet_by: List[str] = [],
+            options: Optional[QueryOptions] = None,
+            **kwargs: Any) -> NoReturn:
         raise SearchError("SearchQuery.run() not implemented!")
 
     # convenience, allows to query(..)
@@ -171,7 +178,11 @@ class SearchQuery(object):
 
 class TagSearchQuery(SearchQuery):
     """Search for tags."""
-    def run(self, query: Optional[Union[str, List[str]]]=None, fields: Optional[Dict]=None, options: Optional[QueryOptions]=None, **kwargs: Any) -> Dict:
+    def run(self,
+            query: Optional[Union[str, List[str]]] = None,
+            fields: Optional[Dict] = None,
+            options: Optional[QueryOptions] = None,
+            **kwargs: Any) -> Dict:
         query = [] if query is None else query
         fields = {} if fields is None else fields
 
@@ -183,12 +194,12 @@ class TagSearchQuery(SearchQuery):
         if isinstance(query, six.string_types):
             query = [query]
 
-        query = query[:] # don't alter caller's query list.
+        query = query[:]  # don't alter caller's query list.
         for field, value in fields.items():
             if field in ('tag', 'tags'):
                 query.append(value)
 
-        context = {'model': model, 'session': model.Session}
+        context = cast(Context, {'model': model, 'session': model.Session})
         data_dict = {
             'query': query,
             'offset': options.get('offset'),
@@ -211,17 +222,20 @@ class TagSearchQuery(SearchQuery):
 
 class ResourceSearchQuery(SearchQuery):
     """Search for resources."""
-    def run(self, fields: Dict={}, options: Optional[QueryOptions]=None, **kwargs: Any) -> Dict:
+    def run(self,
+            fields: Dict = {},
+            options: Optional[QueryOptions] = None,
+            **kwargs: Any) -> Dict:
         if options is None:
             options = QueryOptions(**kwargs)
         else:
             options.update(kwargs)
 
-        context = {
+        context = cast(Context,{
             'model': model,
             'session': model.Session,
             'search_query': True,
-        }
+        })
 
         # Transform fields into structure required by the resource_search
         # action.
@@ -255,8 +269,7 @@ class ResourceSearchQuery(SearchQuery):
 
 
 class PackageSearchQuery(SearchQuery):
-
-    def get_all_entity_ids(self, max_results: int=1000) -> List[str]:
+    def get_all_entity_ids(self, max_results: int = 1000) -> List[str]:
         """
         Return a list of the IDs of all indexed packages.
         """
@@ -268,12 +281,13 @@ class PackageSearchQuery(SearchQuery):
         data = conn.search(query, fq=fq, rows=max_results, fl='id')
         return [r.get('id') for r in data.docs]
 
-    def get_index(self,reference: str) -> Dict:
+    def get_index(self, reference: str) -> Dict:
         query = {
             'rows': 1,
-            'q': 'name:"%s" OR id:"%s"' % (reference,reference),
+            'q': 'name:"%s" OR id:"%s"' % (reference, reference),
             'wt': 'json',
-            'fq': 'site_id:"%s"' % config.get('ckan.site_id')}
+            'fq': 'site_id:"%s"' % config.get('ckan.site_id')
+        }
 
         try:
             if query['q'].startswith('{!'):
@@ -286,16 +300,20 @@ class PackageSearchQuery(SearchQuery):
         try:
             solr_response = conn.search(**query)
         except pysolr.SolrError as e:
-            raise SearchError('SOLR returned an error running query: %r Error: %r' %
-                              (query, e))
+            raise SearchError(
+                'SOLR returned an error running query: %r Error: %r' %
+                (query, e))
 
         if solr_response.hits == 0:
-            raise SearchError('Dataset not found in the search index: %s' % reference)
+            raise SearchError('Dataset not found in the search index: %s' %
+                              reference)
         else:
             return solr_response.docs[0]
 
-
-    def run(self, query: Dict, permission_labels: List[str]=None, **kwargs: Any) -> Dict:
+    def run(self,
+            query: Dict,
+            permission_labels: List[str] = None,
+            **kwargs: Any) -> Dict:
         '''
         Performs a dataset search using the given query.
 
@@ -412,7 +430,7 @@ class PackageSearchQuery(SearchQuery):
 
         # if just fetching the id or name, return a list instead of a dict
         if query.get('fl') in ['id', 'name']:
-            self.results = [r.get(query.get('fl')) for r in self.results]
+            self.results = [r.get(query['fl']) for r in self.results]
 
         # get facets and convert facets list to a dict
         self.facets = solr_response.facets.get('facet_fields', {})
@@ -425,7 +443,7 @@ class PackageSearchQuery(SearchQuery):
 def solr_literal(t: str) -> str:
     '''
     return a safe literal string for a solr query. Instead of escaping
-    each of + - && || ! ( ) { } [ ] ^ " ~ * ? : \ / we're just dropping
+    each of + - && || ! ( ) { } [ ] ^ " ~ * ? : \\ / we're just dropping
     double quotes -- this method currently only used by tokens like site_id
     and permission labels.
     '''
