@@ -17,7 +17,8 @@ from six import string_types
 from ckan.plugins import interfaces
 
 from ckan.common import config
-from typing import Generator, Generic, Iterator, List, Optional, Type, TypeVar, Union
+from typing import (
+    Generator, Generic, Iterator, List, Optional, Type, TypeVar, Union)
 
 
 __all__ = [
@@ -56,7 +57,9 @@ _PLUGINS_SERVICE = {}
 
 
 @contextmanager
-def use_plugin(*plugins: str) -> Generator[Union['SingletonPlugin', List['SingletonPlugin']], None, None]:
+def use_plugin(
+    *plugins: str
+) -> Generator[Union['SingletonPlugin', List['SingletonPlugin']], None, None]:
     '''Load plugin(s) for testing purposes
 
     e.g.

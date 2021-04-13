@@ -5,7 +5,8 @@ extend CKAN.
 
 '''
 from inspect import isclass
-from typing import Any, Callable, Dict, Iterable, List, Optional, Sequence, TYPE_CHECKING, Tuple, Type, Union
+from typing import (Any, Callable, Dict, Iterable, List, Optional, Sequence,
+                    TYPE_CHECKING, Tuple, Type, Union)
 from typing_extensions import TypedDict, Literal
 
 from pyutilib.component.core import Interface as _pca_Interface
@@ -14,7 +15,8 @@ from flask.blueprints import Blueprint
 from flask.wrappers import Response
 
 
-from ckan.types import Action, AuthFunction, Context, DataDict, PFeed, PUploader, PResourceUploader, Schema
+from ckan.types import (Action, AuthFunction, Context, DataDict, PFeed,
+                        PUploader, PResourceUploader, Schema)
 
 if TYPE_CHECKING:
     import click
@@ -94,7 +96,8 @@ class IMiddleware(Interface):
     one for the Pylons stack and one for the Flask stack (eventually
     there will be only the Flask stack).
     '''
-    def make_middleware(self, app: 'CKANFlask', config: 'CKANConfig') -> 'CKANFlask':
+    def make_middleware(self, app: 'CKANFlask',
+                        config: 'CKANConfig') -> 'CKANFlask':
         u'''Return an app configured with this middleware
 
         When called on the Flask stack, this method will get the actual Flask
@@ -116,7 +119,8 @@ class IMiddleware(Interface):
         '''
         return app
 
-    def make_error_log_middleware(self, app: 'CKANFlask', config: 'CKANConfig') -> 'CKANFlask':
+    def make_error_log_middleware(self, app: 'CKANFlask',
+                                  config: 'CKANConfig') -> 'CKANFlask':
         u'''Return an app configured with this error log middleware
 
         Note that both on the Flask and Pylons middleware stacks, this
@@ -303,8 +307,8 @@ class IFeed(Interface):
         from ckan.views.feed import CKANFeed
         return CKANFeed
 
-
-    def get_item_additional_fields(self, dataset_dict: Dict[str, Any]) -> Dict[str, Any]:
+    def get_item_additional_fields(
+            self, dataset_dict: Dict[str, Any]) -> Dict[str, Any]:
         """
         Allows plugins to set additional fields on a feed item.
 
@@ -407,7 +411,8 @@ class IResourceView(Interface):
         :rtype: bool
         '''
 
-    def setup_template_variables(self, context: Context, data_dict: DataDict) -> Dict:
+    def setup_template_variables(self, context: Context,
+                                 data_dict: DataDict) -> Dict:
         u'''
         Adds variables to be passed to the template being rendered.
 
@@ -508,7 +513,8 @@ class IResourcePreview(Interface):
 
         '''
 
-    def setup_template_variables(self, context: Context, data_dict: DataDict) -> None:
+    def setup_template_variables(self, context: Context,
+                                 data_dict: DataDict) -> None:
         u'''
         Add variables to c just prior to the template being rendered.
         The ``data_dict`` contains the resource and the dataset.
@@ -754,7 +760,8 @@ class IResourceController(Interface):
         '''
         pass
 
-    def before_update(self, context: Context, current: Dict, resource: Dict) -> None:
+    def before_update(self, context: Context, current: Dict,
+                      resource: Dict) -> None:
         u'''
         Extensions will receive this before a resource is updated.
 
@@ -785,7 +792,8 @@ class IResourceController(Interface):
         '''
         pass
 
-    def before_delete(self, context: Context, resource, resources: List[Dict]) -> None:
+    def before_delete(self, context: Context, resource,
+                      resources: List[Dict]) -> None:
         u'''
         Extensions will receive this before a resource is deleted.
 
@@ -1222,7 +1230,8 @@ class IDatasetForm(Interface):
 
         '''
 
-    def setup_template_variables(self, context: Context, data_dict: DataDict) -> None:
+    def setup_template_variables(self, context: Context,
+                                 data_dict: DataDict) -> None:
         u'''Add variables to the template context for use in dataset templates.
 
         This function is called before a dataset template is rendered. If you
@@ -1319,7 +1328,8 @@ class IDatasetForm(Interface):
         :rtype: string
         '''
 
-    def validate(self, context: Context, data_dict: DataDict, schema: Schema, action: str) -> Tuple[Dict, Dict]:
+    def validate(self, context: Context, data_dict: DataDict, schema: Schema,
+                 action: str) -> Tuple[Dict, Dict]:
         u'''Customize validation of datasets.
 
         When this method is implemented it is used to perform all validation
@@ -1350,7 +1360,8 @@ class IDatasetForm(Interface):
         :rtype: (dictionary, dictionary)
         '''
 
-    def prepare_dataset_blueprint(self, package_type: str, blueprint: Blueprint) -> Blueprint:
+    def prepare_dataset_blueprint(self, package_type: str,
+                                  blueprint: Blueprint) -> Blueprint:
         u'''Update or replace dataset blueprint for given package type.
 
         Internally CKAN registers blueprint for every custom dataset
@@ -1367,7 +1378,8 @@ class IDatasetForm(Interface):
         '''
         return blueprint
 
-    def prepare_resource_blueprint(self, package_type: str, blueprint: Blueprint) -> Blueprint:
+    def prepare_resource_blueprint(self, package_type: str,
+                                   blueprint: Blueprint) -> Blueprint:
         u'''Update or replace resource blueprint for given package type.
 
         Internally CKAN registers separate resource blueprint for
@@ -1505,19 +1517,23 @@ class IGroupForm(Interface):
         format suitable for the form (optional)
         '''
 
-    def check_data_dict(self, data_dict: DataDict, schema: Optional[Schema]=None) -> None:
+    def check_data_dict(self,
+                        data_dict: DataDict,
+                        schema: Optional[Schema] = None) -> None:
         u'''
         Check if the return data is correct.
 
         raise a DataError if not.
         '''
 
-    def setup_template_variables(self, context: Context, data_dict: DataDict) -> None:
+    def setup_template_variables(self, context: Context,
+                                 data_dict: DataDict) -> None:
         u'''
         Add variables to c just prior to the template being rendered.
         '''
 
-    def validate(self, context: Context, data_dict: DataDict, schema: Schema, action: str) -> Tuple[Dict, Dict]:
+    def validate(self, context: Context, data_dict: DataDict, schema: Schema,
+                 action: str) -> Tuple[Dict, Dict]:
         u'''Customize validation of groups.
 
         When this method is implemented it is used to perform all validation
@@ -1549,7 +1565,8 @@ class IGroupForm(Interface):
         :rtype: (dictionary, dictionary)
         '''
 
-    def prepare_group_blueprint(self, group_type: str, blueprint: Blueprint) -> Blueprint:
+    def prepare_group_blueprint(self, group_type: str,
+                                blueprint: Blueprint) -> Blueprint:
         u'''Update or replace group blueprint for given group type.
 
         Internally CKAN registers separate blueprint for
@@ -1630,7 +1647,8 @@ class IFacets(Interface):
         '''
         return facets_dict
 
-    def group_facets(self, facets_dict: Dict, group_type: str, package_type: Optional[str]) -> Dict[str, Any]:
+    def group_facets(self, facets_dict: Dict, group_type: str,
+                     package_type: Optional[str]) -> Dict[str, Any]:
         u'''Modify and return the ``facets_dict`` for a group's page.
 
         The ``package_type`` is the type of dataset that these facets apply to.
@@ -1749,7 +1767,10 @@ class IAuthenticator(Interface):
         for more details.
         '''
 
-    def abort(self, status_code: int, detail: str, headers: Optional[Dict], comment: Optional[str]) -> Tuple[int, str, Optional[Dict], Optional[str]]:
+    def abort(
+        self, status_code: int, detail: str, headers: Optional[Dict],
+        comment: Optional[str]
+    ) -> Tuple[int, str, Optional[Dict], Optional[str]]:
         u'''Called on abort.  This allows aborts due to authorization issues
         to be overridden'''
         return (status_code, detail, headers, comment)
@@ -1775,7 +1796,8 @@ class IUploader(Interface):
     upload resources and group images.
     '''
 
-    def get_uploader(self, upload_to: str, old_filename: Optional[str]) -> PUploader:
+    def get_uploader(self, upload_to: str,
+                     old_filename: Optional[str]) -> PUploader:
         u'''Return an uploader object to upload general files that must
         implement the following methods:
 
@@ -1819,7 +1841,8 @@ class IUploader(Interface):
 
         '''
 
-    def get_resource_uploader(self, resource: Dict[str, Any]) -> PResourceUploader:
+    def get_resource_uploader(self, resource: Dict[str,
+                                                   Any]) -> PResourceUploader:
         u'''Return an uploader object used to upload resource files that must
         implement the following methods:
 
@@ -1893,7 +1916,8 @@ class IPermissionLabels(Interface):
         :rtype: list of unicode strings
         '''
 
-    def get_user_dataset_labels(self, user_obj: Optional['model.User']) -> List[str]:
+    def get_user_dataset_labels(self,
+                                user_obj: Optional['model.User']) -> List[str]:
         u'''
         Return the permission labels that give a user permission to view
         a dataset. If any of the labels returned from this method match
@@ -1948,7 +1972,8 @@ class IApiToken(Interface):
         '''
         return schema
 
-    def decode_api_token(self, encoded: str, **kwargs) -> Optional[Dict[str, Any]]:
+    def decode_api_token(self, encoded: str,
+                         **kwargs) -> Optional[Dict[str, Any]]:
         """Make an attempt to decode API Token provided in request.
 
         Decode token if it possible and return dictionary with
@@ -1971,7 +1996,8 @@ class IApiToken(Interface):
         """
         return None
 
-    def encode_api_token(self, data: Dict[str, Any], **kwargs: Any) -> Optional[bytes]:
+    def encode_api_token(self, data: Dict[str, Any],
+                         **kwargs: Any) -> Optional[bytes]:
         """Make an attempt to encode API Token.
 
         Encode token if it possible and return string, that will be
@@ -2011,7 +2037,8 @@ class IApiToken(Interface):
         """
         return data
 
-    def postprocess_api_token(self, data: Dict[str, Any], jti: str, data_dict: Dict[str, Any]) -> Dict[str, Any]:
+    def postprocess_api_token(self, data: Dict[str, Any], jti: str,
+                              data_dict: Dict[str, Any]) -> Dict[str, Any]:
         """Encode additional information into API Token.
 
         Allows passing any kind of additional information into API

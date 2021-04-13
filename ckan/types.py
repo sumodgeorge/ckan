@@ -152,20 +152,7 @@ class PFeed(Protocol):
     ) -> None:
         ...
 
-    def add_item(
-        self,
-        title: str,
-        link: str,
-        description: str,
-        updated: datetime.datetime,
-        publised: datetime.datetime,
-        unique_id: str,
-        author_name: Optional[str],
-        author_email: Optional[str],
-        categories: List[str],
-        enclosure: Any,
-        **additional_fields: Any
-    ) -> None:
+    def add_item(self, **kwargs: Any) -> None:
         ...
 
     def writeString(self, encoding: str) -> str:
@@ -192,7 +179,7 @@ class PUploader(Protocol):
 
 
 class PResourceUploader(Protocol):
-    mimetype: str
+    mimetype: Optional[str]
     filesize: int
 
     def __init__(self, resource: Dict) -> None:

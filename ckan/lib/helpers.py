@@ -753,8 +753,10 @@ class _Flash(object):
     # Default category if none is specified.
     default_category = ""
 
-    def __init__(self, session_key: str="flash", categories: Optional[List[str]]=None,
-                 default_category: Optional[str]=None) -> None:
+    def __init__(self,
+                 session_key: str = "flash",
+                 categories: Optional[List[str]] = None,
+                 default_category: Optional[str] = None) -> None:
         self.session_key = session_key
         if categories is not None:
             self.categories = categories
@@ -764,7 +766,10 @@ class _Flash(object):
             raise ValueError("unrecognized default category %r"
                              % (self.default_category, ))
 
-    def __call__(self, message: FlashMessage, category: Optional[str]=None, ignore_duplicate: bool=False,
+    def __call__(self,
+                 message: FlashMessage,
+                 category: Optional[str] = None,
+                 ignore_duplicate: bool = False,
                  allow_html=False):
         if not category:
             category = self.default_category
@@ -800,6 +805,7 @@ class _Flash(object):
 flash = _Flash()
 # this is here for backwards compatability
 _flash = flash
+
 
 @core_helper
 def flash_notice(message: FlashMessage, allow_html: bool = False) -> None:
@@ -1054,7 +1060,8 @@ def build_nav_main(
     output = literal('')
     for item in args:
         padding: Any = (None,) * 4
-        menu_item, title, highlight_controllers, auth_function = (item + padding)[:4]
+        menu_item, title, highlight_controllers, auth_function = (
+            item + padding)[:4]
         if auth_function and not check_access(auth_function):
             continue
         output += _make_menu_item(menu_item, title,
@@ -1439,7 +1446,7 @@ def sorted_extras(package_extras: Dict,
 def check_access(action: str, data_dict: Optional[Dict] = None) -> bool:
     if not getattr(g, u'user', None):
         g.user = ''
-    context = cast(Context, {'model': model,'user': g.user})
+    context = cast(Context, {'model': model, 'user': g.user})
     if not data_dict:
         data_dict = {}
     try:
@@ -2769,8 +2776,8 @@ def featured_group_org(items: List[str], get_action: str, list_action: str,
                        count: int) -> List[Dict]:
     def get_group(id):
         context: Context = {'ignore_auth': True,
-                   'limits': {'packages': 2},
-                   'for_view': True}
+                            'limits': {'packages': 2},
+                            'for_view': True}
         data_dict = {'id': id,
                      'include_datasets': True}
 
@@ -2936,9 +2943,9 @@ def mail_to(email_address: str, name: str) -> Markup:
 def radio(selected: str, id: str, checked: bool) -> Markup:
     if checked:
         return literal((u'<input checked="checked" id="%s_%s" name="%s" \
-            value="%s" type="radio">'                                                                                                                                                    ) % (selected, id, selected, id))
+            value="%s" type="radio">') % (selected, id, selected, id))
     return literal(('<input id="%s_%s" name="%s" \
-        value="%s" type="radio">'                                                                                                                                    ) % (selected, id, selected, id))
+        value="%s" type="radio">') % (selected, id, selected, id))
 
 
 @core_helper
@@ -3001,7 +3008,8 @@ def sanitize_id(id_: str) -> str:
 
 
 @core_helper
-def compare_pkg_dicts(old: Dict, new: Dict, old_activity_id: str) -> List[Dict]:
+def compare_pkg_dicts(old: Dict, new: Dict,
+                      old_activity_id: str) -> List[Dict]:
     '''
     Takes two package dictionaries that represent consecutive versions of
     the same dataset and returns a list of detailed & formatted summaries of

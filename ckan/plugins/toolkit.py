@@ -326,7 +326,9 @@ For example: ``bar = toolkit.aslist(config.get('ckan.foo.bar', []))``
     # Wrapper for the render_snippet function as it uses keywords rather than
     # dict to pass data.
     @classmethod
-    def _render_snippet(cls, template: str, data: Optional[Dict]=None) -> '_helpers.Markup':
+    def _render_snippet(cls,
+                        template: str,
+                        data: Optional[Dict] = None) -> '_helpers.Markup':
         '''Render a template snippet and return the output.
 
         See :doc:`/theming/index`.
@@ -337,7 +339,8 @@ For example: ``bar = toolkit.aslist(config.get('ckan.foo.bar', []))``
 
     # new functions
     @classmethod
-    def _add_template_directory(cls, config: 'common.CKANConfig', relative_path: str) -> None:
+    def _add_template_directory(cls, config: 'common.CKANConfig',
+                                relative_path: str) -> None:
         '''Add a path to the :ref:`extra_template_paths` config setting.
 
         The path is relative to the file calling this function.
@@ -347,7 +350,8 @@ For example: ``bar = toolkit.aslist(config.get('ckan.foo.bar', []))``
                                   'extra_template_paths')
 
     @classmethod
-    def _add_public_directory(cls, config: 'common.CKANConfig', relative_path: str) -> None:
+    def _add_public_directory(cls, config: 'common.CKANConfig',
+                              relative_path: str) -> None:
         '''Add a path to the :ref:`extra_public_paths` config setting.
 
         The path is relative to the file calling this function.
@@ -447,7 +451,9 @@ For example: ``bar = toolkit.aslist(config.get('ckan.foo.bar', []))``
         return [int(part) for part in v_str.split('.')]
 
     @classmethod
-    def _check_ckan_version(cls, min_version: Optional[str]=None, max_version: Optional[str]=None) -> bool:
+    def _check_ckan_version(cls,
+                            min_version: Optional[str] = None,
+                            max_version: Optional[str] = None) -> bool:
         '''Return ``True`` if the CKAN version is greater than or equal to
         ``min_version`` and less than or equal to ``max_version``,
         return ``False`` otherwise.
@@ -480,7 +486,9 @@ For example: ``bar = toolkit.aslist(config.get('ckan.foo.bar', []))``
         return True
 
     @classmethod
-    def _requires_ckan_version(cls, min_version: str, max_version: Optional[str]=None):
+    def _requires_ckan_version(cls,
+                               min_version: str,
+                               max_version: Optional[str] = None):
         '''Raise :py:exc:`~ckan.plugins.toolkit.CkanVersionException` if the
         CKAN version is not greater than or equal to ``min_version`` and
         less then or equal to ``max_version``.
@@ -520,7 +528,8 @@ For example: ``bar = toolkit.aslist(config.get('ckan.foo.bar', []))``
         import ckan.common as common
         try:
             # CKAN >= 2.8
-            endpoint: Tuple[str, str] = tuple(common.request.endpoint.split('.'))
+            endpoint: Tuple[str, str] = tuple(
+                common.request.endpoint.split('.'))
         except AttributeError:
             try:
                 return common.c.controller, common.c.action
@@ -613,29 +622,42 @@ if TYPE_CHECKING:
     mail_recipient = mailer.mail_recipient
     mail_user = mailer.mail_user
 
-    def render_snippet(template: str, data: Optional[Dict] = ...) -> _helpers.Markup: ...
-    def add_template_directory(
-        config: common.CKANConfig, relative_path: str
-    ) -> None:        ...
-    def add_public_directory(
-        config: common.CKANConfig, relative_path: str
-    ) -> None:        ...
-    def add_resource(path: str, name: str) -> None: ...
+    def render_snippet(template: str,
+                       data: Optional[Dict] = ...) -> _helpers.Markup:
+        ...
+
+    def add_template_directory(config: common.CKANConfig,
+                               relative_path: str) -> None:
+        ...
+
+    def add_public_directory(config: common.CKANConfig,
+                             relative_path: str) -> None:
+        ...
+
+    def add_resource(path: str, name: str) -> None:
+        ...
+
     def add_ckan_admin_tabs(
         config: common.CKANConfig,
         route_name: str,
         tab_label: str,
         config_var: str = "ckan.admin_tabs",
         icon: Optional[str] = None,
-    ) -> None:        ...
-    def requires_ckan_version(
-        min_version: str, max_version: Optional[str] = ...
-    ):        ...
+    ) -> None:
+        ...
+
+    def requires_ckan_version(min_version: str,
+                              max_version: Optional[str] = ...):
+        ...
+
     def check_ckan_version(
         min_version: Optional[str] = ...,
         max_version: Optional[str] = ...,
-    ) -> bool:        ...
-    def get_endpoint() -> Union[Tuple[str, str], Tuple[None, None]]: ...
+    ) -> bool:
+        ...
+
+    def get_endpoint() -> Union[Tuple[str, str], Tuple[None, None]]:
+        ...
 
     CkanVersionException = CkanVersionException
     HelperError = HelperError

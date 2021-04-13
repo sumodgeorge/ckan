@@ -79,6 +79,7 @@ def _encode_params(params):
 
 Params = List[Tuple[str, Any]]
 
+
 def url_with_params(url: str, params: Params) -> str:
     params = _encode_params(params)
     return url + u'?' + urlencode(params)

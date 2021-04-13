@@ -42,7 +42,7 @@ class ApiToken(DomainObject):
     plugin_extras: Dict[str, Any]
     owner: Optional[User]
 
-    def __init__(self, user_id: str=None, name: str='Unnamed') -> None:
+    def __init__(self, user_id: str = None, name: str = 'Unnamed') -> None:
         self.id = _make_token()
         self.user_id = user_id
         self.name = name
@@ -63,12 +63,12 @@ class ApiToken(DomainObject):
             return True
         return False
 
-    def touch(self, commit: bool=False) -> None:
+    def touch(self, commit: bool = False) -> None:
         self.last_access = datetime.datetime.utcnow()
         if commit:
             meta.Session.commit()
 
-    def set_extra(self, key: str, value: Any, commit: bool=False) -> None:
+    def set_extra(self, key: str, value: Any, commit: bool = False) -> None:
         extras = self.plugin_extras or {}
         extras[key] = value
         self.plugin_extras = copy.deepcopy(extras)

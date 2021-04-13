@@ -35,7 +35,7 @@ def index() -> str:
     u'''display home page'''
     try:
         context = cast(Context, {u'model': model, u'session': model.Session,
-                   u'user': g.user, u'auth_user_obj': g.userobj})
+                                 u'user': g.user, u'auth_user_obj': g.userobj})
         data_dict = {u'q': u'*:*',
                      u'facet.field': h.facets(),
                      u'rows': 4,

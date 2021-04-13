@@ -8,7 +8,7 @@ import simplejson
 
 from six import string_types
 from six.moves.urllib.parse import quote_plus  # type: ignore
-from typing import Any, Dict, Optional, Tuple, Union
+from typing import Any, Dict, Optional, Tuple
 from pysolr import Solr
 
 log = logging.getLogger(__name__)
@@ -36,7 +36,10 @@ class SolrSettings(object):
     _password: Optional[str] = None
 
     @classmethod
-    def init(cls, url: Optional[str], user: Optional[str]=None, password: Optional[str]=None) -> None:
+    def init(cls,
+             url: Optional[str],
+             user: Optional[str] = None,
+             password: Optional[str] = None) -> None:
         if url is not None:
             cls._url = url
             cls._user = user
@@ -67,7 +70,7 @@ def is_available() -> bool:
     return True
 
 
-def make_connection(decode_dates: bool=True) -> Solr:
+def make_connection(decode_dates: bool = True) -> Solr:
     solr_url, solr_user, solr_password = SolrSettings.get()
 
     if solr_url and solr_user and solr_password:

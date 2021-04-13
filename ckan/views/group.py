@@ -897,7 +897,8 @@ class CreateGroupView(MethodView):
             return self.get(group_type, is_organization,
                             data_dict, errors, error_summary)
 
-        return h.redirect_to(cast(str, group['type']) + u'.read', id=group['name'])
+        return h.redirect_to(
+            cast(str, group['type']) + u'.read', id=group['name'])
 
     def get(self,
             group_type: str,
@@ -997,7 +998,8 @@ class EditGroupView(MethodView):
             assert id
             return self.get(id, group_type, is_organization,
                             data_dict, errors, error_summary)
-        return h.redirect_to(cast(str, group[u'type']) + u'.read', id=group[u'name'])
+        return h.redirect_to(
+            cast(str, group[u'type']) + u'.read', id=group[u'name'])
 
     def get(self,
             id: str,
@@ -1109,7 +1111,7 @@ class DeleteGroupView(MethodView):
 class MembersGroupView(MethodView):
     u'''New members group view'''
 
-    def _prepare(self, id: Optional[str]=None) -> Context:
+    def _prepare(self, id: Optional[str] = None) -> Context:
         context = cast(Context, {
             u'model': model,
             u'session': model.Session,

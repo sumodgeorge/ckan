@@ -83,9 +83,9 @@ def _finish(status_int: int,
     return make_response((response_msg, status_int, headers))
 
 
-def _finish_ok(response_data: Any=None,
-               content_type: str=u'json',
-               resource_location: Optional[str]=None) -> Response:
+def _finish_ok(response_data: Any = None,
+               content_type: str = u'json',
+               resource_location: Optional[str] = None) -> Response:
     u'''If a controller method has completed successfully then
     calling this method will prepare the response.
 
@@ -117,7 +117,7 @@ def _finish_ok(response_data: Any=None,
     return _finish(status_int, response_data, content_type, headers)
 
 
-def _finish_bad_request(extra_msg: str=None) -> Response:
+def _finish_bad_request(extra_msg: str = None) -> Response:
     response_data = _(u'Bad request')
     if extra_msg:
         response_data = u'%s - %s' % (response_data, extra_msg)
@@ -128,7 +128,7 @@ def _wrap_jsonp(callback: str, response_msg: str) -> str:
     return u'{0}({1});'.format(callback, response_msg)
 
 
-def _get_request_data(try_url_params: bool=False):
+def _get_request_data(try_url_params: bool = False):
     u'''Returns a dictionary, extracted from a request.
 
     If there is no data, None or "" is returned.
@@ -206,7 +206,8 @@ def _get_request_data(try_url_params: bool=False):
 
 # View functions
 
-def action(logic_function: str, ver: int=API_DEFAULT_VERSION) -> Response:
+
+def action(logic_function: str, ver: int = API_DEFAULT_VERSION) -> Response:
     u'''Main endpoint for the action API (v3)
 
     Creates a dict with the incoming request data and calls the appropiate
@@ -332,7 +333,7 @@ def action(logic_function: str, ver: int=API_DEFAULT_VERSION) -> Response:
     return _finish_ok(return_dict)
 
 
-def get_api(ver: int=1) -> Response:
+def get_api(ver: int = 1) -> Response:
     u'''Root endpoint for the API, returns the version number'''
 
     response_data = {
@@ -341,7 +342,7 @@ def get_api(ver: int=1) -> Response:
     return _finish_ok(response_data)
 
 
-def dataset_autocomplete(ver: int=API_REST_DEFAULT_VERSION) -> Response:
+def dataset_autocomplete(ver: int = API_REST_DEFAULT_VERSION) -> Response:
     q = request.args.get(u'incomplete', u'')
     limit = request.args.get(u'limit', 10)
     package_dicts = []
@@ -360,7 +361,7 @@ def dataset_autocomplete(ver: int=API_REST_DEFAULT_VERSION) -> Response:
     return _finish_ok(resultSet)
 
 
-def tag_autocomplete(ver: int=API_REST_DEFAULT_VERSION) -> Response:
+def tag_autocomplete(ver: int = API_REST_DEFAULT_VERSION) -> Response:
     q = request.args.get(u'incomplete', u'')
     limit = request.args.get(u'limit', 10)
     vocab = request.args.get(u'vocabulary_id', u'')
@@ -385,7 +386,7 @@ def tag_autocomplete(ver: int=API_REST_DEFAULT_VERSION) -> Response:
     return _finish_ok(resultSet)
 
 
-def format_autocomplete(ver: int=API_REST_DEFAULT_VERSION) -> Response:
+def format_autocomplete(ver: int = API_REST_DEFAULT_VERSION) -> Response:
     q = request.args.get(u'incomplete', u'')
     limit = request.args.get(u'limit', 5)
     formats = []
@@ -405,7 +406,7 @@ def format_autocomplete(ver: int=API_REST_DEFAULT_VERSION) -> Response:
     return _finish_ok(resultSet)
 
 
-def user_autocomplete(ver: int=API_REST_DEFAULT_VERSION) -> Response:
+def user_autocomplete(ver: int = API_REST_DEFAULT_VERSION) -> Response:
     q = request.args.get(u'q', u'')
     limit = request.args.get(u'limit', 20)
     ignore_self = request.args.get(u'ignore_self', False)
@@ -422,7 +423,7 @@ def user_autocomplete(ver: int=API_REST_DEFAULT_VERSION) -> Response:
     return _finish_ok(user_list)
 
 
-def group_autocomplete(ver: int=API_REST_DEFAULT_VERSION) -> Response:
+def group_autocomplete(ver: int = API_REST_DEFAULT_VERSION) -> Response:
     q = request.args.get(u'q', u'')
     limit = request.args.get(u'limit', 20)
     group_list = []
@@ -436,7 +437,7 @@ def group_autocomplete(ver: int=API_REST_DEFAULT_VERSION) -> Response:
     return _finish_ok(group_list)
 
 
-def organization_autocomplete(ver: int=API_REST_DEFAULT_VERSION) -> Response:
+def organization_autocomplete(ver: int = API_REST_DEFAULT_VERSION) -> Response:
     q = request.args.get(u'q', u'')
     limit = request.args.get(u'limit', 20)
     organization_list = []
@@ -449,7 +450,7 @@ def organization_autocomplete(ver: int=API_REST_DEFAULT_VERSION) -> Response:
     return _finish_ok(organization_list)
 
 
-def snippet(snippet_path: str, ver: int=API_REST_DEFAULT_VERSION) -> str:
+def snippet(snippet_path: str, ver: int = API_REST_DEFAULT_VERSION) -> str:
     u'''Renders and returns a snippet used by ajax calls
 
         We only allow snippets in templates/ajax_snippets and its subdirs

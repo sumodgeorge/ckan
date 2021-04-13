@@ -4,7 +4,8 @@ import functools
 import logging
 import re
 from collections import defaultdict
-from typing import Any, Callable, Container, Dict, Iterable, List, Optional, Tuple, TypeVar, Union, cast, overload
+from typing import (Any, Callable, Container, Dict, Iterable, List, Optional,
+                    Tuple, TypeVar, Union, cast, overload)
 from typing_extensions import Literal
 
 from werkzeug.local import LocalProxy
@@ -40,7 +41,7 @@ class UsernamePasswordError(Exception):
 class ActionError(Exception):
     message: Optional[str]
 
-    def __init__(self, message: Optional[str]='') -> None:
+    def __init__(self, message: Optional[str] = '') -> None:
         self.message = message
         super(ActionError, self).__init__(message)
 
@@ -528,9 +529,13 @@ def get_action(action: str) -> Action:
 
 
 @overload
-def get_or_bust(data_dict: Dict, keys: str) -> Any: ...
+def get_or_bust(data_dict: Dict, keys: str) -> Any:
+    ...
+
+
 @overload
-def get_or_bust(data_dict: Dict, keys: Iterable[str]) -> Tuple[Any, ...]: ...
+def get_or_bust(data_dict: Dict, keys: Iterable[str]) -> Tuple[Any, ...]:
+    ...
 
 
 def get_or_bust(data_dict: Dict, keys: Union[str,
@@ -736,7 +741,8 @@ def model_name_to_class(model_module: Any, model_name: str) -> Any:
     try:
         return getattr(model_module, model_class_name)
     except AttributeError:
-        raise ValidationError({"message": "%s isn't a valid model" % model_class_name})
+        raise ValidationError({
+            "message": "%s isn't a valid model" % model_class_name})
 
 
 def _import_module_functions(module_path: str) -> Dict[str, Callable]:

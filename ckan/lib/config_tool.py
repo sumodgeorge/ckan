@@ -215,7 +215,8 @@ def make_changes(input_lines: Iterable[str], new_sections: Iterable[str],
                                                for option
                                                in changes.get(section, 'edit')}
             continue
-        existing_option = parse_option_string(section, line) if section else None
+        existing_option = parse_option_string(
+            section, line) if section else None
         if not existing_option:
             # leave alone comments (does not include commented options)
             output.append(line)

@@ -117,7 +117,6 @@ class Upload(object):
     old_filename: Optional[str]
     old_filepath: Optional[str]
 
-
     def __init__(self,
                  object_type: str,
                  old_filename: Optional[str] = None) -> None:
@@ -209,6 +208,8 @@ class Upload(object):
 
 
 class ResourceUpload(object):
+    mimetype: Optional[str]
+
     def __init__(self, resource: Dict) -> None:
         path = get_storage_path()
         config_mimetype_guess = config.get('ckan.mimetype_guess', 'file_ext')

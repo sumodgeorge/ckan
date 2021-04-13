@@ -15,23 +15,30 @@ Invalid = df.Invalid
 
 
 
-def identity_converter(key: Tuple, data: Dict, errors: TuplizedErrorDict, context: Context) -> None:
+def identity_converter(key: Tuple, data: Dict, errors: TuplizedErrorDict,
+                       context: Context) -> None:
     return
 
-def keep_extras(key: Tuple, data: Dict, errors: TuplizedErrorDict, context: Context) -> None:
+
+def keep_extras(key: Tuple, data: Dict, errors: TuplizedErrorDict,
+                context: Context) -> None:
 
     extras = data.pop(key, {})
     for extras_key, value in six.iteritems(extras):
         data[key[:-1] + (extras_key,)] = value
 
-def not_missing(key: Tuple, data: Dict, errors: TuplizedErrorDict, context: Context) -> None:
+
+def not_missing(key: Tuple, data: Dict, errors: TuplizedErrorDict,
+                context: Context) -> None:
 
     value = data.get(key)
     if value is missing:
         errors[key].append(_('Missing value'))
         raise StopOnError
 
-def not_empty(key: Tuple, data: Dict, errors: TuplizedErrorDict, context: Context) -> None:
+
+def not_empty(key: Tuple, data: Dict, errors: TuplizedErrorDict,
+              context: Context) -> None:
 
     value = data.get(key)
     if not value or value is missing:
@@ -60,7 +67,9 @@ def both_not_empty(other_key: str) -> Callable:
 
     return callable
 
-def empty(key: Tuple, data: Dict, errors: TuplizedErrorDict, context: Context) -> None:
+
+def empty(key: Tuple, data: Dict, errors: TuplizedErrorDict,
+          context: Context) -> None:
 
     value = data.pop(key, None)
 
@@ -72,7 +81,9 @@ def empty(key: Tuple, data: Dict, errors: TuplizedErrorDict, context: Context) -
         errors[key].append(_(
             'The input field %(name)s was not expected.') % {"name": key_name})
 
-def ignore(key: Tuple, data: Dict, errors: TuplizedErrorDict, context: Context) -> NoReturn:
+
+def ignore(key: Tuple, data: Dict, errors: TuplizedErrorDict,
+           context: Context) -> NoReturn:
 
     value = data.pop(key, None)
     raise StopOnError
@@ -89,7 +100,9 @@ def default(default_value: Any) -> Callable:
 
     return callable
 
-def configured_default(config_name: str, default_value_if_not_configured: Any) -> Callable:
+
+def configured_default(config_name: str,
+                       default_value_if_not_configured: Any) -> Callable:
     '''When key is missing or value is an empty string or None, replace it with
     a default value from config, or if that isn't set from the
     default_value_if_not_configured.'''
@@ -99,7 +112,9 @@ def configured_default(config_name: str, default_value_if_not_configured: Any) -
         default_value = default_value_if_not_configured
     return default(default_value)
 
-def ignore_missing(key: Tuple, data: Dict, errors: TuplizedErrorDict, context: Context) -> None:
+
+def ignore_missing(key: Tuple, data: Dict, errors: TuplizedErrorDict,
+                   context: Context) -> None:
     '''If the key is missing from the data, ignore the rest of the key's
     schema.
 
@@ -120,7 +135,9 @@ def ignore_missing(key: Tuple, data: Dict, errors: TuplizedErrorDict, context: C
         data.pop(key, None)
         raise StopOnError
 
-def ignore_empty(key: Tuple, data: Dict, errors: TuplizedErrorDict, context: Context) -> None:
+
+def ignore_empty(key: Tuple, data: Dict, errors: TuplizedErrorDict,
+                 context: Context) -> None:
 
     value = data.get(key)
 
@@ -178,7 +195,9 @@ def unicode_safe(value: Any) -> str:
         except Exception:
             return u'\N{REPLACEMENT CHARACTER}'
 
-def limit_to_configured_maximum(config_option: str, default_limit: int) -> Callable:
+
+def limit_to_configured_maximum(config_option: str,
+                                default_limit: int) -> Callable:
     '''
     If the value is over a limit, it changes it to the limit. The limit is
     defined by a configuration option, or if that is not set, a given int

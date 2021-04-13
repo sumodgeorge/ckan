@@ -89,7 +89,7 @@ def _get_dashboard_context(filter_type=None, filter_id=None, q=None):
     }
 
 
-def index(offset: int=0) -> str:
+def index(offset: int = 0) -> str:
     context = cast(Context, {
         u'model': model,
         u'session': model.Session,

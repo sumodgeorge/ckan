@@ -38,7 +38,7 @@ if six.PY2:
     from pylons.templating import (  # type: ignore
         cached_template, pylons_globals
     )
-    from ckan.common import response # type: ignore
+    from ckan.common import response  # type: ignore
 
 
 log = logging.getLogger(__name__)

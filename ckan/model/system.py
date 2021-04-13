@@ -15,5 +15,8 @@ class System(domain_object.DomainObject):
         pass
 
     @classmethod
-    def by_name(cls, name: str, autoflush: bool=True, for_update: bool=False) -> Optional["System"]:
+    def by_name(cls,
+                name: str,
+                autoflush: bool = True,
+                for_update: bool = False) -> Optional["System"]:
         return System()

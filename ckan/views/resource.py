@@ -395,15 +395,13 @@ class EditView(MethodView):
             id=id, resource_id=resource_id
         )
 
-    def get(
-        self,
-        package_type: str,
-        id: str,
-        resource_id: str,
-        data: Optional[Dict]=None,
-        errors: Optional[Dict]=None,
-        error_summary: Optional[Dict]=None
-    ) -> str:
+    def get(self,
+            package_type: str,
+            id: str,
+            resource_id: str,
+            data: Optional[Dict] = None,
+            errors: Optional[Dict] = None,
+            error_summary: Optional[Dict] = None) -> str:
         context = self._prepare(id)
         pkg_dict = get_action(u'package_show')(context, {u'id': id})
 

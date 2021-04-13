@@ -271,7 +271,7 @@ class EditView(MethodView):
             base.abort(403, _(u'Unauthorized to edit a user.'))
         return context, id
 
-    def post(self, id: Optional[str]=None) -> Union[Response, str]:
+    def post(self, id: Optional[str] = None) -> Union[Response, str]:
         context, id = self._prepare(id)
         if not context[u'save']:
             return self.get(id)
@@ -546,7 +546,7 @@ def delete(id: str) -> Response:
         return h.redirect_to(user_index)
 
 
-def generate_apikey(id: Optional[str]=None) -> Response:
+def generate_apikey(id: Optional[str] = None) -> Response:
     u'''Cycle the API key of a user'''
     context = cast(Context, {
         u'model': model,
@@ -572,7 +572,7 @@ def generate_apikey(id: Optional[str]=None) -> Response:
     return h.redirect_to(u'user.read', id=result[u'name'])
 
 
-def activity(id: str, offset: int=0) -> str:
+def activity(id: str, offset: int = 0) -> str:
     u'''Render this user's public activity stream page.'''
 
     context = cast(Context, {
