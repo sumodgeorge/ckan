@@ -3489,19 +3489,16 @@ def config_option_show(context: Context, data_dict: DataDict) -> Any:
     '''Show the current value of a particular configuration option.
 
     Only returns runtime-editable config options (the ones returned by
-    :py:func:`~ckan.logic.action.get.config_option_list`), which can be
-        updated with the
+    :py:func:`~ckan.logic.action.get.config_option_list`), which can be updated with the
     :py:func:`~ckan.logic.action.update.config_option_update` action.
 
     :param key: The configuration option key
     :type key: string
 
-    :returns: The value of the config option from either the system_info table
-        or ini file.
+    :returns: The value of the config option from either the system_info table or ini file.
     :rtype: string
 
-    :raises: :class:`ckan.logic.ValidationError`: if config option is not in
-        the schema (whitelisted as editable).
+    :raises: :class:`ckan.logic.ValidationError`: if config option is not in the schema (whitelisted as editable).
     '''
 
     _check_access('config_option_show', context, data_dict)

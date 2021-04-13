@@ -94,7 +94,8 @@ def set_app_global(key: str, value: str) -> None:
     setattr(app_globals, key, new_value)
 
 
-def process_app_global(key: str, value: str) -> Tuple[str, Union[bool, int, str, List[str]]]:
+def process_app_global(
+        key: str, value: str) -> Tuple[str, Union[bool, int, str, List[str]]]:
     '''
     Tweak a key, value pair meant to be set on the app_globals (g) object
 
@@ -115,6 +116,8 @@ def process_app_global(key: str, value: str) -> Tuple[str, Union[bool, int, str,
             new_value = int(value)
         elif data_type == 'split':
             new_value = value.split()
+        else:
+            new_value = value
     return key, new_value
 
 
@@ -219,7 +222,6 @@ class _Globals(object):
             self.ckan_doc_version = self.ckan_version[:3]
         else:
             self.ckan_doc_version = 'latest'
-
         # process the config details to set globals
         for key in app_globals_from_config_details.keys():
             new_key, value = process_app_global(key, config.get(key) or '')

@@ -13,10 +13,10 @@ def config_edit_using_option_strings(config_filepath: str, desired_option_string
                                      section: str, edit: bool=False) -> None:
     '''Writes the desired_option_strings to the config file.'''
     # Parse the desired_options
-    desired_options = filter(None,
-                             [parse_option_string(section, desired_option_string,
-                                                  raise_on_error=True)
-                              for desired_option_string in desired_option_strings])
+    desired_options = list(filter(
+        None,
+        [parse_option_string(section, desired_option_string, raise_on_error=True)
+         for desired_option_string in desired_option_strings]))
     # Make the changes
     config_edit(config_filepath, desired_options, edit=edit)
 

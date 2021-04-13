@@ -19,6 +19,7 @@ into plugins-toolkit.rst manually before running Sphinx).
 '''
 import inspect
 import types
+from typing import Callable, Optional
 
 import ckan.plugins.toolkit as toolkit
 
@@ -32,7 +33,9 @@ def setup(app):
     app.connect('source-read', source_read)
 
 
-def format_function(name, function, docstring=None):
+def format_function(name: str,
+                    function: Callable,
+                    docstring: Optional[str] = None) -> str:
     '''Return a Sphinx .. function:: directive for the given function.
 
     The directive includes the function's docstring if it has one.
@@ -60,7 +63,9 @@ def format_function(name, function, docstring=None):
 
     # Get the arguments of the function, as a string like:
     # "(foo, bar=None, ...)"
-    argstring = inspect.formatargspec(*inspect.getargspec(function))
+    argstring = inspect.formatargspec(
+        inspect.getfullargspec(function).args
+    )
 
     docstring = docstring or inspect.getdoc(function)
     if docstring is None:
