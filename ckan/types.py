@@ -1,12 +1,18 @@
 # -*- coding: utf-8 -*-
 
 import datetime
-from functools import partial
-from types import ModuleType
 from typing import (
-    Any, Callable, Dict, Iterable, List,
-    Mapping, Optional, Tuple, Type, Union,
-    TYPE_CHECKING
+    Any,
+    Callable,
+    Dict,
+    Iterable,
+    List,
+    Mapping,
+    Optional,
+    Tuple,
+    Type,
+    Union,
+    TYPE_CHECKING,
 )
 from sqlalchemy.orm.scoping import ScopedSession
 from sqlalchemy import Table
@@ -30,15 +36,16 @@ DataDict = Dict[str, Any]
 ErrorDict = Dict[str, Union[List[Union[str, Dict[str, Any]]], str]]
 TuplizedErrorDict = Dict[Tuple, List[str]]
 
+
 class Context(TypedDict, total=False):
     user: str
-    model: 'model_'
+    model: "model_"
     session: AlchemySession
 
     __auth_user_obj_checked: bool
     __auth_audit: List[Tuple[str, int]]
-    auth_user_obj: Optional['model_.User']
-    user_obj: 'model_.User'
+    auth_user_obj: Optional["model_.User"]
+    user_obj: "model_.User"
 
     id: str
     user_id: str
@@ -67,16 +74,16 @@ class Context(TypedDict, total=False):
     skip_validation: bool
     count_private_and_draft_datasets: bool
 
-    schema: 'Schema'
-    group: 'model_.Group'
-    package: 'model_.Package'
+    schema: "Schema"
+    group: "model_.Group"
+    package: "model_.Package"
 
-    tag: 'model_.Tag'
-    activity: 'model_.Activity'
-    task_status: 'model_.TaskStatus'
-    resource: 'model_.Resource'
-    resource_view: 'model_.ResourceView'
-    relationship: 'model_.PackageRelationship'
+    tag: "model_.Tag"
+    activity: "model_.Activity"
+    task_status: "model_.TaskStatus"
+    resource: "model_.Resource"
+    resource_view: "model_.ResourceView"
+    relationship: "model_.PackageRelationship"
     api_version: int
     dataset_counts: Dict
     limits: Dict
@@ -90,11 +97,13 @@ class AuthResult(TypedDict, total=False):
 
 
 class ValueValidator(Protocol):
-    def __call__(self, value: Any) -> Any: ...
+    def __call__(self, value: Any) -> Any:
+        ...
 
 
 class ContextValidator(Protocol):
-    def __call__(self, *, value: Any, context: Context) -> Any: ...
+    def __call__(self, *, value: Any, context: Context) -> Any:
+        ...
 
 
 class DataValidator(Protocol):
@@ -104,16 +113,19 @@ class DataValidator(Protocol):
         data: Dict[TuplizedKey, Any],
         errors: TuplizedErrorDict,
         context: Context,
-    ) -> Any: ...
+    ) -> Any:
+        ...
 
 
 Validator = Union[ValueValidator, ContextValidator, DataValidator]
 
-Schema = Dict[str, Union[Iterable[Validator], 'Schema']]
+Schema = Dict[str, Union[Iterable[Validator], "Schema"]]
 ComplexSchemaFunc = Callable[..., Schema]
 PlainSchemaFunc = Callable[[], Schema]
 
-AuthFunctionWithOptionalDataDict = Callable[[Context, Optional[DataDict]], AuthResult]
+AuthFunctionWithOptionalDataDict = Callable[
+    [Context, Optional[DataDict]], AuthResult
+]
 AuthFunctionWithMandatoryDataDict = Callable[[Context, DataDict], AuthResult]
 AuthFunction = Union[
     AuthFunctionWithOptionalDataDict,
@@ -121,6 +133,7 @@ AuthFunction = Union[
     # partial
 ]
 Action = Callable[[Context, DataDict], Any]
+
 
 class PFeed(Protocol):
     def __init__(
@@ -136,68 +149,90 @@ class PFeed(Protocol):
         next_page: Optional[str],
         first_page: Optional[str],
         last_page: Optional[str],
-    ) -> None: ...
+    ) -> None:
+        ...
+
     def add_item(
-            self,
-            title: str,
-            link: str,
-            description: str,
-            updated: datetime.datetime,
-            publised: datetime.datetime,
-            unique_id: str,
-            author_name: Optional[str],
-            author_email: Optional[str],
-            categories: List[str],
-            enclosure: Any,
-            **additional_fields: Any
-    ) -> None: ...
+        self,
+        title: str,
+        link: str,
+        description: str,
+        updated: datetime.datetime,
+        publised: datetime.datetime,
+        unique_id: str,
+        author_name: Optional[str],
+        author_email: Optional[str],
+        categories: List[str],
+        enclosure: Any,
+        **additional_fields: Any
+    ) -> None:
+        ...
 
-    def writeString(self, encoding: str) -> str: ...
-
+    def writeString(self, encoding: str) -> str:
+        ...
 
 
 class PUploader(Protocol):
-    def __init__(self, object_type: str, old_filename: Optional[str]=None) -> None: ...
-    def upload(self, max_size: int=...) -> None: ...
-    def update_data_dict(self, data_dict: Dict[str, Any], url_field: str, file_field: str, clear_field: str) -> None: ...
+    def __init__(
+        self, object_type: str, old_filename: Optional[str] = None
+    ) -> None:
+        ...
+
+    def upload(self, max_size: int = ...) -> None:
+        ...
+
+    def update_data_dict(
+        self,
+        data_dict: Dict[str, Any],
+        url_field: str,
+        file_field: str,
+        clear_field: str,
+    ) -> None:
+        ...
 
 
 class PResourceUploader(Protocol):
     mimetype: str
     filesize: int
-    def __init__(self, resource: Dict) -> None: ...
-    def get_path(self, id: str) -> str: ...
-    def upload(self, id: str, max_size: int=...) -> None: ...
+
+    def __init__(self, resource: Dict) -> None:
+        ...
+
+    def get_path(self, id: str) -> str:
+        ...
+
+    def upload(self, id: str, max_size: int = ...) -> None:
+        ...
 
 
 class PModel(Protocol):
     Session: AlchemySession
-    State: Type['model_.State']
-    System: Type['model_.System']
-    Package: Type['model_.Package']
-    PackageMember: Type['model_.PackageMember']
-    Tag: Type['model_.Tag']
-    PackageTag: Type['model_.PackageTag']
-    Member: Type['model_.Member']
-    User: Type['model_.User']
-    Group: Type['model_.Group']
-    GroupExtra: Type['model_.GroupExtra']
-    PackageExtra: Type['model_.PackageExtra']
-    Resource: Type['model_.Resource']
-    ResourceView: Type['model_.ResourceView']
-    TrackingSummary: Type['model_.TrackingSummary']
-    Rating: Type['model_.Rating']
-    PackageRelationship: Type['model_.PackageRelationship']
-    TaskStatus: Type['model_.TaskStatus']
-    Vocabulary: Type['model_.Vocabulary']
-    Activity: Type['model_.Activity']
-    ActivityDetail: Type['model_.ActivityDetail']
-    UserFollowingUser: Type['model_.UserFollowingUser']
-    UserFollowingDataset: Type['model_.UserFollowingDataset']
-    UserFollowingGroup: Type['model_.UserFollowingGroup']
-    SystemInfo: Type['model_.SystemInfo']
-    Dashboard: Type['model_.Dashboard']
-    ApiToken: Type['model_.ApiToken']
+    State: Type["model_.State"]
+    System: Type["model_.System"]
+    Package: Type["model_.Package"]
+    PackageMember: Type["model_.PackageMember"]
+    Tag: Type["model_.Tag"]
+    PackageTag: Type["model_.PackageTag"]
+    Member: Type["model_.Member"]
+    User: Type["model_.User"]
+    Group: Type["model_.Group"]
+    GroupExtra: Type["model_.GroupExtra"]
+    PackageExtra: Type["model_.PackageExtra"]
+    Resource: Type["model_.Resource"]
+    ResourceView: Type["model_.ResourceView"]
+    TrackingSummary: Type["model_.TrackingSummary"]
+    Rating: Type["model_.Rating"]
+    PackageRelationship: Type["model_.PackageRelationship"]
+    TaskStatus: Type["model_.TaskStatus"]
+    Vocabulary: Type["model_.Vocabulary"]
+    Activity: Type["model_.Activity"]
+    ActivityDetail: Type["model_.ActivityDetail"]
+    UserFollowingUser: Type["model_.UserFollowingUser"]
+    UserFollowingDataset: Type["model_.UserFollowingDataset"]
+    UserFollowingGroup: Type["model_.UserFollowingGroup"]
+    SystemInfo: Type["model_.SystemInfo"]
+    Dashboard: Type["model_.Dashboard"]
+    ApiToken: Type["model_.ApiToken"]
 
     resource_table: Table
     member_table: Table
@@ -218,4 +253,4 @@ class PModel(Protocol):
     task_status_table: Table
     package_relationship_table: Table
 
-    repo: 'model_.Repository'
+    repo: "model_.Repository"

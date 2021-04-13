@@ -9,19 +9,23 @@ from typing_extensions import Literal
 INSERT_NEW_SECTIONS_BEFORE_SECTION = 'app:main'
 
 
-def config_edit_using_option_strings(config_filepath: str, desired_option_strings: List[str],
-                                     section: str, edit: bool=False) -> None:
+def config_edit_using_option_strings(config_filepath: str,
+                                     desired_option_strings: List[str],
+                                     section: str,
+                                     edit: bool = False) -> None:
     '''Writes the desired_option_strings to the config file.'''
     # Parse the desired_options
     desired_options = list(filter(
         None,
-        [parse_option_string(section, desired_option_string, raise_on_error=True)
+        [parse_option_string(
+            section, desired_option_string, raise_on_error=True)
          for desired_option_string in desired_option_strings]))
     # Make the changes
     config_edit(config_filepath, desired_options, edit=edit)
 
 
-def config_edit_using_merge_file(config_filepath: str, merge_config_filepath: str) -> None:
+def config_edit_using_merge_file(config_filepath: str,
+                                 merge_config_filepath: str) -> None:
     '''Merges options found in a config file (merge_config_filepath) into the
     main config file (config_filepath).
     '''
@@ -34,7 +38,9 @@ def config_edit_using_merge_file(config_filepath: str, merge_config_filepath: st
     config_edit(config_filepath, desired_options)
 
 
-def config_edit(config_filepath: str, desired_options: Iterable['Option'], edit: bool=False) -> None:
+def config_edit(config_filepath: str,
+                desired_options: Iterable['Option'],
+                edit: bool = False) -> None:
     '''Writes the desired_options to the config file.'''
     # Read and parse the existing config file
     with open(config_filepath, 'rb') as f:
@@ -52,7 +58,9 @@ def config_edit(config_filepath: str, desired_options: Iterable['Option'], edit:
         f.write(six.ensure_binary('\n'.join(output) + '\n'))
 
 
-def parse_option_string(section: str, option_string: str, raise_on_error: bool=False) -> Optional['Option']:
+def parse_option_string(section: str,
+                        option_string: str,
+                        raise_on_error: bool = False) -> Optional['Option']:
     option_match = OPTION_RE.match(option_string)
     if not option_match:
         if raise_on_error:
@@ -68,7 +76,12 @@ def parse_option_string(section: str, option_string: str, raise_on_error: bool=F
 
 
 class Option(object):
-    def __init__(self, section: str, key: str, value: str, is_commented_out: Any, original: Optional[str]=None) -> None:
+    def __init__(self,
+                 section: str,
+                 key: str,
+                 value: str,
+                 is_commented_out: Any,
+                 original: Optional[str] = None) -> None:
         self.section = section
         self.key = key
         self.value = value
@@ -93,7 +106,8 @@ class Option(object):
         self.original = None  # it is no longer accurate
 
 
-def calculate_new_sections(existing_options: Iterable[Option], desired_options: Iterable[Option]) -> set:
+def calculate_new_sections(existing_options: Iterable[Option],
+                           desired_options: Iterable[Option]) -> set:
     existing_sections = {option.section for option in existing_options}
     desired_sections = {option.section for option in desired_options}
     new_sections = desired_sections - existing_sections
@@ -119,7 +133,9 @@ class Changes(dict):
             return []
 
 
-def calculate_changes(existing_options_dict: Dict, desired_options: Iterable[Option], edit: bool) -> Changes:
+def calculate_changes(existing_options_dict: Dict,
+                      desired_options: Iterable[Option],
+                      edit: bool) -> Changes:
     changes = Changes()
 
     for desired_option in desired_options:
@@ -158,7 +174,8 @@ def parse_config(input_lines: List[str]) -> Dict[str, Option]:
     return options
 
 
-def make_changes(input_lines: Iterable[str], new_sections: Iterable[str], changes: Changes) -> list:
+def make_changes(input_lines: Iterable[str], new_sections: Iterable[str],
+                 changes: Changes) -> list:
     '''Makes changes to the config file (returned as lines).'''
     output = []
     section = None

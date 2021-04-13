@@ -30,9 +30,14 @@ class MailerException(Exception):
     pass
 
 
-def _mail_recipient(recipient_name, recipient_email,
-                    sender_name, sender_url, subject,
-                    body, body_html=None, headers=None):
+def _mail_recipient(recipient_name,
+                    recipient_email,
+                    sender_name,
+                    sender_url,
+                    subject,
+                    body,
+                    body_html=None,
+                    headers=None):
 
     if not headers:
         headers = {}
@@ -116,8 +121,12 @@ def _mail_recipient(recipient_name, recipient_email,
         smtp_connection.quit()
 
 
-def mail_recipient(recipient_name: str, recipient_email: str, subject: str,
-                   body: str, body_html: Optional[str]=None, headers: Dict={}) -> None:
+def mail_recipient(recipient_name: str,
+                   recipient_email: str,
+                   subject: str,
+                   body: str,
+                   body_html: Optional[str] = None,
+                   headers: Dict = {}) -> None:
     '''Sends an email'''
     site_title = config.get('ckan.site_title')
     site_url = config.get('ckan.site_url')
@@ -126,7 +135,11 @@ def mail_recipient(recipient_name: str, recipient_email: str, subject: str,
                            body_html=body_html, headers=headers)
 
 
-def mail_user(recipient: model.User, subject: str, body: str, body_html: Optional[str]=None, headers: Dict={}) -> None:
+def mail_user(recipient: model.User,
+              subject: str,
+              body: str,
+              body_html: Optional[str] = None,
+              headers: Dict = {}) -> None:
     '''Sends an email to a CKAN user'''
     if (recipient.email is None) or not len(recipient.email):
         raise MailerException(_("No recipient email address available!"))
@@ -145,7 +158,9 @@ def get_reset_link_body(user: model.User) -> str:
     return render('emails/reset_password.txt', extra_vars)
 
 
-def get_invite_body(user: model.User, group_dict: Optional[Dict]=None, role: Optional[str]=None) -> str:
+def get_invite_body(user: model.User,
+                    group_dict: Optional[Dict] = None,
+                    role: Optional[str] = None) -> str:
     extra_vars = {
         'reset_link': get_reset_link(user),
         'site_title': config.get('ckan.site_title'),

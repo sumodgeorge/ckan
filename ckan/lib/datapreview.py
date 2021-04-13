@@ -63,7 +63,9 @@ def on_same_domain(data_dict: Dict) -> bool:
     return compare_domains([ckan_url, resource_url])
 
 
-def get_preview_plugin(data_dict: Dict, return_first: bool=False) -> Optional[p.IResourcePreview]:
+def get_preview_plugin(
+        data_dict: Dict,
+        return_first: bool = False) -> Optional[p.IResourcePreview]:
     '''Determines whether there is an extension that can preview the resource.
 
     :param data_dict: contains a resource and package dict.
@@ -156,7 +158,8 @@ def get_allowed_view_plugins(data_dict: Dict) -> List[p.IResourceView]:
     return can_view
 
 
-def get_default_view_plugins(get_datastore_views: bool=False) -> List[p.IResourceView]:
+def get_default_view_plugins(
+        get_datastore_views: bool = False) -> List[p.IResourceView]:
     '''
     Returns the list of view plugins to be created by default on new resources
 
@@ -204,9 +207,9 @@ def get_default_view_plugins(get_datastore_views: bool=False) -> List[p.IResourc
 
 def add_views_to_resource(context: Context,
                           resource_dict: Dict,
-                          dataset_dict: Optional[Dict]=None,
-                          view_types: List[str]=[],
-                          create_datastore_views: bool=False) -> List[Dict]:
+                          dataset_dict: Optional[Dict] = None,
+                          view_types: List[str] = [],
+                          create_datastore_views: bool = False) -> List[Dict]:
     '''
     Creates the provided views (if necessary) on the provided resource
 
@@ -275,10 +278,11 @@ def add_views_to_resource(context: Context,
     return created_views
 
 
-def add_views_to_dataset_resources(context: Context,
-                                   dataset_dict: Dict,
-                                   view_types: List[str]=[],
-                                   create_datastore_views: bool=False) -> List[Dict]:
+def add_views_to_dataset_resources(
+        context: Context,
+        dataset_dict: Dict,
+        view_types: List[str] = [],
+        create_datastore_views: bool = False) -> List[Dict]:
     '''
     Creates the provided views on all resources of the provided dataset
 

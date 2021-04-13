@@ -54,11 +54,10 @@ from ckan.views import (identify_user,
 
 import logging
 from logging.handlers import SMTPHandler
-from ckan.lib.helpers import HelperAttributeDict
 from flask.blueprints import Blueprint
 from flask.wrappers import Response
 from werkzeug.local import LocalProxy
-from typing import Any, Dict, List, Optional, Tuple, Union
+from typing import Any, Dict, List, Optional, Tuple, Union, cast
 log = logging.getLogger(__name__)
 
 
@@ -406,11 +405,12 @@ def ckan_after_request(response: Response) -> Response:
     return response
 
 
-def helper_functions() -> Dict[str, HelperAttributeDict]:
+def helper_functions() -> Dict[str, helpers.HelperAttributeDict]:
     u'''Make helper functions (`h`) available to Flask templates'''
     if not helpers.helper_functions:
         helpers.load_plugin_helpers()
-    return dict(h=helpers.helper_functions)
+    return cast(Dict[str, helpers.HelperAttributeDict],
+                dict(h=helpers.helper_functions))
 
 
 def c_object() -> Dict[str, LocalProxy]:
@@ -454,7 +454,9 @@ class CKANFlask(MultiStaticFlask):
     app_name: str = 'flask_app'
     static_folder: List[str]
 
-    def can_handle_request(self, environ: Any) -> Union[Tuple[bool, str], Tuple[bool, str, str]]:
+    def can_handle_request(
+            self,
+            environ: Any) -> Union[Tuple[bool, str], Tuple[bool, str, str]]:
         '''
         Decides whether it can handle a request with the Flask app by
         matching the request environ against the route mapper
@@ -483,7 +485,8 @@ class CKANFlask(MultiStaticFlask):
         except HTTPException:
             return (False, self.app_name)
 
-    def register_extension_blueprint(self, blueprint: Blueprint, **kwargs: Dict):
+    def register_extension_blueprint(self, blueprint: Blueprint,
+                                     **kwargs: Dict):
         '''
         This method should be used to register blueprints that come from
         extensions, so there's an opportunity to add extension-specific
@@ -525,7 +528,7 @@ def _register_core_blueprints(app):
 def _register_error_handler(app):
     u'''Register error handler'''
 
-    def error_handler(e) -> str:
+    def error_handler(e) -> Tuple[str, Optional[int]]:
         log.error(e, exc_info=sys.exc_info)  # type: ignore
         if isinstance(e, HTTPException):
             extra_vars = {
@@ -562,7 +565,9 @@ def _setup_error_mail_handler(app):
         if ':' in smtp_server else smtp_server
     credentials = None
     if config.get('smtp.user'):
-        credentials = (config.get('smtp.user', ''), config.get('smtp.password', ''))
+        credentials = (
+            config.get('smtp.user', ''),
+            config.get('smtp.password', ''))
     secure = () if asbool(config.get('smtp.starttls')) else None
     mail_handler = SMTPHandler(
         mailhost=mailhost,

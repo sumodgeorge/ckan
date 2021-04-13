@@ -32,7 +32,7 @@ from ckan.common import config
 from ckan.config.environment import load_environment
 from ckan.model import meta
 import ckan.plugins as plugins
-from typing import Any, Callable, Dict, Iterable, List, NoReturn, Optional
+from typing import Any, Callable, Dict, Iterable, List, Optional
 
 
 log = logging.getLogger(__name__)
@@ -101,7 +101,7 @@ def get_all_queues() -> List[rq.Queue]:
             q.name.startswith(prefix)]
 
 
-def get_queue(name: str=DEFAULT_QUEUE_NAME) -> rq.Queue:
+def get_queue(name: str = DEFAULT_QUEUE_NAME) -> rq.Queue:
     u'''
     Get a job queue.
 
@@ -126,8 +126,12 @@ def get_queue(name: str=DEFAULT_QUEUE_NAME) -> rq.Queue:
         return queue
 
 
-def enqueue(fn: Callable, args: Optional[Iterable]=None, kwargs: Optional[Dict]=None, title: Optional[str]=None, queue: str=DEFAULT_QUEUE_NAME,
-            rq_kwargs: Optional[Dict]=None) -> Job:
+def enqueue(fn: Callable,
+            args: Optional[Iterable] = None,
+            kwargs: Optional[Dict] = None,
+            title: Optional[str] = None,
+            queue: str = DEFAULT_QUEUE_NAME,
+            rq_kwargs: Optional[Dict] = None) -> Job:
     u'''
     Enqueue a job to be run in the background.
 
@@ -232,7 +236,10 @@ class Worker(rq.Worker):
     non-committed changes are rolled back and instance variables bound
     to the old session have to be re-fetched from the database.
     '''
-    def __init__(self, queues: Optional[Iterable[str]]=None, *args: Any, **kwargs: Any) -> None:
+    def __init__(self,
+                 queues: Optional[Iterable[str]] = None,
+                 *args: Any,
+                 **kwargs: Any) -> None:
         u'''
         Constructor.
 

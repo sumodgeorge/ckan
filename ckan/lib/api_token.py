@@ -65,7 +65,8 @@ def get_schema() -> Schema:
     return schema
 
 
-def postprocess(data: Dict[str, Any], jti: str, data_dict: Dict[str, Any]) -> Dict[str, Any]:
+def postprocess(data: Dict[str, Any], jti: str,
+                data_dict: Dict[str, Any]) -> Dict[str, Any]:
     for plugin in _get_plugins():
         data = plugin.postprocess_api_token(data, jti, data_dict)
     return data
@@ -114,7 +115,9 @@ def add_extra(result: Dict[str, Any]) -> Dict[str, Any]:
     return result
 
 
-def get_user_from_token(token: str, update_access_time: bool=True) -> Optional[model.User]:
+def get_user_from_token(token: str,
+                        update_access_time: bool = True
+                        ) -> Optional[model.User]:
     data = decode(token)
     if not data:
         return None

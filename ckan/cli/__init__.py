@@ -10,7 +10,7 @@ from logging.config import fileConfig as loggingFileConfig
 from six.moves.configparser import ConfigParser  # type: ignore
 
 from ckan.exceptions import CkanConfigurationException
-from typing import Any, Optional
+from typing import Any, Dict, Optional, cast
 
 log = logging.getLogger(__name__)
 
@@ -54,7 +54,7 @@ class CKANConfigLoader(object):
 
         # # The global_config key is to keep compatibility with Pylons.
         # # It can be safely removed when the Flask migration is completed.
-        self.config[u'global_conf'] = self.parser.defaults().copy()  # type: ignore
+        self.config[u'global_conf'] = cast(Dict, self.parser.defaults()).copy()
 
         self._update_config()
 
@@ -91,7 +91,7 @@ def error_shout(exception: Any) -> None:
     click.secho(str(exception), fg=u'red', err=True)
 
 
-def load_config(ini_path: Optional[str]=None) -> Config:
+def load_config(ini_path: Optional[str] = None) -> Config:
     if ini_path:
         if ini_path.startswith(u'~'):
             ini_path = os.path.expanduser(ini_path)

@@ -51,10 +51,9 @@ def is_flask_request() -> bool:
              not pylons_request_available))
 
 
-def streaming_response(
-        data: Iterable[Any],
-        mimetype: str=u'application/octet-stream',
-        with_context: bool=False) -> flask.Response:
+def streaming_response(data: Iterable[Any],
+                       mimetype: str = u'application/octet-stream',
+                       with_context: bool = False) -> flask.Response:
     iter_data = iter(data)
     if is_flask_request():
         # Removal of context variables for pylon's app is prevented
@@ -250,22 +249,34 @@ T = TypeVar('T')
 SequenceT = TypeVar('SequenceT', list, tuple)
 
 @overload
-def aslist(obj: str, sep: Optional[str]=None, strip: bool=True) -> List[str]: ...
+def aslist(obj: str,
+           sep: Optional[str] = None,
+           strip: bool = True) -> List[str]:
+    ...
 
 
 @overload
-def aslist(obj: List[T], sep: Optional[str]=None, strip: bool=True) -> List[T]: ...
+def aslist(obj: List[T],
+           sep: Optional[str] = None,
+           strip: bool = True) -> List[T]:
+    ...
 
 
 @overload
-def aslist(obj: Tuple[T], sep: Optional[str]=None, strip: bool=True) -> Tuple[T]: ...
+def aslist(obj: Tuple[T],
+           sep: Optional[str] = None,
+           strip: bool = True) -> Tuple[T]:
+    ...
 
 
 @overload
-def aslist(obj: SequenceT, sep: Optional[str]=None, strip: bool=True) -> SequenceT: ...
+def aslist(obj: SequenceT,
+           sep: Optional[str] = None,
+           strip: bool = True) -> SequenceT:
+    ...
 
 
-def aslist(obj, sep=None, strip=True):
+def aslist(obj: Any, sep: Optional[str] = None, strip: bool = True):
     if isinstance(obj, six.string_types):
         lst = obj.split(sep)
         if strip:

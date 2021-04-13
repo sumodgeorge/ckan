@@ -39,7 +39,7 @@ from string import Template
 import dominate.tags as tags
 from markupsafe import Markup
 from six import text_type
-from six.moves import range
+from six.moves import range  # type: ignore
 from typing import Any, Callable, Dict, Iterable, Optional
 
 
@@ -99,17 +99,15 @@ class BasePage(list):
 
     """
 
-    def __init__(
-        self,
-        collection: Iterable,
-        page: int=1,
-        items_per_page: int=20,
-        item_count: Optional[int]=None,
-        sqlalchemy_session: Any=None,
-        presliced_list: bool=False,
-        url: Optional[Callable]=None,
-        **kwargs: Any
-    ) -> None:
+    def __init__(self,
+                 collection: Iterable,
+                 page: int = 1,
+                 items_per_page: int = 20,
+                 item_count: Optional[int] = None,
+                 sqlalchemy_session: Any = None,
+                 presliced_list: bool = False,
+                 url: Optional[Callable] = None,
+                 **kwargs: Any) -> None:
         """Create a "Page" instance.
 
         Parameters:
@@ -261,23 +259,21 @@ class BasePage(list):
             }
         )
 
-    def pager(
-        self,
-        format: str=u"~2~",
-        page_param: str=u"page",
-        partial_param: str=u"partial",
-        show_if_single_page: bool=False,
-        separator: str=u" ",
-        onclick: Optional[str]=None,
-        symbol_first: str=u"<<",
-        symbol_last: str=u">>",
-        symbol_previous: str=u"<",
-        symbol_next: str=u">",
-        link_attr: Dict={u"class": u"pager_link"},
-        curpage_attr: Dict={u"class": u"pager_curpage"},
-        dotdot_attr: Dict={u"class": u"pager_dotdot"},
-        **kwargs: Any
-    ) -> Markup:
+    def pager(self,
+              format: str = u"~2~",
+              page_param: str = u"page",
+              partial_param: str = u"partial",
+              show_if_single_page: bool = False,
+              separator: str = u" ",
+              onclick: Optional[str] = None,
+              symbol_first: str = u"<<",
+              symbol_last: str = u">>",
+              symbol_previous: str = u"<",
+              symbol_next: str = u">",
+              link_attr: Dict = {u"class": u"pager_link"},
+              curpage_attr: Dict = {u"class": u"pager_curpage"},
+              dotdot_attr: Dict = {u"class": u"pager_dotdot"},
+              **kwargs: Any) -> Markup:
         """Return string with links to other pages (e.g. "1 2 [3] 4 5 6 7").
 
         format:

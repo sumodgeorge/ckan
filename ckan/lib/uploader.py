@@ -50,7 +50,8 @@ def _get_underlying_file(wrapper: Union[FlaskFileStorage, cgi.FieldStorage]):
     return wrapper.file
 
 
-def get_uploader(upload_to: str, old_filename: Optional[str]=None) -> PUploader:
+def get_uploader(upload_to: str,
+                 old_filename: Optional[str] = None) -> PUploader:
     '''Query IUploader plugins and return an uploader instance for general
     files.'''
     upload = None
@@ -117,7 +118,9 @@ class Upload(object):
     old_filepath: Optional[str]
 
 
-    def __init__(self, object_type: str, old_filename: Optional[str]=None) -> None:
+    def __init__(self,
+                 object_type: str,
+                 old_filename: Optional[str] = None) -> None:
         ''' Setup upload by creating a subdirectory of the storage directory
         of name object_type. old_filename is the name of the file in the url
         field last time'''
@@ -141,7 +144,8 @@ class Upload(object):
         if old_filename:
             self.old_filepath = os.path.join(self.storage_path, old_filename)
 
-    def update_data_dict(self, data_dict: Dict, url_field: str, file_field: str, clear_field: str) -> None:
+    def update_data_dict(self, data_dict: Dict, url_field: str,
+                         file_field: str, clear_field: str) -> None:
         ''' Manipulate data from the data_dict.  url_field is the name of the
         field where the upload is going to be. file_field is name of the key
         where the FieldStorage is kept (i.e the field where the file data
@@ -174,7 +178,7 @@ class Upload(object):
             if self.clear and self.url == self.old_filename:
                 data_dict[url_field] = ''
 
-    def upload(self, max_size: int=2) -> None:
+    def upload(self, max_size: int = 2) -> None:
         ''' Actually upload the file.
         This should happen just before a commit but after the data has
         been validated and flushed to the db. This is so we do not store
@@ -273,7 +277,7 @@ class ResourceUpload(object):
         filepath = os.path.join(directory, id[6:])
         return filepath
 
-    def upload(self, id: str, max_size: int=10) -> None:
+    def upload(self, id: str, max_size: int = 10) -> None:
         '''Actually upload the file.
 
         :returns: ``'file uploaded'`` if a new file was successfully uploaded

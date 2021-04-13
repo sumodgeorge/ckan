@@ -47,7 +47,10 @@ APIKEY_HEADER_NAME_KEY = 'apikey_header_name'
 APIKEY_HEADER_NAME_DEFAULT = 'X-CKAN-API-Key'
 
 
-def abort(status_code: int, detail: str='', headers: Optional[Dict]=None, comment: Optional[str]=None) -> NoReturn:
+def abort(status_code: int,
+          detail: str = '',
+          headers: Optional[Dict] = None,
+          comment: Optional[str] = None) -> NoReturn:
     '''Abort the current request immediately by returning an HTTP exception.
 
     This is a wrapper for :py:func:`pylons.controllers.util.abort` that adds
@@ -122,7 +125,10 @@ def render_jinja2(template_name: str, extra_vars: Dict) -> str:
     return template.render(**extra_vars)
 
 
-def render(template_name: str, extra_vars: Optional[Dict[str, Any]]=None, *pargs, **kwargs) -> str:
+def render(template_name: str,
+           extra_vars: Optional[Dict[str, Any]] = None,
+           *pargs,
+           **kwargs) -> str:
     '''Render a template and return the output.
 
     This is CKAN's main template rendering function.
@@ -236,7 +242,7 @@ def _pylons_prepare_renderer(template_name, extra_vars, cache_key=None,
     return render_template
 
 
-def _allow_caching(cache_force: Optional[bool]=None):
+def _allow_caching(cache_force: Optional[bool] = None):
     # Caching Logic
 
     allow_cache = True
