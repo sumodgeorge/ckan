@@ -63,7 +63,7 @@ defaults:
             $(npm bin)/cypress run
           ;;
         esac
-  run_type_checks: &run_front_tests
+  run_type_checks: &run_type_checks
     run:
       command: |
         case $CIRCLE_NODE_INDEX in
