@@ -635,11 +635,11 @@ class TestActionAuth(object):
     def test_fn_signatures(self):
         errors = []
         for name, fn in six.iteritems(self.actions):
-            args_info = inspect.getargspec(fn)
+            args_info = inspect.getfullargspec(fn)
             if (
                 args_info.args != ["context", "data_dict"]
                 or args_info.varargs is not None
-                or args_info.keywords is not None
+                or args_info.varkw is not None
             ):
                 if name not in self.ACTION_FN_SIGNATURES_BLACKLIST:
                     errors.append(name)
