@@ -34,7 +34,7 @@ from webob import Request
 try:
     from webob.multidict import MultiDict
 except ImportError:
-    from webob import UnicodeMultiDict as MultiDict
+    from webob import UnicodeMultiDict as MultiDict  # type: ignore
 
 from webob.exc import HTTPFound, HTTPUnauthorized
 from zope.interface import implementer
@@ -162,7 +162,7 @@ class FriendlyFormPlugin(object):
                     credentials = {u'login': login, u'password': password}
 
             try:
-                credentials[u'max_age'] = form[u'remember']
+                credentials[u'max_age'] = form[u'remember']  # type: ignore
             except KeyError:
                 pass
 
