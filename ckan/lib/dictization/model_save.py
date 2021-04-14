@@ -182,7 +182,7 @@ def package_membership_list_save(group_dicts: Optional[List[Dict]], package: 'mo
     capacity = 'public'
     model = context["model"]
     session = context["session"]
-    user = context.get('user')
+    user = context.get('user', '')
 
     members = session.query(model.Member) \
             .filter(model.Member.table_id == package.id) \
@@ -267,7 +267,6 @@ def relationship_list_save(relationship_dicts: Optional[List[Dict]], package: 'm
 def package_dict_save(pkg_dict: Dict, context: Context) -> 'model.Package':
     model = context["model"]
     package = context.get("package")
-    allow_partial_update = context.get("allow_partial_update", False)
     if package:
         pkg_dict["id"] = package.id
     Package = model.Package
@@ -585,18 +584,38 @@ def tag_dict_save(tag_dict: Dict, context: Context) -> 'model.Tag':
     return tag
 
 @overload
-def follower_dict_save(data_dict: Dict, context: Context, FollowerClass: Type['follower_.UserFollowingUser']) -> 'follower_.UserFollowingUser': ...
-@overload
-def follower_dict_save(data_dict: Dict, context: Context, FollowerClass: Type['follower_.UserFollowingGroup']) -> 'follower_.UserFollowingGroup': ...
-@overload
-def follower_dict_save(data_dict: Dict, context: Context, FollowerClass: Type['follower_.UserFollowingDataset']) -> 'follower_.UserFollowingDataset': ...
+def follower_dict_save(
+    data_dict: Dict[str, Any], context: Context,
+    FollowerClass: Type['follower_.UserFollowingUser']
+) -> 'follower_.UserFollowingUser':
+    ...
 
-def follower_dict_save(data_dict: Dict, context: Context, FollowerClass: Type['follower_.ModelFollowingModel']) -> 'follower_.ModelFollowingModel':
+
+@overload
+def follower_dict_save(
+    data_dict: Dict[str, Any], context: Context,
+    FollowerClass: Type['follower_.UserFollowingGroup']
+) -> 'follower_.UserFollowingGroup':
+    ...
+
+
+@overload
+def follower_dict_save(
+    data_dict: Dict[str, Any], context: Context,
+    FollowerClass: Type['follower_.UserFollowingDataset']
+) -> 'follower_.UserFollowingDataset':
+    ...
+
+
+def follower_dict_save(
+    data_dict: Dict[str, Any], context: Context,
+    FollowerClass: Type['follower_.ModelFollowingModel']
+) -> 'follower_.ModelFollowingModel':
     model = context['model']
     session = context['session']
-    follower_obj = FollowerClass(
-            follower_id=model.User.get(context['user']).id,
-            object_id=data_dict['id'])
+    follower_obj = FollowerClass(follower_id=model.User.get(
+        context['user']).id,
+                                 object_id=data_dict['id'])
     session.add(follower_obj)
     return follower_obj
 

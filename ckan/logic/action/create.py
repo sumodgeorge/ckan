@@ -155,10 +155,9 @@ def package_create(context: Context, data_dict: DataDict) -> Union[Dict, str]:
     else:
         package_plugin = lib_plugins.lookup_package_plugin(data_dict['type'])
 
-    if 'schema' in context:
-        schema = context['schema']
-    else:
-        schema = package_plugin.create_package_schema()
+    if 'schema' not in context:
+        context['schema'] = package_plugin.create_package_schema()
+    schema = context['schema']
 
     _check_access('package_create', context, data_dict)
 
@@ -1375,9 +1374,11 @@ def follow_user(context: Context, data_dict: DataDict) -> Dict:
     if not userobj:
         raise NotAuthorized(_("You must be logged in to follow users"))
 
-    schema = (context.get('schema')
-              or ckan.logic.schema.default_follow_user_schema())
+    if 'schema' not in context:
+        context['schema'] = ckan.logic.schema.default_follow_user_schema()
+    schema = context['schema']
 
+    context = cast(Context, context)
     validated_data_dict, errors = _validate(data_dict, schema, context)
 
     if errors:
@@ -1435,9 +1436,10 @@ def follow_dataset(context: Context, data_dict: DataDict) -> Dict:
         raise NotAuthorized(
             _("You must be logged in to follow a dataset."))
 
-    schema = (context.get('schema')
-              or ckan.logic.schema.default_follow_dataset_schema())
-
+    if 'schema' not in context:
+        context['schema'] = ckan.logic.schema.default_follow_dataset_schema()
+    schema = context['schema']
+    context = cast(Context, context)
     validated_data_dict, errors = _validate(data_dict, schema, context)
 
     if errors:
@@ -1576,6 +1578,7 @@ def follow_group(context: Context, data_dict: DataDict) -> Dict:
         raise NotAuthorized(
             _("You must be logged in to follow a group."))
 
+    context = cast(Context, context)
     schema = context.get('schema',
                          ckan.logic.schema.default_follow_group_schema())
 

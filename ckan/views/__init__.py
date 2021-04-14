@@ -1,6 +1,6 @@
 # encoding: utf-8
 
-from typing import Any, Callable, Optional
+from typing import Any, Callable, Dict, Optional
 
 from sqlalchemy import inspect
 from ckan.common import asbool
@@ -244,7 +244,7 @@ def set_controller_and_action() -> None:
     g.controller, g.action = p.toolkit.get_endpoint()
 
 
-def handle_i18n(environ: Optional[Any] = None) -> None:
+def handle_i18n(environ: Optional[Dict[str, Any]] = None) -> None:
     u'''
     Strips the locale code from the requested url
     (eg '/sk/about' -> '/about') and sets environ variables for the
@@ -255,6 +255,7 @@ def handle_i18n(environ: Optional[Any] = None) -> None:
         * CKAN_CURRENT_URL is set to the current application url
     '''
     environ = environ or request.environ
+    assert environ
     locale_list = get_locales_from_config()
     default_locale = config.get(u'ckan.locale_default', u'en')
 

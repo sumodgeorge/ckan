@@ -271,11 +271,11 @@ def package_update(context: Context, data_dict: DataDict) -> Union[str, Dict]:
 
     user = context['user']
     # get the schema
+
     package_plugin = lib_plugins.lookup_package_plugin(pkg.type)
-    if 'schema' in context:
-        schema = context['schema']
-    else:
-        schema = package_plugin.update_package_schema()
+    if 'schema' not in context:
+        context['schema'] = package_plugin.update_package_schema()
+    schema = context['schema']
 
     if 'api_version' not in context:
         # check_data_dict() is deprecated. If the package_plugin has a
@@ -308,9 +308,7 @@ def package_update(context: Context, data_dict: DataDict) -> Union[str, Dict]:
     data, errors = lib_plugins.plugin_validate(
         package_plugin, context, data_dict, schema, 'package_update')
     log.debug('package_update validate_errs=%r user=%s package=%s data=%r',
-              errors, context.get('user'),
-              context.get('package').name if context.get('package') else '',
-              data)
+              errors, user, context['package'].name, data)
 
     if errors:
         model.Session.rollback()
@@ -323,7 +321,7 @@ def package_update(context: Context, data_dict: DataDict) -> Union[str, Dict]:
 
     pkg = model_save.package_dict_save(data, context)
 
-    context_org_update = context.copy()
+    context_org_update = cast(Context, context.copy())
     context_org_update['ignore_auth'] = True
     context_org_update['defer_commit'] = True
     _get_action('package_owner_org_update')(context_org_update,

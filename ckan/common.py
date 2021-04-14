@@ -177,7 +177,7 @@ class CKANRequest(LocalProxy):
     `is_flask_request`) and at the same time provide all objects methods to be
     able to interact with them transparently.
     '''
-
+    endpoint: str
     @property
     def params(self) -> ImmutableMultiDict:
         u''' Special case as Pylons' request.params is used all over the place.

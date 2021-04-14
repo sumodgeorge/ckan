@@ -130,7 +130,7 @@ def get_all_key_combinations(data: Dict,
 
     '''
     schema_prefixes = {key[:-1] for key in flattened_schema}
-    combinations = set([()])
+    combinations: Set[Tuple[Any,...]] = set([()])
 
     for key in sorted(data.keys(), key=flattened_order_key):
         # make sure the tuple key is a valid one in the schema
@@ -265,7 +265,7 @@ def convert(converter: Callable, key: Any, converted_data: Dict,
 
 def validate(data: Dict,
              schema: Dict,
-             context: Optional[Context] = None) -> Tuple[Dict, Dict]:
+             context: Optional[Context] = None) -> Tuple[Dict[str, Any], Dict[str, Any]]:
     '''Validate an unflattened nested dict against a schema.'''
     context = context or {}
 

@@ -9,5 +9,6 @@
     "**/tests",
     "ckan/migration",
     "ckan/lib/create_test_data.py"
-  ]
+  ],
+  "reportTypedDictNotRequiredAccess": false
 }

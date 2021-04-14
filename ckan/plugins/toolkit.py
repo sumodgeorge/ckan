@@ -528,7 +528,7 @@ For example: ``bar = toolkit.aslist(config.get('ckan.foo.bar', []))``
         import ckan.common as common
         try:
             # CKAN >= 2.8
-            endpoint: Tuple[str, str] = tuple(
+            endpoint = tuple(
                 common.request.endpoint.split('.'))
         except AttributeError:
             try:
@@ -538,7 +538,7 @@ For example: ``bar = toolkit.aslist(config.get('ckan.foo.bar', []))``
         # service routes, like `static`
         if len(endpoint) == 1:
             return (endpoint[0], 'index')
-        return endpoint
+        return endpoint[0], endpoint[1]
 
     def __getattr__(self, name):
         ''' return the function/object requested '''
