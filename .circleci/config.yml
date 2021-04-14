@@ -68,6 +68,7 @@ defaults:
       command: |
         case $CIRCLE_NODE_INDEX in
           $NODE_TESTS_CONTAINER)
+            export NODE\_OPTIONS=--experimental-worker;
             $(npm bin)/pyright
           ;;
         esac
