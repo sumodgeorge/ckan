@@ -354,7 +354,8 @@ def _build_js_translation(lang, source_filenames, entries, dest_filename):
                 result[entry.msgid] = [None, entry.msgstr]
             elif entry.msgstr_plural:
                 plural = result[entry.msgid] = [entry.msgid_plural]
-                ordered_plural = sorted(entry.msgstr_plural.items())  # type: ignore
+                ordered_plural = sorted(
+                    entry.msgstr_plural.items())  # type: ignore
                 for order, msgstr in ordered_plural:
                     plural.append(msgstr)
     with open(dest_filename, u'w') as f:

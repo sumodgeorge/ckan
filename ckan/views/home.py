@@ -86,7 +86,7 @@ def about() -> str:
     return base.render(u'home/about.html', extra_vars={})
 
 
-def redirect_locale(target_locale: str, path: Optional[str]=None) -> Any:
+def redirect_locale(target_locale: str, path: Optional[str] = None) -> Any:
     target = f'/{target_locale}/{path}' if path else f'/{target_locale}'
     return redirect(target, code=308)
 

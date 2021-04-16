@@ -538,8 +538,8 @@ def get_or_bust(data_dict: Dict, keys: Iterable[str]) -> Tuple[Any, ...]:
     ...
 
 
-def get_or_bust(data_dict: Dict, keys: Union[str,
-                                             Iterable[str]]) -> Union[Any, Tuple]:
+def get_or_bust(data_dict: Dict,
+                keys: Union[str, Iterable[str]]) -> Union[Any, Tuple]:
     '''Return the value(s) from the given data_dict for the given key(s).
 
     Usage::

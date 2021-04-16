@@ -178,6 +178,7 @@ class CKANRequest(LocalProxy):
     able to interact with them transparently.
     '''
     endpoint: str
+
     @property
     def params(self) -> ImmutableMultiDict:
         u''' Special case as Pylons' request.params is used all over the place.
@@ -276,11 +277,13 @@ def aslist(obj: SequenceT,
            strip: bool = True) -> SequenceT:
     ...
 
+
 @overload
 def aslist(obj: Literal[None],
            sep: Optional[str] = None,
            strip: bool = True) -> List[str]:
     ...
+
 
 def aslist(obj: Any, sep: Optional[str] = None, strip: bool = True):
     if isinstance(obj, six.string_types):
