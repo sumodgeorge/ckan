@@ -1,8 +1,8 @@
 # encoding: utf-8
 
-from typing import cast
-from ckan.types import Context
-from flask import Blueprint, abort
+from typing import Any, Optional, cast
+
+from flask import Blueprint, abort, redirect
 
 import ckan.model as model
 import ckan.logic as logic
@@ -11,6 +11,8 @@ import ckan.lib.search as search
 import ckan.lib.helpers as h
 
 from ckan.common import g, config, _
+from ckan.types import Context
+
 
 CACHE_PARAMETERS = [u'__cache', u'__no_cache__']
 
@@ -84,9 +86,36 @@ def about() -> str:
     return base.render(u'home/about.html', extra_vars={})
 
 
+def redirect_locale(target_locale: str, path: Optional[str]=None) -> Any:
+    target = f'/{target_locale}/{path}' if path else f'/{target_locale}'
+    return redirect(target, code=308)
+
+
 util_rules = [
     (u'/', index),
     (u'/about', about)
 ]
 for rule, view_func in util_rules:
     home.add_url_rule(rule, view_func=view_func)
+
+locales_mapping = [
+    ('zh_TW', 'zh_Hant_TW'),
+    ('zh_CN', 'zh_Hans_CN'),
+]
+
+for locale in locales_mapping:
+
+    legacy_locale = locale[0]
+    new_locale = locale[1]
+
+    home.add_url_rule(
+        f'/{legacy_locale}/',
+        view_func=redirect_locale,
+        defaults={'target_locale': new_locale}
+    )
+
+    home.add_url_rule(
+        f'/{legacy_locale}/<path:path>',
+        view_func=redirect_locale,
+        defaults={'target_locale': new_locale}
+    )
