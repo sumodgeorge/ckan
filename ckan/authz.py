@@ -145,7 +145,7 @@ def auth_functions_list() -> KeysView:
     return _AuthFunctions.keys()
 
 
-def is_sysadmin(username: str) -> bool:
+def is_sysadmin(username: Optional[str]) -> bool:
     ''' Returns True is username is a sysadmin '''
     user = _get_user(username)
     return bool(user and user.sysadmin)
@@ -285,7 +285,9 @@ def get_roles_with_permission(permission: str) -> List[str]:
     return roles
 
 
-def has_user_permission_for_group_or_org(group_id: Optional[str], user_name: str, permission: str) -> bool:
+def has_user_permission_for_group_or_org(group_id: Optional[str],
+                                         user_name: Optional[str],
+                                         permission: str) -> bool:
     ''' Check if the user has the given permissions for the group, allowing for
     sysadmin rights and permission cascading down a group hierarchy.
 
@@ -371,7 +373,7 @@ def users_role_for_group_or_org(group_id: Optional[str], user_name: Optional[str
     return None
 
 
-def has_user_permission_for_some_org(user_name: str, permission: str) -> bool:
+def has_user_permission_for_some_org(user_name: Optional[str], permission: str) -> bool:
     ''' Check if the user has the given permission for any organization. '''
     user_id = get_user_id_for_username(user_name, allow_none=True)
     if not user_id:

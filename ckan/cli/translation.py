@@ -55,7 +55,7 @@ def mangle():
 
     for entry in po:
         msg = entry.msgid.encode(u'utf-8')
-        matches = re.finditer(extract_reg_ex, msg)
+        matches = re.finditer(extract_reg_ex.encode('utf-8'), msg)
         length = len(msg)
         position = 0
         translation = u''
@@ -184,7 +184,7 @@ def check_po_file(path):
             for function in (
                 simple_conv_specs, mapping_keys, replacement_fields
             ):
-                for key, msgstr in six.iteritems(
+                for key in six.iterkeys(
                         entry.msgstr_plural):  # type: ignore
                     if key == u'0':
                         error = check_translation(

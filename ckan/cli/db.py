@@ -154,7 +154,9 @@ def _resolve_alembic_config(plugin):
         if plugin_obj is None:
             tk.error_shout(u"Plugin '{}' cannot be loaded.".format(plugin))
             raise click.Abort()
-        plugin_dir = os.path.dirname(inspect.getsourcefile(type(plugin_obj)))
+        source = inspect.getsourcefile(type(plugin_obj))
+        assert source
+        plugin_dir = os.path.dirname(source)
 
         # if there is `plugin` folder instead of single_file, find
         # plugin's parent dir

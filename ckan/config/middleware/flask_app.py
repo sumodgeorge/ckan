@@ -560,8 +560,8 @@ def _setup_error_mail_handler(app):
             log_record.headers = request.headers
             return True
 
-    smtp_server = config.get('smtp.server', 'localhost')
-    mailhost = tuple(smtp_server.split(':')) \
+    smtp_server = str(config.get('smtp.server', 'localhost'))
+    mailhost = cast(Tuple[str, int], tuple(smtp_server.split(':'))) \
         if ':' in smtp_server else smtp_server
     credentials = None
     if config.get('smtp.user'):

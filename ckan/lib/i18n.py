@@ -260,7 +260,7 @@ def handle_request(request: Request, tmpl_context: Any) -> str:
 
     extra_directory = config.get('ckan.i18n.extra_directory')
     extra_domain = config.get('ckan.i18n.extra_gettext_domain')
-    extra_locales = aslist(config.get('ckan.i18n.extra_locales'))
+    extra_locales = aslist(config.get('ckan.i18n.extra_locales', None))
     if extra_directory and extra_domain and extra_locales:
         if lang in extra_locales:
             _add_extra_translations(extra_directory, lang, extra_domain)
@@ -354,7 +354,7 @@ def _build_js_translation(lang, source_filenames, entries, dest_filename):
                 result[entry.msgid] = [None, entry.msgstr]
             elif entry.msgstr_plural:
                 plural = result[entry.msgid] = [entry.msgid_plural]
-                ordered_plural = sorted(entry.msgstr_plural.items())
+                ordered_plural = sorted(entry.msgstr_plural.items())  # type: ignore
                 for order, msgstr in ordered_plural:
                     plural.append(msgstr)
     with open(dest_filename, u'w') as f:
