@@ -1,5 +1,7 @@
 # encoding: utf-8
 
+from ckan.types import ContextValidator
+from typing import cast
 import ckan.plugins as plugins
 import ckan.plugins.toolkit as toolkit
 
@@ -24,8 +26,9 @@ def group_create(context, data_dict=None):
     member_ids = [member_tuple[0] for member_tuple in members]
 
     # We have the logged-in user's user name, get their user id.
-    convert_user_name_or_id_to_id = toolkit.get_converter(
-        'convert_user_name_or_id_to_id')
+    convert_user_name_or_id_to_id = cast(
+        ContextValidator,
+        toolkit.get_converter('convert_user_name_or_id_to_id'))
     try:
         user_id = convert_user_name_or_id_to_id(user_name, context)
     except toolkit.Invalid:

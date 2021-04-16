@@ -1,11 +1,14 @@
 # encoding: utf-8
 
+from typing import Any, Dict
+from ckan.types import Context, DataDict
+from ckan.common import CKANConfig
 from six import text_type
 import ckan.plugins as p
 
 ignore_empty = p.toolkit.get_validator('ignore_empty')
 
-DEFAULT_AUDIO_FORMATS = 'wav ogg mp3'
+DEFAULT_AUDIO_FORMATS: str = 'wav ogg mp3'
 
 
 class AudioView(p.SingletonPlugin):
@@ -14,13 +17,13 @@ class AudioView(p.SingletonPlugin):
     p.implements(p.IConfigurer, inherit=True)
     p.implements(p.IResourceView, inherit=True)
 
-    def update_config(self, config):
+    def update_config(self, config: CKANConfig):
         p.toolkit.add_template_directory(config, 'theme/templates')
         self.formats = config.get(
             'ckan.preview.audio_formats',
             DEFAULT_AUDIO_FORMATS).split()
 
-    def info(self):
+    def info(self) -> Dict[str, Any]:
         return {'name': 'audio_view',
                 'title': p.toolkit._('Audio'),
                 'icon': 'file-audio-o',
@@ -30,12 +33,12 @@ class AudioView(p.SingletonPlugin):
                 'default_title': p.toolkit._('Audio'),
                 }
 
-    def can_view(self, data_dict):
+    def can_view(self, data_dict: DataDict) -> bool:
         return (data_dict['resource'].get('format', '').lower()
                 in self.formats)
 
-    def view_template(self, context, data_dict):
+    def view_template(self, context: Context, data_dict: DataDict) -> str:
         return 'audio_view.html'
 
-    def form_template(self, context, data_dict):
+    def form_template(self, context: Context, data_dict: DataDict) -> str:
         return 'audio_form.html'

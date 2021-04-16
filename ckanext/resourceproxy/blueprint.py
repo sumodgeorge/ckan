@@ -3,7 +3,7 @@
 from logging import getLogger
 
 import requests
-from six.moves.urllib.parse import urlsplit
+from six.moves.urllib.parse import urlsplit  # type: ignore
 from flask import Blueprint, make_response
 
 import ckan.lib.base as base

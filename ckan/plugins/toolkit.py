@@ -638,7 +638,7 @@ if TYPE_CHECKING:
     def add_resource(path: str, name: str) -> None:
         ...
 
-    def add_ckan_admin_tabs(
+    def add_ckan_admin_tab(
         config: common.CKANConfig,
         route_name: str,
         tab_label: str,

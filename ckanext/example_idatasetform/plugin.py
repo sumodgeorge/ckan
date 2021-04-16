@@ -1,5 +1,7 @@
 # encoding: utf-8
 
+from typing import Callable, cast
+from ckan.types import Context, Validator
 import logging
 
 import ckan.plugins as plugins
@@ -15,7 +17,7 @@ def create_country_codes():
 
     '''
     user = tk.get_action('get_site_user')({'ignore_auth': True}, {})
-    context = {'user': user['name']}
+    context: Context = {'user': user['name']}
     try:
         data = {'id': 'country_codes'}
         tk.get_action('vocabulary_show')(context, data)
@@ -36,7 +38,7 @@ def country_codes():
     create_country_codes()
     try:
         country_codes = tk.get_action('tag_list')(
-                data_dict={'vocabulary_id': 'country_codes'})
+                {}, {'vocabulary_id': 'country_codes'})
         return country_codes
     except tk.ObjectNotFound:
         return None
@@ -63,6 +65,9 @@ class ExampleIDatasetFormPlugin(plugins.SingletonPlugin,
     num_times_package_form_called = 0
     num_times_check_data_dict_called = 0
     num_times_setup_template_variables_called = 0
+    country_codes = cast(
+        Callable[..., Validator],
+        tk.get_converter('convert_to_tags'))('country_codes')
 
     def update_config(self, config):
         # Add this plugin's templates dir to CKAN's extra_template_paths, so
@@ -84,9 +89,10 @@ class ExampleIDatasetFormPlugin(plugins.SingletonPlugin,
 
     def _modify_package_schema(self, schema):
         # Add our custom country_code metadata field to the schema.
+
         schema.update({
                 'country_code': [tk.get_validator('ignore_missing'),
-                    tk.get_converter('convert_to_tags')('country_codes')]
+                                 country_codes]
                 })
         # Add our custom_test metadata field to the schema, this one will use
         # convert_to_extras instead of convert_to_tags.
@@ -120,7 +126,7 @@ class ExampleIDatasetFormPlugin(plugins.SingletonPlugin,
         # Add our custom country_code metadata field to the schema.
         schema.update({
             'country_code': [
-                tk.get_converter('convert_from_tags')('country_codes'),
+                country_codes,
                 tk.get_validator('ignore_missing')]
             })
 

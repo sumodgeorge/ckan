@@ -92,6 +92,8 @@ class Context(TypedDict, total=False):
     metadata_modified: str
     with_capacity: bool
 
+    table_names: List[str]
+
 
 class AuthResult(TypedDict, total=False):
     success: bool
@@ -104,7 +106,7 @@ class ValueValidator(Protocol):
 
 
 class ContextValidator(Protocol):
-    def __call__(self, *, value: Any, context: Context) -> Any:
+    def __call__(self, value: Any, context: Context) -> Any:
         ...
 
 

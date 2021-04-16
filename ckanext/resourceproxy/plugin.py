@@ -2,7 +2,7 @@
 
 from logging import getLogger
 
-from six.moves.urllib.parse import urlparse
+from six.moves.urllib.parse import urlparse  # type: ignore
 
 import ckan.lib.helpers as h
 import ckan.plugins as p

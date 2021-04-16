@@ -697,7 +697,7 @@ def clear_validators_cache() -> None:
 
 # This function exists mainly so that validators can be made available to
 # extensions via ckan.plugins.toolkit.
-def get_validator(validator: str) -> Validator:
+def get_validator(validator: str) -> Union[Validator, Callable[..., Validator]]:
     '''Return a validator function by name.
 
     :param validator: the name of the validator function to return,

@@ -1,6 +1,7 @@
 # encoding: utf-8
 
-from six.moves.urllib.parse import urlencode
+from typing import Any, Dict
+from six.moves.urllib.parse import urlencode  # type: ignore
 
 from flask import Blueprint
 from six import text_type
@@ -12,7 +13,8 @@ import re
 datatablesview = Blueprint(u'datatablesview', __name__)
 
 
-def merge_filters(view_filters, user_filters_str):
+def merge_filters(view_filters: Dict[str, Any],
+                  user_filters_str: str) -> Dict[str, Any]:
     u'''
     view filters are built as part of the view, user filters
     are selected by the user interacting with the view. Any filters
@@ -41,7 +43,7 @@ def merge_filters(view_filters, user_filters_str):
 
 def ajax(resource_view_id):
     resource_view = get_action(u'resource_view_show'
-                               )(None, {
+                               )({}, {
                                    u'id': resource_view_id
                                })
 
@@ -55,7 +57,7 @@ def ajax(resource_view_id):
 
     datastore_search = get_action(u'datastore_search')
     unfiltered_response = datastore_search(
-        None, {
+        {}, {
             u"resource_id": resource_view[u'resource_id'],
             u"limit": 0,
             u"filters": view_filters,
@@ -101,7 +103,7 @@ def ajax(resource_view_id):
 
     try:
         response = datastore_search(
-            None, {
+            {}, {
                 u"q": search_text,
                 u"resource_id": resource_view[u'resource_id'],
                 u'plain': False,
@@ -137,7 +139,7 @@ def ajax(resource_view_id):
 def filtered_download(resource_view_id):
     params = json.loads(request.form[u'params'])
     resource_view = get_action(u'resource_view_show'
-                               )(None, {
+                               )({}, {
                                    u'id': resource_view_id
                                })
 
@@ -148,7 +150,7 @@ def filtered_download(resource_view_id):
 
     datastore_search = get_action(u'datastore_search')
     unfiltered_response = datastore_search(
-        None, {
+        {}, {
             u"resource_id": resource_view[u'resource_id'],
             u"limit": 0,
             u"filters": view_filters,

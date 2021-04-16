@@ -1,13 +1,15 @@
 # encoding: utf-8
 
+from ckan.types import Context, ContextValidator, DataDict
+from typing import Optional, cast
 import ckan.plugins as plugins
 import ckan.plugins.toolkit as toolkit
 
 
-def group_create(context, data_dict=None):
+def group_create(context: Context, data_dict: Optional[DataDict]=None):
 
     # Get the user name of the logged-in user.
-    user_name = context['user']
+    user_name: str = context['user']
 
     # Get a list of the members of the 'curators' group.
     members = toolkit.get_action('member_list')(
@@ -19,8 +21,9 @@ def group_create(context, data_dict=None):
     member_ids = [member_tuple[0] for member_tuple in members]
 
     # We have the logged-in user's user name, get their user id.
-    convert_user_name_or_id_to_id = toolkit.get_converter(
-        'convert_user_name_or_id_to_id')
+    convert_user_name_or_id_to_id = cast(
+        ContextValidator,
+        toolkit.get_converter('convert_user_name_or_id_to_id'))
     user_id = convert_user_name_or_id_to_id(user_name, context)
 
     # Finally, we can test whether the user is a member of the curators group.

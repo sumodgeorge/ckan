@@ -1,9 +1,13 @@
 # encoding: utf-8
 
+from typing import cast
+from ckan.types import AuthResult, Context, DataDict
 import ckan.plugins as p
 
 
-def datastore_auth(context, data_dict, privilege='resource_update'):
+def datastore_auth(context: Context,
+                   data_dict: DataDict,
+                   privilege: str = 'resource_update') -> AuthResult:
     if 'id' not in data_dict:
         data_dict['id'] = data_dict.get('resource_id')
 
@@ -36,12 +40,12 @@ def datastore_upsert(context, data_dict):
     return datastore_auth(context, data_dict)
 
 
-def datastore_delete(context, data_dict):
+def datastore_delete(context: Context, data_dict: DataDict):
     return datastore_auth(context, data_dict)
 
 
 @p.toolkit.auth_allow_anonymous_access
-def datastore_info(context, data_dict):
+def datastore_info(context: Context, data_dict: DataDict):
     return datastore_auth(context, data_dict, 'resource_show')
 
 
@@ -51,12 +55,12 @@ def datastore_search(context, data_dict):
 
 
 @p.toolkit.auth_allow_anonymous_access
-def datastore_search_sql(context, data_dict):
+def datastore_search_sql(context: Context, data_dict: DataDict) -> AuthResult:
     '''need access to view all tables in query'''
 
     for name in context['table_names']:
         name_auth = datastore_auth(
-            dict(context),  # required because check_access mutates context
+            context.copy(),  # required because check_access mutates context
             {'id': name},
             'resource_show')
         if not name_auth['success']:

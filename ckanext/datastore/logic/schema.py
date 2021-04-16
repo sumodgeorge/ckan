@@ -1,6 +1,8 @@
 # encoding: utf-8
 
+from ckan.types import Validator
 import json
+from typing import Callable
 
 from six import string_types, text_type
 
@@ -18,12 +20,14 @@ ignore_missing = get_validator('ignore_missing')
 empty = get_validator('empty')
 boolean_validator = get_validator('boolean_validator')
 int_validator = get_validator('int_validator')
-one_of = get_validator('one_of')
+one_of: Callable[..., Validator] = get_validator('one_of')
 unicode_only = get_validator('unicode_only')
-default = get_validator('default')
+default: Callable[..., Validator] = get_validator('default')
 natural_number_validator = get_validator('natural_number_validator')
-configured_default = get_validator('configured_default')
-limit_to_configured_maximum = get_validator('limit_to_configured_maximum')
+configured_default: Callable[..., Validator] = get_validator(
+    'configured_default')
+limit_to_configured_maximum: Callable[..., Validator] = get_validator(
+    'limit_to_configured_maximum')
 
 
 def rename(old, new):

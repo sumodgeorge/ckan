@@ -99,7 +99,8 @@ LEGACY_ROUTE_NAMES = {
 
 
 class HelperAttributeDict(dict):
-    def __init__(self, *args: Any, **kwargs: Any) -> None:
+    def __init__(self, *args: Callable[..., Any],
+                 **kwargs: Callable[..., Any]) -> None:
         super(HelperAttributeDict, self).__init__(*args, **kwargs)
         self.__dict__ = self
 
@@ -110,10 +111,13 @@ class HelperAttributeDict(dict):
             )
         )
 
+    def __getattr__(self, key: str) -> Callable[..., Any]:
+        return self[key]
+
 
 # Builtin helper functions.
 _builtin_functions: Dict[str, Callable] = {}
-helper_functions: Dict[str, Callable] = HelperAttributeDict()
+helper_functions = HelperAttributeDict()
 
 
 class literal(Markup):
@@ -2943,9 +2947,9 @@ def mail_to(email_address: str, name: str) -> Markup:
 def radio(selected: str, id: str, checked: bool) -> Markup:
     if checked:
         return literal((u'<input checked="checked" id="%s_%s" name="%s" \
-            value="%s" type="radio">') % (selected, id, selected, id))
+            value="%s" type="radio">'                                     ) % (selected, id, selected, id))
     return literal(('<input id="%s_%s" name="%s" \
-        value="%s" type="radio">') % (selected, id, selected, id))
+        value="%s" type="radio">'                                 ) % (selected, id, selected, id))
 
 
 @core_helper

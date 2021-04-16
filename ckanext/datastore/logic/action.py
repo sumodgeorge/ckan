@@ -1,7 +1,9 @@
 # encoding: utf-8
 
+from ckan.types import Context
 import logging
 import json
+from typing import cast
 
 import sqlalchemy
 import six
@@ -157,7 +159,7 @@ def datastore_create(context, data_dict):
     try:
         result = backend.create(context, data_dict)
     except InvalidDataError as err:
-        raise p.toolkit.ValidationError(text_type(err))
+        raise p.toolkit.ValidationError({'message': text_type(err)})
 
     if data_dict.get('calculate_record_count', False):
         backend.calculate_record_count(data_dict['resource_id'])
@@ -603,7 +605,7 @@ def datastore_search_sql(context, data_dict):
         '''
         p.toolkit.check_access(
             'datastore_search_sql',
-            dict(context, table_names=table_names),
+            cast(Context, dict(context, table_names=table_names)),
             data_dict)
 
     result = backend.search_sql(

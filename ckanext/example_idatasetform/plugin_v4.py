@@ -1,12 +1,14 @@
 # encoding: utf-8
 
+from typing import Callable, cast
+from ckan.types import Context, Validator
 import ckan.plugins as p
 import ckan.plugins.toolkit as tk
 
 
 def create_country_codes():
     user = tk.get_action('get_site_user')({'ignore_auth': True}, {})
-    context = {'user': user['name']}
+    context: Context = {'user': user['name']}
     try:
         data = {'id': 'country_codes'}
         tk.get_action('vocabulary_show')(context, data)
@@ -22,7 +24,7 @@ def country_codes():
     create_country_codes()
     try:
         tag_list = tk.get_action('tag_list')
-        country_codes = tag_list(data_dict={'vocabulary_id': 'country_codes'})
+        country_codes = tag_list({}, {'vocabulary_id': 'country_codes'})
         return country_codes
     except tk.ObjectNotFound:
         return None
@@ -32,6 +34,9 @@ class ExampleIDatasetFormPlugin(p.SingletonPlugin, tk.DefaultDatasetForm):
     p.implements(p.IDatasetForm)
     p.implements(p.IConfigurer)
     p.implements(p.ITemplateHelpers)
+    country_codes = cast(
+        Callable[..., Validator],
+        tk.get_converter('convert_to_tags'))('country_codes')
 
     def get_helpers(self):
         return {'country_codes': country_codes}
@@ -44,7 +49,7 @@ class ExampleIDatasetFormPlugin(p.SingletonPlugin, tk.DefaultDatasetForm):
         schema.update({
             'country_code': [
                 tk.get_validator('ignore_missing'),
-                tk.get_converter('convert_to_tags')('country_codes')
+                country_codes
             ]
         })
         return schema
@@ -59,7 +64,7 @@ class ExampleIDatasetFormPlugin(p.SingletonPlugin, tk.DefaultDatasetForm):
         schema['tags']['__extras'].append(tk.get_converter('free_tags_only'))
         schema.update({
             'country_code': [
-                tk.get_converter('convert_from_tags')('country_codes'),
+                country_codes,
                 tk.get_validator('ignore_missing')]
         })
         return schema

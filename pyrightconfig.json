@@ -3,11 +3,12 @@
 
   ],
   "include": [
-    "ckan"
+    "ckan",
+    "ckanext"
   ],
   "exclude": [
-    "**/tests",
-    "ckan/migration",
+    "**/tests*",
+    "**/migration",
     "ckan/lib/create_test_data.py"
   ],
   "reportTypedDictNotRequiredAccess": false
