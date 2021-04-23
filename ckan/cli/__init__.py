@@ -95,11 +95,11 @@ def load_config(ini_path: Optional[str] = None) -> Config:
     if ini_path:
         if ini_path.startswith(u'~'):
             ini_path = os.path.expanduser(ini_path)
-        filename = os.path.abspath(ini_path)
-        config_source = u'-c parameter'
+        filename: Optional[str] = os.path.abspath(ini_path)
+        config_source = [u'-c parameter']
     elif os.environ.get(u'CKAN_INI'):
-        filename = os.environ.get(u'CKAN_INI')
-        config_source = u'$CKAN_INI'
+        filename = os.environ[u'CKAN_INI']
+        config_source = [u'$CKAN_INI']
     else:
         # deprecated method since CKAN 2.9
         default_filenames = [u'ckan.ini', u'development.ini']

@@ -18,7 +18,7 @@ from ckan.common import _, g
 
 import ckan.lib.maintain as maintain
 
-from typing import Callable, Collection, Dict, KeysView, List, Optional, Union
+from typing import Any, Callable, Collection, Dict, KeysView, List, Optional, Union, cast
 from ckan.types import AuthResult, AuthFunction, DataDict, Context
 
 log = getLogger(__name__)
@@ -222,11 +222,13 @@ def is_authorized(action: str, context: Context, data_dict: Optional[DataDict]=N
         # access straight away
         if not getattr(auth_function, 'auth_allow_anonymous_access', False) \
            and not context.get('auth_user_obj'):
+            if isinstance(auth_function, functools.partial):
+                name = auth_function.func.__name__  # type: ignore
+            else:
+                name = auth_function.__name__
             return {
                 'success': False,
-                'msg': 'Action {0} requires an authenticated user'.format(
-                    (auth_function if not isinstance(auth_function, functools.partial)
-                        else auth_function.func).__name__)
+                'msg': 'Action {0} requires an authenticated user'.format(name)
             }
 
         return auth_function(context, data_dict or {})

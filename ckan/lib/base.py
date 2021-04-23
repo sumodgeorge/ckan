@@ -77,7 +77,7 @@ def abort(status_code: int,
     # with Lucid) causes an exception when unicode is received.
     detail = detail.encode('utf8')
 
-    return _abort(status_code=status_code,
+    return _abort(status_code=status_code,  # type: ignore
                   detail=detail,
                   headers=headers,
                   comment=comment)
@@ -156,7 +156,7 @@ def render(template_name: str,
     if not is_flask_request():
         renderer = _pylons_prepare_renderer(template_name, extra_vars,
                                             *pargs, **kwargs)
-        return cached_template(template_name, renderer)
+        return cached_template(template_name, renderer)  # type: ignore
 
     _allow_caching()
     return flask_render_template(template_name, **extra_vars)

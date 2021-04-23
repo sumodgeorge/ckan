@@ -32,7 +32,7 @@ legacy_dict_sort = lambda x: (len(x), dict.items(x))
 def table_dictize(obj: Any, context: Context, **kw) -> Dict[str, Any]:
     '''Get any model object and represent it as a dict'''
 
-    result_dict = {}
+    result_dict: Dict[str, Any] = {}
 
     model = context["model"]
     session = model.Session

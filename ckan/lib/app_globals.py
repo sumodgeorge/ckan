@@ -12,7 +12,7 @@ from ckan.common import config
 import ckan
 import ckan.model as model
 from ckan.logic.schema import update_configuration_schema
-from typing import Dict, List, Tuple, Union
+from typing import Any, Dict, List, Tuple, Union
 
 
 log = logging.getLogger(__name__)
@@ -73,7 +73,7 @@ app_globals_from_config_details: Dict[str, Dict[str, str]] = {
 
 
 # A place to store the origional config options of we override them
-_CONFIG_CACHE = {}
+_CONFIG_CACHE: Dict[str, Any] = {}
 
 def set_main_css(css_file: str) -> None:
     ''' Sets the main_css.  The css_file must be of the form file.css '''
@@ -103,7 +103,7 @@ def process_app_global(
     '''
     options = app_globals_from_config_details.get(key)
     key = get_globals_key(key)
-    new_value = value
+    new_value: Any = value
     if options:
         if 'name' in options:
             key = options['name']

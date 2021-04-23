@@ -4,6 +4,7 @@ from __future__ import print_function
 
 import os
 import sys
+from typing import Any
 
 import click
 import paste.script # type: ignore
@@ -22,7 +23,7 @@ from ckan.common import asbool
 import ckan.lib.maintain as maintain
 # This is a test Flask request context to be used internally.
 # Do not use it!
-_cli_test_request_context = None
+_cli_test_request_context: Any = None
 
 
 # NB No CKAN imports are allowed until after the config file is loaded.

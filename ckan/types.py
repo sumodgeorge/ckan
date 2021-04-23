@@ -38,7 +38,8 @@ TuplizedErrorDict = Dict[Tuple, List[str]]
 
 class Context(TypedDict, total=False):
     user: str
-    model: "model_"
+    # model: "model_"
+    model: "PModel"
     session: AlchemySession
 
     __auth_user_obj_checked: bool
@@ -122,7 +123,9 @@ class DataValidator(Protocol):
 
 Validator = Union[ValueValidator, ContextValidator, DataValidator]
 
-Schema = Dict[str, Union[Iterable[Validator], "Schema"]]
+# NestedSchema = "Schema"
+NestedSchema = Dict[str, Iterable[Validator]]
+Schema = Dict[str, Union[Iterable[Validator], "NestedSchema"]]
 ComplexSchemaFunc = Callable[..., Schema]
 PlainSchemaFunc = Callable[[], Schema]
 

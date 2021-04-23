@@ -79,7 +79,7 @@ def get_preview_plugin(
 
     data_dict['resource']['on_same_domain'] = on_same_domain(data_dict)
 
-    plugins_that_can_preview = []
+    plugins_that_can_preview: List[Dict[str, Any]] = []
     plugins_fixable = []
     for plugin in p.PluginImplementations(p.IResourcePreview):
         p_info = {'plugin': plugin, 'quality': 1}
@@ -126,7 +126,7 @@ def get_view_plugin(view_type: Optional[str]) -> Optional[p.IResourceView]:
         name = info.get('name')
         if name == view_type:
             return plugin
-
+    return None
 
 def get_view_plugins(view_types: Iterable[str]) -> List[p.IResourceView]:
     '''
@@ -181,7 +181,7 @@ def get_default_view_plugins(
     if config.get('ckan.views.default_views') is None:
         default_view_types = DEFAULT_RESOURCE_VIEW_TYPES
     else:
-        default_view_types = config.get('ckan.views.default_views').split()
+        default_view_types = config.get('ckan.views.default_views', '').split()
 
     default_view_plugins = []
     for view_type in default_view_types:

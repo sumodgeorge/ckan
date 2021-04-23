@@ -8,7 +8,7 @@ import ckan.logic as logic
 from collections import namedtuple
 from ckan.cli import error_shout
 
-_ViewCount = namedtuple(u'ViewCount', u'id name count')
+ViewCount = namedtuple(u'ViewCount', u'id name count')
 
 
 @click.group(name=u'tracking', short_help=u'Update tracking statistics')
@@ -73,7 +73,7 @@ def _total_views(engine):
             GROUP BY p.id, p.name
             ORDER BY total_views DESC
     '''
-    return [_ViewCount(*t) for t in engine.execute(sql).fetchall()]
+    return [ViewCount(*t) for t in engine.execute(sql).fetchall()]
 
 
 def _recent_views(engine, measure_from):
@@ -88,7 +88,7 @@ def _recent_views(engine, measure_from):
             ORDER BY total_views DESC
     '''
     return [
-        _ViewCount(*t) for t in engine.execute(
+        ViewCount(*t) for t in engine.execute(
             sql, measure_from=str(measure_from)
         ).fetchall()
     ]

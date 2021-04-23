@@ -75,12 +75,12 @@ def check_resource_changes(change_list: List[Dict], old: Dict, new: Dict,
     new_resource_set = set()
     new_resource_dict = {}
 
-    for resource in old.get(u'resources'):
+    for resource in old.get(u'resources', []):
         old_resource_set.add(resource['id'])
         old_resource_dict[resource['id']] = {
             key: value for (key, value) in resource.items() if key != u'id'}
 
-    for resource in new.get(u'resources'):
+    for resource in new.get(u'resources', []):
         new_resource_set.add(resource['id'])
         new_resource_dict[resource['id']] = {
             key: value for (key, value) in resource.items() if key != u'id'}
@@ -137,7 +137,7 @@ def check_resource_changes(change_list: List[Dict], old: Dict, new: Dict,
                                 u'resource_id': resource_id,
                                 u'resource_name':
                                 new_resource_dict[resource_id].get(u'name'),
-                                u'org_id': new.get(u'organization')['id']
+                                u'org_id': new[u'organization']['id']
                                     if new.get(u'organization') else u'',
                                 u'format': new_metadata.get(u'format')})
 
@@ -150,7 +150,7 @@ def check_resource_changes(change_list: List[Dict], old: Dict, new: Dict,
                                 u'resource_id': resource_id,
                                 u'resource_name':
                                 new_resource_dict[resource_id].get(u'name'),
-                                u'org_id': new.get(u'organization')['id']
+                                u'org_id': new[u'organization']['id']
                                     if new.get(u'organization') else u'',
                                 u'old_format': old_metadata.get(u'format'),
                                 u'new_format': new_metadata.get(u'format')})

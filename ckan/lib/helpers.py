@@ -56,10 +56,11 @@ from ckan.common import _, ungettext, c, g, request, session, json
 from ckan.lib.webassets_tools import include_asset, render_assets
 from markupsafe import Markup, escape
 from typing import Dict, Iterable, Optional, Tuple, TypeVar, Union
+from typing_extensions import Protocol
 from flask.wrappers import Response
 
 T = TypeVar("T")
-Helper = TypeVar("Helper", bound=Callable)
+Helper = TypeVar("Helper", bound=Callable[..., Any])
 
 if six.PY2:
     from pylons import url as _pylons_default_url  # type: ignore
@@ -155,26 +156,11 @@ def _is_chained_helper(func: Callable) -> bool:
 def chained_helper(func: Helper) -> Helper:
     """Decorator function allowing helper functions to be chained.
     """
-    func.chained_helper = True
+    func.chained_helper = True  # type: ignore
     return func
 
 
-@overload
-def _datestamp_to_datetime(datetime_: str) -> Optional[datetime.datetime]:
-    ...
-
-
-@overload
-def _datestamp_to_datetime(datetime_: datetime.datetime) -> datetime.datetime:
-    ...
-
-
-@overload
-def _datestamp_to_datetime(datetime_: Any) -> None:
-    ...
-
-
-def _datestamp_to_datetime(datetime_):
+def _datestamp_to_datetime(datetime_: Any) -> Optional[datetime.datetime]:
     ''' Converts a datestamp to a datetime.  If a datetime is provided it
     just gets returned.
 
@@ -257,7 +243,7 @@ def redirect_to(*args: Any, **kw: Any) -> Response:
     if is_flask_request():
         return cast(Response, _flask_redirect(_url))
     else:
-        return _routes_redirect_to(_url)
+        return _routes_redirect_to(_url)  # type: ignore
 
 
 @maintain.deprecated('h.url is deprecated please use h.url_for')
@@ -701,7 +687,7 @@ def lang_native_name(lang_: Optional[str] = None) -> Optional[str]:
         either from parameter or current environ setting'''
     name = lang_ or lang()
     if not name:
-        return
+        return None
     locale = i18n.get_locales_dict().get(name)
     if locale:
         return locale.display_name or locale.english_name
@@ -1061,7 +1047,7 @@ def build_nav_main(
 
     :rtype: str
     """
-    output = literal('')
+    output: Markup = literal('')
     for item in args:
         padding: Any = (None,) * 4
         menu_item, title, highlight_controllers, auth_function = (
@@ -1138,7 +1124,7 @@ def build_extra_admin_nav() -> Markup:
 
     '''
     admin_tabs_dict = config.get('ckan.admin_tabs')
-    output = literal('')
+    output: Markup = literal('')
     if admin_tabs_dict:
         for k, v in six.iteritems(admin_tabs_dict):
             if v['icon']:
@@ -1212,7 +1198,7 @@ def humanize_entity_type(entity_type: str, object_type: str,
 
     """
     if entity_type == object_type:
-        return  # use the default text included in template
+        return None  # use the default text included in template
 
     log.debug(
         u'Humanize %s of type %s for %s', entity_type, object_type, purpose)
@@ -1254,10 +1240,11 @@ def humanize_entity_type(entity_type: str, object_type: str,
 
 
 @core_helper
-def get_facet_items_dict(facet: str,
-                         search_facets: Optional[Dict] = None,
-                         limit: Optional[int] = None,
-                         exclude_active: bool = False) -> List[Dict]:
+def get_facet_items_dict(
+        facet: str,
+        search_facets: Optional[Dict[str, Dict[str, Any]]] = None,
+        limit: Optional[int] = None,
+        exclude_active: bool = False) -> List[Dict]:
     '''Return the list of unselected facet items for the given facet, sorted
     by count.
 
@@ -1278,13 +1265,14 @@ def get_facet_items_dict(facet: str,
 
     '''
     if search_facets is None:
-        search_facets = getattr(c, u'search_facets', None)
+        search_facets = getattr(
+            c, u'search_facets', None)
 
     if not search_facets or not search_facets.get(
             facet, {}).get('items'):
         return []
     facets = []
-    for facet_item in search_facets.get(facet)['items']:
+    for facet_item in search_facets[facet]['items']:
         if not len(facet_item['name'].strip()):
             continue
         params_items = request.params.items(multi=True) \
@@ -1306,7 +1294,7 @@ def get_facet_items_dict(facet: str,
 
 @core_helper
 def has_more_facets(facet: str,
-                    search_facets: Dict,
+                    search_facets: Dict[str, Dict[str, Any]],
                     limit: Optional[int] = None,
                     exclude_active: bool = False) -> bool:
     '''
@@ -1325,7 +1313,7 @@ def has_more_facets(facet: str,
 
     '''
     facets = []
-    for facet_item in search_facets.get(facet)['items']:
+    for facet_item in search_facets[facet]['items']:
         if not len(facet_item['name'].strip()):
             continue
         params_items = request.params.items(multi=True) \
@@ -1413,7 +1401,7 @@ def _url_with_params(url: str, params: Optional[Iterable[Tuple[str,
 def sorted_extras(package_extras: Dict,
                   auto_clean: bool = False,
                   subs: Dict[str, str] = None,
-                  exclude: List[str] = None) -> List[Tuple[str, Any]]:
+                  exclude: Optional[List[str]] = None) -> List[Tuple[str, Any]]:
     ''' Used for outputting package extras
 
     :param package_extras: the package extras
@@ -1429,6 +1417,7 @@ def sorted_extras(package_extras: Dict,
     # If exclude is not supplied use values defined in the config
     if not exclude:
         exclude = config.get('package_hide_extras', [])
+    assert exclude is not None
     output = []
     for extra in sorted(package_extras, key=lambda x: x['key']):
         if extra.get('state') == 'deleted':
@@ -1501,6 +1490,7 @@ def linked_user(user: Union[str, model.User],
                 url_for('user.read', id=name)
             )
         ))
+    return None
 
 
 @core_helper
@@ -1705,7 +1695,8 @@ def pager_url(page: int, partial: Optional[str] = None, **kwargs: Any) -> str:
         pargs.append(request.endpoint)
         # FIXME: add `id` param to kwargs if it really required somewhere
     else:
-        routes_dict = _pylons_default_url.environ['pylons.routes_dict']
+        routes_dict = _pylons_default_url.environ[  # type: ignore
+            'pylons.routes_dict']
         kwargs['controller'] = routes_dict['controller']
         kwargs['action'] = routes_dict['action']
         if routes_dict.get('id'):
@@ -1751,7 +1742,7 @@ def get_display_timezone() -> datetime.tzinfo:
 
 
 @core_helper
-def render_datetime(datetime_: datetime.datetime,
+def render_datetime(datetime_: Optional[datetime.datetime],
                     date_format: Optional[str] = None,
                     with_hours: bool = False,
                     with_seconds: bool = False) -> str:
@@ -2216,7 +2207,9 @@ def remove_url_param(key: str,
         params.remove((keys[0], value))
     else:
         for key in keys:
-            [params.remove((k, v)) for (k, v) in params[:] if k == key]
+            for (k, v) in params[:]:
+                if k == key:
+                    params.remove((k, v))
     if replace is not None:
         params.append((keys[0], replace))
 
@@ -2544,7 +2537,7 @@ def resource_preview(resource: Dict, package: Dict) -> Optional[str]:
     '''
 
     if not resource['url']:
-        return
+        return None
 
     datapreview.res_format(resource)
     directly = False
@@ -2555,7 +2548,7 @@ def resource_preview(resource: Dict, package: Dict) -> Optional[str]:
                       resource_id=resource['id'], id=package['id'],
                       qualified=True)
     else:
-        return
+        return None
 
     return snippet("dataviewer/snippets/data_preview.html",
                    embed=directly,
@@ -2564,11 +2557,12 @@ def resource_preview(resource: Dict, package: Dict) -> Optional[str]:
 
 
 @core_helper
-def get_allowed_view_types(resource: Dict, package: Dict) -> List[Dict]:
+def get_allowed_view_types(
+        resource: Dict, package: Dict) -> List[Tuple[Any, ...]]:
     data_dict = {'resource': resource, 'package': package}
     plugins = datapreview.get_allowed_view_plugins(data_dict)
 
-    allowed_view_types = []
+    allowed_view_types: List[Tuple[Any, ...]] = []
     for plugin in plugins:
         info = plugin.info()
         allowed_view_types.append((info['name'],
@@ -2587,6 +2581,7 @@ def rendered_resource_view(resource_view: Dict,
     Returns a rendered resource view snippet.
     '''
     view_plugin = datapreview.get_view_plugin(resource_view['view_type'])
+    assert view_plugin
     context: Context = {}
     data_dict = {'resource_view': resource_view,
                  'resource': resource,
@@ -2618,6 +2613,7 @@ def resource_view_is_filterable(resource_view: Dict) -> bool:
     Returns True if the given resource view support filters.
     '''
     view_plugin = datapreview.get_view_plugin(resource_view['view_type'])
+    assert view_plugin
     return view_plugin.info().get('filterable', False)
 
 
@@ -2649,6 +2645,7 @@ def resource_view_is_iframed(resource_view: Dict) -> bool:
     Returns true if the given resource view should be displayed in an iframe.
     '''
     view_plugin = datapreview.get_view_plugin(resource_view['view_type'])
+    assert view_plugin
     return view_plugin.info().get('iframed', True)
 
 
@@ -2658,6 +2655,7 @@ def resource_view_icon(resource_view: Dict) -> str:
     Returns the icon for a particular view type.
     '''
     view_plugin = datapreview.get_view_plugin(resource_view['view_type'])
+    assert view_plugin
     return view_plugin.info().get('icon', 'picture')
 
 
@@ -2667,6 +2665,7 @@ def resource_view_display_preview(resource_view: Dict) -> bool:
     Returns if the view should display a preview.
     '''
     view_plugin = datapreview.get_view_plugin(resource_view['view_type'])
+    assert view_plugin
     return view_plugin.info().get('preview_enabled', True)
 
 
@@ -2676,6 +2675,7 @@ def resource_view_full_page(resource_view: Dict) -> bool:
     Returns if the edit view page should be full page.
     '''
     view_plugin = datapreview.get_view_plugin(resource_view['view_type'])
+    assert view_plugin
     return view_plugin.info().get('full_page_edit', False)
 
 
@@ -2823,7 +2823,7 @@ def get_site_statistics() -> Dict[str, int]:
     return stats
 
 
-_RESOURCE_FORMATS = None
+_RESOURCE_FORMATS: Optional[Dict[str, Any]] = None
 
 
 @core_helper
@@ -3029,7 +3029,7 @@ def compare_pkg_dicts(old: Dict, new: Dict,
     to form a detailed summary of the change.
     '''
     from ckan.lib.changes import check_metadata_changes, check_resource_changes
-    change_list = []
+    change_list: List[Dict[str, Any]] = []
 
     check_metadata_changes(change_list, old, new)
 
