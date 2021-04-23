@@ -2947,9 +2947,9 @@ def mail_to(email_address: str, name: str) -> Markup:
 def radio(selected: str, id: str, checked: bool) -> Markup:
     if checked:
         return literal((u'<input checked="checked" id="%s_%s" name="%s" \
-            value="%s" type="radio">'                                     ) % (selected, id, selected, id))
+            value="%s" type="radio">') % (selected, id, selected, id))
     return literal(('<input id="%s_%s" name="%s" \
-        value="%s" type="radio">'                                 ) % (selected, id, selected, id))
+        value="%s" type="radio">') % (selected, id, selected, id))
 
 
 @core_helper

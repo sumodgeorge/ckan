@@ -146,7 +146,7 @@ def datapusher_submit(context, data_dict):
             }))
     except requests.exceptions.ConnectionError as e:
         error: Dict[str, Any] = {'message': 'Could not connect to DataPusher.',
-                 'details': str(e)}
+                                 'details': str(e)}
         task['error'] = json.dumps(error)
         task['state'] = 'error'
         task['last_updated'] = str(datetime.datetime.utcnow()),

@@ -178,6 +178,7 @@ def dump_to(
         records_format = u'objects'
     else:
         assert False, u'Unsupported format'
+
     def start_writer(fields):
         bom = options.get(u'bom', False)
         return writer_factory(output, fields, resource_id, bom)
