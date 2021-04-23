@@ -20,7 +20,7 @@ import ckan.model as model
 import ckan.plugins as plugins
 from ckan import authz
 from ckan.common import _, config, g, request
-from typing import Any, Dict, Optional, Tuple, Union, cast
+from typing import Any, Dict, List, Optional, Tuple, Union, cast
 from flask.wrappers import Response
 
 log = logging.getLogger(__name__)
@@ -162,9 +162,9 @@ def read(id: str) -> Union[Response, str]:
 class ApiTokenView(MethodView):
     def get(self,
             id: str,
-            data: Optional[Dict] = None,
-            errors: Optional[Dict] = None,
-            error_summary: Optional[Dict] = None) -> Union[Response, str]:
+            data: Optional[Dict[str, Any]] = None,
+            errors: Optional[Dict[str, Any]] = None,
+            error_summary: Optional[Dict[str, Any]] = None) -> Union[Response, str]:
         context = cast(Context, {
             u'model': model,
             u'session': model.Session,
@@ -335,9 +335,9 @@ class EditView(MethodView):
 
     def get(self,
             id: Optional[str] = None,
-            data: Optional[Dict] = None,
-            errors: Optional[Dict] = None,
-            error_summary: Optional[Dict] = None) -> str:
+            data: Optional[Dict[str, Any]] = None,
+            errors: Optional[Dict[str, Any]] = None,
+            error_summary: Optional[Dict[str, Any]] = None) -> str:
         context, id = self._prepare(id)
         data_dict = {u'id': id}
         try:
@@ -443,9 +443,9 @@ class RegisterView(MethodView):
         return resp
 
     def get(self,
-            data: Optional[Dict] = None,
-            errors: Optional[Dict] = None,
-            error_summary: Optional[Dict] = None) -> str:
+            data: Optional[Dict[str, Any]] = None,
+            errors: Optional[Dict[str, Any]] = None,
+            error_summary: Optional[Dict[str, Any]] = None) -> str:
         self._prepare()
 
         if g.user and not data and not authz.is_sysadmin(g.user):
@@ -623,7 +623,7 @@ class RequestResetView(MethodView):
 
     def post(self) -> Response:
         self._prepare()
-        id = request.form.get(u'user')
+        id = request.form.get(u'user', '')
         if id in (None, u''):
             h.flash_error(_(u'Email is required'))
             return h.redirect_to(u'/user/reset')
@@ -631,7 +631,7 @@ class RequestResetView(MethodView):
 
         context = cast(
             Context, {u'model': model, u'user': g.user, u'ignore_auth': True})
-        user_objs = []
+        user_objs: List[model.User] = []
 
         # Usernames cannot contain '@' symbols
         if u'@' in id:

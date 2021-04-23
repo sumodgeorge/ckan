@@ -338,7 +338,7 @@ class IResourceView(Interface):
     u'''Add custom view renderings for different resource types.
 
     '''
-    def info(self) -> Dict:
+    def info(self) -> Dict[str, Any]:
         u'''
         Returns a dictionary with configuration options for the view.
 
@@ -412,7 +412,7 @@ class IResourceView(Interface):
         '''
 
     def setup_template_variables(self, context: Context,
-                                 data_dict: DataDict) -> Dict:
+                                 data_dict: DataDict) -> Dict[str, Any]:
         u'''
         Adds variables to be passed to the template being rendered.
 
@@ -537,7 +537,7 @@ class ITagController(Interface):
     synchronization and authorization setup are complete.
 
     '''
-    def before_view(self, tag_dict: Dict) -> Dict:
+    def before_view(self, tag_dict: Dict[str, Any]) -> Dict[str, Any]:
         u'''
         Extensions will receive this before the tag gets displayed. The
         dictionary passed will be the one that gets sent to the template.
@@ -573,7 +573,7 @@ class IGroupController(Interface):
         '''
         pass
 
-    def before_view(self, data_dict: DataDict) -> Dict:
+    def before_view(self, data_dict: DataDict) -> Dict[str, Any]:
         u'''
         Extensions will receive this before the group gets
         displayed. The dictionary passed will be the one that gets
@@ -613,7 +613,7 @@ class IOrganizationController(Interface):
         '''
         pass
 
-    def before_view(self, data_dict: DataDict) -> Dict:
+    def before_view(self, data_dict: DataDict) -> Dict[str, Any]:
         u'''
         Extensions will receive this before the organization gets
         displayed. The dictionary passed will be the one that gets
@@ -647,7 +647,7 @@ class IPackageController(Interface):
         '''
         pass
 
-    def after_create(self, context: Context, pkg_dict: Dict) -> None:
+    def after_create(self, context: Context, pkg_dict: Dict[str, Any]) -> None:
         u'''
         Extensions will receive the validated data dict after the dataset
         has been created (Note that the create method will return a dataset
@@ -656,28 +656,28 @@ class IPackageController(Interface):
         '''
         pass
 
-    def after_update(self, context: Context, pkg_dict: Dict) -> None:
+    def after_update(self, context: Context, pkg_dict: Dict[str, Any]) -> None:
         u'''
         Extensions will receive the validated data dict after the dataset
         has been updated.
         '''
         pass
 
-    def after_delete(self, context: Context, pkg_dict: Dict) -> None:
+    def after_delete(self, context: Context, pkg_dict: Dict[str, Any]) -> None:
         u'''
         Extensions will receive the data dict (typically containing
         just the dataset id) after the dataset has been deleted.
         '''
         pass
 
-    def after_show(self, context: Context, pkg_dict: Dict) -> None:
+    def after_show(self, context: Context, pkg_dict: Dict[str, Any]) -> None:
         u'''
         Extensions will receive the validated data dict after the dataset
         is ready for display.
         '''
         pass
 
-    def before_search(self, search_params: Dict) -> Dict:
+    def before_search(self, search_params: Dict[str, Any]) -> Dict[str, Any]:
         u'''
         Extensions will receive a dictionary with the query parameters,
         and should return a modified (or not) version of it.
@@ -688,7 +688,9 @@ class IPackageController(Interface):
         '''
         return search_params
 
-    def after_search(self, search_results: Dict, search_params: Dict) -> Dict:
+    def after_search(self,
+                     search_results: Dict[str, Any],
+                     search_params: Dict[str, Any]) -> Dict[str, Any]:
         u'''
         Extensions will receive the search results, as well as the search
         parameters, and should return a modified (or not) object with the
@@ -707,7 +709,7 @@ class IPackageController(Interface):
 
         return search_results
 
-    def before_index(self, pkg_dict: Dict) -> Dict:
+    def before_index(self, pkg_dict: Dict[str, Any]) -> Dict[str, Any]:
         u'''
         Extensions will receive what will be given to Solr for
         indexing. This is essentially a flattened dict (except for
@@ -717,7 +719,7 @@ class IPackageController(Interface):
         '''
         return pkg_dict
 
-    def before_view(self, pkg_dict: Dict) -> Dict:
+    def before_view(self, pkg_dict: Dict[str, Any]) -> Dict[str, Any]:
         u'''
         Extensions will receive this before the dataset gets
         displayed. The dictionary passed will be the one that gets
@@ -731,7 +733,7 @@ class IResourceController(Interface):
     Hook into the resource view.
     '''
 
-    def before_create(self, context: Context, resource: Dict) -> None:
+    def before_create(self, context: Context, resource: Dict[str, Any]) -> None:
         u'''
         Extensions will receive this before a resource is created.
 
@@ -744,7 +746,7 @@ class IResourceController(Interface):
         '''
         pass
 
-    def after_create(self, context: Context, resource: Dict) -> None:
+    def after_create(self, context: Context, resource: Dict[str, Any]) -> None:
         u'''
         Extensions will receive this after a resource is created.
 
@@ -760,8 +762,8 @@ class IResourceController(Interface):
         '''
         pass
 
-    def before_update(self, context: Context, current: Dict,
-                      resource: Dict) -> None:
+    def before_update(self, context: Context, current: Dict[str, Any],
+                      resource: Dict[str, Any]) -> None:
         u'''
         Extensions will receive this before a resource is updated.
 
@@ -776,7 +778,7 @@ class IResourceController(Interface):
         '''
         pass
 
-    def after_update(self, context: Context, resource: Dict) -> None:
+    def after_update(self, context: Context, resource: Dict[str, Any]) -> None:
         u'''
         Extensions will receive this after a resource is updated.
 
@@ -793,7 +795,7 @@ class IResourceController(Interface):
         pass
 
     def before_delete(self, context: Context, resource,
-                      resources: List[Dict]) -> None:
+                      resources: List[Dict[str, Any]]) -> None:
         u'''
         Extensions will receive this before a resource is deleted.
 
@@ -811,7 +813,9 @@ class IResourceController(Interface):
         '''
         pass
 
-    def after_delete(self, context: Context, resources: List[Dict]) -> None:
+    def after_delete(self,
+                     context: Context,
+                     resources: List[Dict[str, Any]]) -> None:
         u'''
         Extensions will receive this after a resource is deleted.
 
@@ -824,7 +828,7 @@ class IResourceController(Interface):
         '''
         pass
 
-    def before_show(self, resource_dict: Dict) -> Dict:
+    def before_show(self, resource_dict: Dict[str, Any]) -> Dict[str, Any]:
         u'''
         Extensions will receive the validated data dict before the resource
         is ready for display.
@@ -906,7 +910,7 @@ class IConfigurer(Interface):
         :param config: ``config`` object
         '''
 
-    def update_config_schema(self, schema: Schema) -> Dict:
+    def update_config_schema(self, schema: Schema) -> Dict[str, Any]:
         u'''
         Return a schema with the runtime-editable config options.
 
@@ -1158,7 +1162,7 @@ class IDatasetForm(Interface):
 
         '''
 
-    def create_package_schema(self) -> Dict:
+    def create_package_schema(self) -> Dict[str, Any]:
         u'''Return the schema for validating new dataset dicts.
 
         CKAN will use the returned schema to validate and convert data coming
@@ -1181,7 +1185,7 @@ class IDatasetForm(Interface):
 
         '''
 
-    def update_package_schema(self) -> Dict:
+    def update_package_schema(self) -> Dict[str, Any]:
         u'''Return the schema for validating updated dataset dicts.
 
         CKAN will use the returned schema to validate and convert data coming
@@ -1204,7 +1208,7 @@ class IDatasetForm(Interface):
 
         '''
 
-    def show_package_schema(self) -> Dict:
+    def show_package_schema(self) -> Dict[str, Any]:
         u'''
         Return a schema to validate datasets before they're shown to the user.
 
@@ -1329,7 +1333,7 @@ class IDatasetForm(Interface):
         '''
 
     def validate(self, context: Context, data_dict: DataDict, schema: Schema,
-                 action: str) -> Tuple[Dict, Dict]:
+                 action: str) -> Tuple[Dict[str, Any], Dict[str, Any]]:
         u'''Customize validation of datasets.
 
         When this method is implemented it is used to perform all validation
@@ -1505,7 +1509,7 @@ class IGroupForm(Interface):
         rendered.  e.g. ``group/new_group_form.html``.
         '''
 
-    def form_to_db_schema(self) -> Dict:
+    def form_to_db_schema(self) -> Dict[str, Any]:
         u'''
         Returns the schema for mapping group data from a form to a format
         suitable for the database.
@@ -1533,7 +1537,7 @@ class IGroupForm(Interface):
         '''
 
     def validate(self, context: Context, data_dict: DataDict, schema: Schema,
-                 action: str) -> Tuple[Dict, Dict]:
+                 action: str) -> Tuple[Dict[str, Any], Dict[str, Any]]:
         u'''Customize validation of groups.
 
         When this method is implemented it is used to perform all validation
@@ -1628,7 +1632,9 @@ class IFacets(Interface):
     they will each be able to modify the facets dict in turn.
 
     '''
-    def dataset_facets(self, facets_dict: Dict, package_type: str) -> Dict:
+    def dataset_facets(self,
+                       facets_dict: Dict[str, Any],
+                       package_type: str) -> Dict[str, Any]:
         u'''Modify and return the ``facets_dict`` for the dataset search page.
 
         The ``package_type`` is the type of dataset that these facets apply to.
@@ -1647,7 +1653,7 @@ class IFacets(Interface):
         '''
         return facets_dict
 
-    def group_facets(self, facets_dict: Dict, group_type: str,
+    def group_facets(self, facets_dict: Dict[str, Any], group_type: str,
                      package_type: Optional[str]) -> Dict[str, Any]:
         u'''Modify and return the ``facets_dict`` for a group's page.
 
@@ -1674,8 +1680,9 @@ class IFacets(Interface):
         '''
         return facets_dict
 
-    def organization_facets(self, facets_dict: Dict, organization_type: str,
-                            package_type: str) -> Dict:
+    def organization_facets(self,
+                            facets_dict: Dict[str, Any], organization_type: str,
+                            package_type: str) -> Dict[str, Any]:
         u'''Modify and return the ``facets_dict`` for an organization's page.
 
         The ``package_type`` is the type of dataset that these facets apply to.
@@ -2062,7 +2069,7 @@ class IApiToken(Interface):
         """
         return data
 
-    def add_extra_fields(self, data_dict: DataDict) -> Dict:
+    def add_extra_fields(self, data_dict: DataDict) -> Dict[str, Any]:
         """Provide additional information alongside with API Token.
 
         Any extra information that is not itself a part of a token,

@@ -49,7 +49,7 @@ ValidationError = logic.ValidationError
 _get_or_bust = logic.get_or_bust
 
 
-def resource_update(context: Context, data_dict: DataDict) -> Dict:
+def resource_update(context: Context, data_dict: DataDict) -> Dict[str, Any]:
     '''Update a resource.
 
     To update a resource you must be authorized to update the dataset that the
@@ -110,7 +110,7 @@ def resource_update(context: Context, data_dict: DataDict) -> Dict:
         updated_pkg_dict = _get_action('package_update')(context, pkg_dict)
     except ValidationError as e:
         try:
-            error_dict = cast(Dict, e.error_dict['resources'][n])
+            error_dict = cast(Dict[str, Any], e.error_dict['resources'][n])
         except (KeyError, IndexError):
             error_dict = e.error_dict
         raise ValidationError(error_dict)
@@ -130,7 +130,7 @@ def resource_update(context: Context, data_dict: DataDict) -> Dict:
     return resource
 
 
-def resource_view_update(context: Context, data_dict: DataDict) -> Dict:
+def resource_view_update(context: Context, data_dict: DataDict) -> Dict[str, Any]:
     '''Update a resource view.
 
     To update a resource_view you must be authorized to update the resource
@@ -179,7 +179,7 @@ def resource_view_update(context: Context, data_dict: DataDict) -> Dict:
         model.repo.commit()
     return model_dictize.resource_view_dictize(resource_view, context)
 
-def resource_view_reorder(context: Context, data_dict: DataDict) -> Dict:
+def resource_view_reorder(context: Context, data_dict: DataDict) -> Dict[str, Any]:
     '''Reorder resource views.
 
     :param id: the id of the resource
@@ -226,7 +226,7 @@ def resource_view_reorder(context: Context, data_dict: DataDict) -> Dict:
     return {'id': id, 'order': new_order}
 
 
-def package_update(context: Context, data_dict: DataDict) -> Union[str, Dict]:
+def package_update(context: Context, data_dict: DataDict) -> Union[str, Dict[str, Any]]:
     '''Update a dataset (package).
 
     You must be authorized to edit the dataset and the groups that it belongs
@@ -370,7 +370,7 @@ def package_update(context: Context, data_dict: DataDict) -> Union[str, Dict]:
     return output
 
 
-def package_revise(context: Context, data_dict: DataDict) -> Dict:
+def package_revise(context: Context, data_dict: DataDict) -> Dict[str, Any]:
     '''Revise a dataset (package) selectively with match, filter and
     update parameters.
 
@@ -531,7 +531,7 @@ def package_revise(context: Context, data_dict: DataDict) -> Dict:
     return rval
 
 
-def package_resource_reorder(context: Context, data_dict: DataDict) -> Dict:
+def package_resource_reorder(context: Context, data_dict: DataDict) -> Dict[str, Any]:
     '''Reorder resources against datasets.  If only partial resource ids are
     supplied then these are assumed to be first and the other resources will
     stay in their original order
@@ -589,7 +589,7 @@ def _update_package_relationship(relationship: 'model_.PackageRelationship', com
     return rel_dict
 
 
-def package_relationship_update(context: Context, data_dict: DataDict) -> Dict:
+def package_relationship_update(context: Context, data_dict: DataDict) -> Dict[str, Any]:
     '''Update a relationship between two datasets (packages).
 
     The subject, object and type parameters are required to identify the
@@ -757,7 +757,7 @@ def _group_or_org_update(context, data_dict, is_org=False):
     return model_dictize.group_dictize(group, context)
 
 
-def group_update(context: Context, data_dict: DataDict) -> Dict:
+def group_update(context: Context, data_dict: DataDict) -> Dict[str, Any]:
     '''Update a group.
 
     You must be authorized to edit the group.
@@ -781,7 +781,7 @@ def group_update(context: Context, data_dict: DataDict) -> Dict:
     # values. This includes: packages, users, groups, tags, extras
     return _group_or_org_update(context, data_dict)
 
-def organization_update(context: Context, data_dict: DataDict) -> Dict:
+def organization_update(context: Context, data_dict: DataDict) -> Dict[str, Any]:
     '''Update a organization.
 
     You must be authorized to edit the organization.
@@ -804,7 +804,7 @@ def organization_update(context: Context, data_dict: DataDict) -> Dict:
     # values. This includes: users, groups, tags, extras
     return _group_or_org_update(context, data_dict, is_org=True)
 
-def user_update(context: Context, data_dict: DataDict) -> Dict:
+def user_update(context: Context, data_dict: DataDict) -> Dict[str, Any]:
     '''Update a user account.
 
     Normal users can only update their own user accounts. Sysadmins can update
@@ -879,7 +879,7 @@ def user_update(context: Context, data_dict: DataDict) -> Dict:
     return user_dict
 
 
-def user_generate_apikey(context: Context, data_dict: DataDict) -> Dict:
+def user_generate_apikey(context: Context, data_dict: DataDict) -> Dict[str, Any]:
     '''Cycle a user's API key
 
     :param id: the name or id of the user whose key needs to be updated
@@ -912,7 +912,7 @@ def user_generate_apikey(context: Context, data_dict: DataDict) -> Dict:
     return _get_action('user_update')(context, data_dict)
 
 
-def task_status_update(context: Context, data_dict: DataDict) -> Dict:
+def task_status_update(context: Context, data_dict: DataDict) -> Dict[str, Any]:
     '''Update a task status.
 
     :param id: the id of the task status to update
@@ -964,7 +964,7 @@ def task_status_update(context: Context, data_dict: DataDict) -> Dict:
     session.close()
     return model_dictize.task_status_dictize(task_status, context)
 
-def task_status_update_many(context: Context, data_dict: DataDict) -> Dict:
+def task_status_update_many(context: Context, data_dict: DataDict) -> Dict[str, Any]:
     '''Update many task statuses at once.
 
     :param data: the task_status dictionaries to update, for the format of task
@@ -988,7 +988,7 @@ def task_status_update_many(context: Context, data_dict: DataDict) -> Dict:
         model.Session.commit()
     return {'results': results}
 
-def term_translation_update(context: Context, data_dict: DataDict) -> Dict:
+def term_translation_update(context: Context, data_dict: DataDict) -> Dict[str, Any]:
     '''Create or update a term translation.
 
     You must be a sysadmin to create or update term translations.
@@ -1038,7 +1038,7 @@ def term_translation_update(context: Context, data_dict: DataDict) -> Dict:
 
     return data
 
-def term_translation_update_many(context: Context, data_dict: DataDict) -> Dict:
+def term_translation_update_many(context: Context, data_dict: DataDict) -> Dict[str, Any]:
     '''Create or update many term translations at once.
 
     :param data: the term translation dictionaries to create or update,
@@ -1070,7 +1070,7 @@ def term_translation_update_many(context: Context, data_dict: DataDict) -> Dict:
     return {'success': '%s rows updated' % (num + 1)}  # type: ignore
 
 
-def vocabulary_update(context: Context, data_dict: DataDict) -> Dict:
+def vocabulary_update(context: Context, data_dict: DataDict) -> Dict[str, Any]:
     '''Update a tag vocabulary.
 
     You must be a sysadmin to update vocabularies.
@@ -1314,7 +1314,7 @@ def bulk_update_delete(context: Context, data_dict: DataDict) -> None:
     _bulk_update_dataset(context, data_dict, {'state': 'deleted'})
 
 
-def config_option_update(context: Context, data_dict: DataDict) -> Dict:
+def config_option_update(context: Context, data_dict: DataDict) -> Dict[str, Any]:
     '''
 
     .. versionadded:: 2.4

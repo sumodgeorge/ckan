@@ -123,7 +123,7 @@ def query_for(_type: Any) -> SearchQuery:
         raise SearchError("Unknown search type: %s" % _type)
 
 
-def dispatch_by_operation(entity_type: str, entity: Dict,
+def dispatch_by_operation(entity_type: str, entity: Dict[str, Any],
                           operation: str) -> None:
     """Call the appropriate index method for a given notification."""
     try:
@@ -277,7 +277,7 @@ def check() -> None:
         print((pkg.metadata_modified.strftime('%Y-%m-%d'), pkg.name))
 
 
-def show(package_reference: str) -> Dict:
+def show(package_reference: str) -> Dict[str, Any]:
     package_query = query_for(model.Package)
     return package_query.get_index(package_reference)
 

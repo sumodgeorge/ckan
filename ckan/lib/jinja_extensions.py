@@ -35,7 +35,7 @@ def _get_extensions():
             AssetExtension]
 
 
-def get_jinja_env_options() -> Dict:
+def get_jinja_env_options() -> Dict[str, Any]:
     return dict(
         loader=CkanFileSystemLoader(config['computed_template_paths']),
         autoescape=True,
@@ -234,7 +234,7 @@ class BaseExtension(ext.Extension):
     {% tag_name args, kw %}
     after parsing it will call _call(args, kw) which must be defined. '''
 
-    def parse(self, parser):
+    def parse(self, parser: Any) -> None:
         stream = parser.stream
         tag = next(stream)
         # get arguments

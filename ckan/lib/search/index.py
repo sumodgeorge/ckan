@@ -82,11 +82,11 @@ class SearchIndex(object):
     def __init__(self) -> None:
         pass
 
-    def insert_dict(self, data: Dict) -> None:
+    def insert_dict(self, data: Dict[str, Any]) -> None:
         """ Insert new data from a dictionary. """
         return self.update_dict(data)
 
-    def update_dict(self, data: Dict, defer_commit: bool = False) -> None:
+    def update_dict(self, data: Dict[str, Any], defer_commit: bool = False) -> None:
         """ Update data from a dictionary. """
         log.debug("NOOP Index: %s" % ",".join(data.keys()))
 
@@ -330,7 +330,7 @@ class PackageSearchIndex(SearchIndex):
             log.exception(e)
             raise SearchIndexError(e)
 
-    def delete_package(self, pkg_dict: Dict) -> None:
+    def delete_package(self, pkg_dict: Dict[str, Any]) -> None:
         conn = make_connection()
         query = "+%s:%s AND +(id:\"%s\" OR name:\"%s\") AND +site_id:\"%s\"" % \
                 (TYPE_FIELD, PACKAGE_TYPE, pkg_dict.get('id'), pkg_dict.get('id'), config.get('ckan.site_id'))

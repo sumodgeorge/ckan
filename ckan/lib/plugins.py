@@ -345,16 +345,16 @@ class DefaultDatasetForm(object):
        being registered.
 
     '''
-    def create_package_schema(self) -> Dict:
+    def create_package_schema(self) -> Dict[str, Any]:
         return ckan.logic.schema.default_create_package_schema()
 
-    def update_package_schema(self) -> Dict:
+    def update_package_schema(self) -> Dict[str, Any]:
         return ckan.logic.schema.default_update_package_schema()
 
-    def show_package_schema(self) -> Dict:
+    def show_package_schema(self) -> Dict[str, Any]:
         return ckan.logic.schema.default_show_package_schema()
 
-    def setup_template_variables(self, context: Dict, data_dict: Dict) -> None:
+    def setup_template_variables(self, context: Context, data_dict: Dict[str, Any]) -> None:
         data_dict.update({'available_only': True})
 
         ## This is messy as auths take domain object not data_dict
@@ -468,7 +468,7 @@ class DefaultGroupForm(object):
     def group_form(self) -> str:
         return 'group/new_group_form.html'
 
-    def form_to_db_schema_options(self, options: Dict) -> Dict:
+    def form_to_db_schema_options(self, options: Dict[str, Any]) -> Dict[str, Any]:
         ''' This allows us to select different schemas for different
         purpose eg via the web interface or via the api or creation vs
         updating. It is optional and if not available form_to_db_schema
@@ -488,20 +488,20 @@ class DefaultGroupForm(object):
         else:
             return self.form_to_db_schema()
 
-    def form_to_db_schema_api_create(self) -> Dict:
+    def form_to_db_schema_api_create(self) -> Dict[str, Any]:
         return ckan.logic.schema.default_group_schema()
 
-    def form_to_db_schema_api_update(self) -> Dict:
+    def form_to_db_schema_api_update(self) -> Dict[str, Any]:
         return ckan.logic.schema.default_update_group_schema()
 
-    def form_to_db_schema(self) -> Dict:
+    def form_to_db_schema(self) -> Dict[str, Any]:
         return ckan.logic.schema.group_form_schema()
 
-    def db_to_form_schema(self) -> Dict:
+    def db_to_form_schema(self) -> Dict[str, Any]:
         '''This is an interface to manipulate data from the database
         into a format suitable for the form (optional)'''
 
-    def db_to_form_schema_options(self, options: Dict) -> Dict:
+    def db_to_form_schema_options(self, options: Dict[str, Any]) -> Dict[str, Any]:
         '''This allows the selection of different schemas for different
         purposes.  It is optional and if not available, ``db_to_form_schema``
         should be used.
@@ -513,7 +513,7 @@ class DefaultGroupForm(object):
             return schema
         return self.db_to_form_schema()
 
-    def check_data_dict(self, data_dict: Dict) -> None:
+    def check_data_dict(self, data_dict: Dict[str, Any]) -> None:
         '''Check if the return data is correct, mostly for checking out
         if spammers are submitting only part of the form
 
@@ -535,7 +535,7 @@ class DefaultGroupForm(object):
         '''
         pass
 
-    def setup_template_variables(self, context: Context, data_dict: Dict) -> None:
+    def setup_template_variables(self, context: Context, data_dict: Dict[str, Any]) -> None:
         c.is_sysadmin = ckan.authz.is_sysadmin(c.user)
 
         ## This is messy as auths take domain object not data_dict
@@ -561,7 +561,7 @@ class DefaultOrganizationForm(DefaultGroupForm):
     def group_form(self) -> str:
         return 'organization/new_organization_form.html'
 
-    def setup_template_variables(self, context: Dict, data_dict: Dict) -> None:
+    def setup_template_variables(self, context: Context, data_dict: Dict[str, Any]) -> None:
         pass
 
     def new_template(self) -> str:

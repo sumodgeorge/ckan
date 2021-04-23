@@ -10,13 +10,13 @@ from ckan.common import _
 from ckan.types import ErrorDict
 from ckan import model
 from ckan.model.domain_object import DomainObject
-from typing import Dict, List, Mapping, cast
+from typing import Any, Dict, List, Mapping, cast
 
 
-def rename_keys(dict_: Dict,
-                key_map: Mapping,
+def rename_keys(dict_: Dict[str, Any],
+                key_map: Mapping[str, Any],
                 reverse: bool = False,
-                destructive: bool = False) -> Dict:
+                destructive: bool = False) -> Dict[str, Any]:
     '''Returns a dict that has particular keys renamed,
     according to the key_map.
 

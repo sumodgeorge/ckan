@@ -2,6 +2,7 @@
 
 from __future__ import print_function
 import os
+from typing import cast
 
 import alembic.command
 import click
@@ -151,7 +152,7 @@ def migration(plugin, message):
         tk.error_shout(u'Config is not loaded')
         raise click.Abort()
     config = CKANAlembicConfig(_resolve_alembic_config(plugin))
-    migration_dir = os.path.dirname(config.config_file_name)
+    migration_dir = os.path.dirname(cast(str, config.config_file_name))
     config.set_main_option(
         u"sqlalchemy.url",
         str(ckan.model.repo.metadata.bind.url))  # type: ignore

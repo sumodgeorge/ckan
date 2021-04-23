@@ -486,7 +486,7 @@ class CKANFlask(MultiStaticFlask):
             return (False, self.app_name)
 
     def register_extension_blueprint(self, blueprint: Blueprint,
-                                     **kwargs: Dict):
+                                     **kwargs: Dict[str, Any]):
         '''
         This method should be used to register blueprints that come from
         extensions, so there's an opportunity to add extension-specific

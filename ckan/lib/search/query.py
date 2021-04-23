@@ -291,7 +291,7 @@ class PackageSearchQuery(SearchQuery):
         data = conn.search(query, fq=fq, rows=max_results, fl='id')
         return [r.get('id') for r in data.docs]
 
-    def get_index(self, reference: str) -> Dict:
+    def get_index(self, reference: str) -> Dict[str, Any]:
         query = {
             'rows': 1,
             'q': 'name:"%s" OR id:"%s"' % (reference, reference),
@@ -321,9 +321,9 @@ class PackageSearchQuery(SearchQuery):
             return solr_response.docs[0]
 
     def run(self,
-            query: Dict,
+            query: Dict[str, Any],
             permission_labels: List[str] = None,
-            **kwargs: Any) -> Dict:
+            **kwargs: Any) -> Dict[str, Any]:
         '''
         Performs a dataset search using the given query.
 

@@ -33,11 +33,11 @@ from ckan.types import Context
 ## package save
 
 def group_list_dictize(obj_list: Union[Iterable[model.Group], Iterable[Tuple[model.Group, str]]], context: Context,
-                       sort_key: Callable=lambda x: x['display_name'], reverse: bool=False,
+                       sort_key: Callable[..., Any]=lambda x: x['display_name'], reverse: bool=False,
                        with_package_counts: bool=True,
                        include_groups: bool=False,
                        include_tags: bool=False,
-                       include_extras: bool=False) -> List[Dict]:
+                       include_extras: bool=False) -> List[Dict[str, Any]]:
 
     group_dictize_context: Context = context.copy()
     # Set options to avoid any SOLR queries for each group, which would
@@ -65,7 +65,7 @@ def group_list_dictize(obj_list: Union[Iterable[model.Group], Iterable[Tuple[mod
 
     return sorted(group_list, key=sort_key, reverse=reverse)
 
-def resource_list_dictize(res_list: List[model.Resource], context: Context) -> List[Dict]:
+def resource_list_dictize(res_list: List[model.Resource], context: Context) -> List[Dict[str, Any]]:
 
     active = context.get('active', True)
     result_list = []
@@ -78,7 +78,7 @@ def resource_list_dictize(res_list: List[model.Resource], context: Context) -> L
 
     return sorted(result_list, key=lambda x: x["position"])
 
-def extras_dict_dictize(extras_dict: Dict, context: Context) -> List[Dict]:
+def extras_dict_dictize(extras_dict: Dict[str, Any], context: Context) -> List[Dict[str, Any]]:
     result_list = []
     for extra in six.itervalues(extras_dict):
         dictized = d.table_dictize(extra, context)
@@ -88,7 +88,7 @@ def extras_dict_dictize(extras_dict: Dict, context: Context) -> List[Dict]:
 
     return sorted(result_list, key=lambda x: x["key"])
 
-def extras_list_dictize(extras_list: List[Any], context: Context) -> List[Dict]:
+def extras_list_dictize(extras_list: List[Any], context: Context) -> List[Dict[str, Any]]:
     result_list = []
     active = context.get('active', True)
     for extra in extras_list:
@@ -100,7 +100,7 @@ def extras_list_dictize(extras_list: List[Any], context: Context) -> List[Dict]:
     return sorted(result_list, key=lambda x: x["key"])
 
 
-def resource_dictize(res: model.Resource, context: Context) -> Dict:
+def resource_dictize(res: model.Resource, context: Context) -> Dict[str, Any]:
     resource = d.table_dictize(res, context)
     extras = resource.pop("extras", None)
     if extras:
@@ -135,7 +135,7 @@ def _execute(q, table, context: Context):
     return session.execute(q)
 
 
-def package_dictize(pkg: model.Package, context: Context) -> Dict:
+def package_dictize(pkg: model.Package, context: Context) -> Dict[str, Any]:
     '''
     Given a Package object, returns an equivalent dictionary.
     '''
@@ -265,7 +265,7 @@ def _get_members(context, group, member_type):
     return q.all()
 
 
-def get_group_dataset_counts() -> Dict:
+def get_group_dataset_counts() -> Dict[str, Any]:
     '''For all public groups, return their dataset counts, as a SOLR facet'''
     query = search.PackageSearchQuery()
     q = {'q': '',
@@ -281,7 +281,7 @@ def group_dictize(group: model.Group, context: Context,
                   include_users: bool=True,
                   include_extras: bool=True,
                   packages_field: Optional[str]='datasets',
-                  **kw: Any) -> Dict:
+                  **kw: Any) -> Dict[str, Any]:
     '''
     Turns a Group object and related into a dictionary. The related objects
     like tags are included unless you specify it in the params.
@@ -399,7 +399,7 @@ def group_dictize(group: model.Group, context: Context,
         )
     return result_dict
 
-def tag_list_dictize(tag_list: Union[Iterable[model.Tag], Iterable[Tuple[model.Tag, str]]], context: Context) -> List[Dict]:
+def tag_list_dictize(tag_list: Union[Iterable[model.Tag], Iterable[Tuple[model.Tag, str]]], context: Context) -> List[Dict[str, Any]]:
 
     result_list = []
     for tag in tag_list:
@@ -426,7 +426,7 @@ def tag_list_dictize(tag_list: Union[Iterable[model.Tag], Iterable[Tuple[model.T
 
     return result_list
 
-def tag_dictize(tag: model.Tag, context: Context, include_datasets: bool=True) -> Dict:
+def tag_dictize(tag: model.Tag, context: Context, include_datasets: bool=True) -> Dict[str, Any]:
     tag_dict = d.table_dictize(tag, context)
     package_dicts = []
     if include_datasets:
@@ -470,7 +470,7 @@ def tag_dictize(tag: model.Tag, context: Context, include_datasets: bool=True) -
     return tag_dict
 
 def user_list_dictize(obj_list: List[model.User], context: Context,
-                      sort_key: Callable=lambda x:x['name'], reverse: bool=False) -> List[Dict]:
+                      sort_key: Callable=lambda x:x['name'], reverse: bool=False) -> List[Dict[str, Any]]:
 
     result_list = []
 
@@ -482,12 +482,12 @@ def user_list_dictize(obj_list: List[model.User], context: Context,
         result_list.append(user_dict)
     return sorted(result_list, key=sort_key, reverse=reverse)
 
-def member_dictize(member: Union[model.Member, model.PackageMember], context: Context) -> Dict:
+def member_dictize(member: Union[model.Member, model.PackageMember], context: Context) -> Dict[str, Any]:
     return d.table_dictize(member, context)
 
 def user_dictize(
         user: Union[model.User, Tuple[model.User, str]], context: Context, include_password_hash: bool=False,
-        include_plugin_extras: bool=False) -> Dict:
+        include_plugin_extras: bool=False) -> Dict[str, Any]:
     model = context['model']
     session = model.Session
 
@@ -550,12 +550,12 @@ def user_dictize(
 
     return result_dict
 
-def task_status_dictize(task_status: model.TaskStatus, context: Context) -> Dict:
+def task_status_dictize(task_status: model.TaskStatus, context: Context) -> Dict[str, Any]:
     return d.table_dictize(task_status, context)
 
 ## conversion to api
 
-def group_to_api(group: model.Group, context: Context) -> Dict:
+def group_to_api(group: model.Group, context: Context) -> Dict[str, Any]:
     api_version = context.get('api_version')
     assert api_version, 'No api_version supplied in context'
     dictized = group_dictize(group, context)
@@ -579,12 +579,12 @@ def tag_to_api(tag: model.Tag, context: Context) -> Iterable[str]:
         return sorted(package["id"] for package in dictized["packages"])
 
 
-def resource_dict_to_api(res_dict: Dict, package_id: str, context: Context) -> None:
+def resource_dict_to_api(res_dict: Dict[str, Any], package_id: str, context: Context) -> None:
     res_dict.pop("state")
     res_dict["package_id"] = package_id
 
 
-def package_to_api(pkg: model.Package, context: Context) -> Dict:
+def package_to_api(pkg: model.Package, context: Context) -> Dict[str, Any]:
     api_version = context.get('api_version')
     assert api_version, 'No api_version supplied in context'
     dictized = package_dictize(pkg, context)
@@ -643,7 +643,7 @@ def package_to_api(pkg: model.Package, context: Context) -> Dict:
 
     return dictized
 
-def vocabulary_dictize(vocabulary: model.Vocabulary, context: Context, include_datasets: bool=False) -> Dict:
+def vocabulary_dictize(vocabulary: model.Vocabulary, context: Context, include_datasets: bool=False) -> Dict[str, Any]:
     vocabulary_dict = d.table_dictize(vocabulary, context)
     assert 'tags' not in vocabulary_dict
 
@@ -651,11 +651,11 @@ def vocabulary_dictize(vocabulary: model.Vocabulary, context: Context, include_d
                                for tag in vocabulary.tags]
     return vocabulary_dict
 
-def vocabulary_list_dictize(vocabulary_list: List[model.Vocabulary], context: Context) -> List[Dict]:
+def vocabulary_list_dictize(vocabulary_list: List[model.Vocabulary], context: Context) -> List[Dict[str, Any]]:
     return [vocabulary_dictize(vocabulary, context)
             for vocabulary in vocabulary_list]
 
-def activity_dictize(activity: model.Activity, context: Context, include_data: bool=False) -> Dict:
+def activity_dictize(activity: model.Activity, context: Context, include_data: bool=False) -> Dict[str, Any]:
     activity_dict = d.table_dictize(activity, context)
     if not include_data:
         # replace the data with just a {'title': title} and not the rest of
@@ -669,7 +669,7 @@ def activity_dictize(activity: model.Activity, context: Context, include_data: b
 
 
 def activity_list_dictize(activity_list: List[model.Activity], context: Context,
-                          include_data: bool=False) -> List[Dict]:
+                          include_data: bool=False) -> List[Dict[str, Any]]:
     return [activity_dictize(activity, context, include_data)
             for activity in activity_list]
 
@@ -704,16 +704,16 @@ def tag_to_api2(tag, context: Context):
     context['api_version'] = 2
     return tag_to_api(tag, context)
 
-def user_following_user_dictize(follower: model.UserFollowingUser, context: Context) -> Dict:
+def user_following_user_dictize(follower: model.UserFollowingUser, context: Context) -> Dict[str, Any]:
     return d.table_dictize(follower, context)
 
-def user_following_dataset_dictize(follower: model.UserFollowingDataset, context: Context) -> Dict:
+def user_following_dataset_dictize(follower: model.UserFollowingDataset, context: Context) -> Dict[str, Any]:
     return d.table_dictize(follower, context)
 
-def user_following_group_dictize(follower: model.UserFollowingGroup, context: Context) -> Dict:
+def user_following_group_dictize(follower: model.UserFollowingGroup, context: Context) -> Dict[str, Any]:
     return d.table_dictize(follower, context)
 
-def resource_view_dictize(resource_view: model.ResourceView, context: Context) -> Dict:
+def resource_view_dictize(resource_view: model.ResourceView, context: Context) -> Dict[str, Any]:
     dictized = d.table_dictize(resource_view, context)
     dictized.pop('order')
     config = dictized.pop('config', {})
@@ -723,14 +723,14 @@ def resource_view_dictize(resource_view: model.ResourceView, context: Context) -
     dictized['package_id'] = package_id
     return dictized
 
-def resource_view_list_dictize(resource_views: List[model.ResourceView], context: Context) -> List[Dict]:
+def resource_view_list_dictize(resource_views: List[model.ResourceView], context: Context) -> List[Dict[str, Any]]:
     resource_view_dicts = []
     for view in resource_views:
         resource_view_dicts.append(resource_view_dictize(view, context))
     return resource_view_dicts
 
 
-def api_token_dictize(api_token: model.ApiToken, context: Context) -> Dict:
+def api_token_dictize(api_token: model.ApiToken, context: Context) -> Dict[str, Any]:
     include_plugin_extras = context.get(u'include_plugin_extras', False)
     result_dict = d.table_dictize(api_token, context)
     plugin_extras = result_dict.pop(u'plugin_extras', None)
@@ -740,7 +740,7 @@ def api_token_dictize(api_token: model.ApiToken, context: Context) -> Dict:
     return result_dict
 
 
-def api_token_list_dictize(tokens: Iterable[model.ApiToken], context: Context) -> List[Dict]:
+def api_token_list_dictize(tokens: Iterable[model.ApiToken], context: Context) -> List[Dict[str, Any]]:
     token_dicts = []
     for token in tokens:
         token_dicts.append(api_token_dictize(token, context))

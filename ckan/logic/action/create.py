@@ -51,7 +51,7 @@ NotAuthorized = logic.NotAuthorized
 _get_or_bust = logic.get_or_bust
 
 
-def package_create(context: Context, data_dict: DataDict) -> Union[Dict, str]:
+def package_create(context: Context, data_dict: DataDict) -> Union[Dict[str, Any], str]:
     '''Create a new dataset (package).
 
     You must be authorized to create new datasets. If you specify any groups
@@ -246,7 +246,7 @@ def package_create(context: Context, data_dict: DataDict) -> Union[Dict, str]:
     )
 
 
-def resource_create(context: Context, data_dict: DataDict) -> Dict:
+def resource_create(context: Context, data_dict: DataDict) -> Dict[str, Any]:
     '''Appends a new resource to a datasets list of resources.
 
     :param package_id: id of package that the resource should be added to.
@@ -355,7 +355,7 @@ def resource_create(context: Context, data_dict: DataDict) -> Dict:
     return resource
 
 
-def resource_view_create(context: Context, data_dict: DataDict) -> Dict:
+def resource_view_create(context: Context, data_dict: DataDict) -> Dict[str, Any]:
     '''Creates a new resource view.
 
     :param resource_id: id of the resource
@@ -502,7 +502,7 @@ def package_create_default_resource_views(
         create_datastore_views=create_datastore_views)
 
 
-def package_relationship_create(context: Context, data_dict: DataDict) -> Dict:
+def package_relationship_create(context: Context, data_dict: DataDict) -> Dict[str, Any]:
     '''Create a relationship between two datasets (packages).
 
     You must be authorized to edit both the subject and the object datasets.
@@ -561,7 +561,7 @@ def package_relationship_create(context: Context, data_dict: DataDict) -> Dict:
     return relationship_dicts
 
 
-def member_create(context: Context, data_dict: DataDict) -> Dict:
+def member_create(context: Context, data_dict: DataDict) -> Dict[str, Any]:
     '''Make an object (e.g. a user, dataset or group) a member of a group.
 
     If the object is already a member of the group then the capacity of the
@@ -629,7 +629,7 @@ def member_create(context: Context, data_dict: DataDict) -> Dict:
     return model_dictize.member_dictize(member, context)
 
 
-def package_collaborator_create(context: Context, data_dict: DataDict) -> Dict:
+def package_collaborator_create(context: Context, data_dict: DataDict) -> Dict[str, Any]:
     '''Make a user a collaborator in a dataset.
 
     If the user is already a collaborator in the dataset then their
@@ -943,7 +943,7 @@ def organization_create(context: Context,
     return _group_or_org_create(context, data_dict, is_org=True)
 
 
-def rating_create(context: Context, data_dict: DataDict) -> Dict:
+def rating_create(context: Context, data_dict: DataDict) -> Dict[str, Any]:
     '''Rate a dataset (package).
 
     You must provide your API key in the Authorization header.
@@ -1001,7 +1001,7 @@ def rating_create(context: Context, data_dict: DataDict) -> Dict:
     return ret_dict
 
 
-def user_create(context: Context, data_dict: DataDict) -> Dict:
+def user_create(context: Context, data_dict: DataDict) -> Dict[str, Any]:
     '''Create a new user.
 
     You must be authorized to create users.
@@ -1119,7 +1119,7 @@ def user_create(context: Context, data_dict: DataDict) -> Dict:
     return user_dict
 
 
-def user_invite(context: Context, data_dict: DataDict) -> Dict:
+def user_invite(context: Context, data_dict: DataDict) -> Dict[str, Any]:
     '''Invite a new user.
 
     You must be authorized to create group members.
@@ -1214,7 +1214,7 @@ def _get_random_username_from_email(email):
     return cleaned_localpart
 
 
-def vocabulary_create(context: Context, data_dict: DataDict) -> Dict:
+def vocabulary_create(context: Context, data_dict: DataDict) -> Dict[str, Any]:
     '''Create a new tag vocabulary.
 
     You must be a sysadmin to create vocabularies.
@@ -1309,7 +1309,7 @@ def activity_create(context, activity_dict, **kw):
     return model_dictize.activity_dictize(activity, context)
 
 
-def tag_create(context: Context, data_dict: DataDict) -> Dict:
+def tag_create(context: Context, data_dict: DataDict) -> Dict[str, Any]:
     '''Create a new vocabulary tag.
 
     You must be a sysadmin to create vocabulary tags.
@@ -1351,7 +1351,7 @@ def tag_create(context: Context, data_dict: DataDict) -> Dict:
     return model_dictize.tag_dictize(tag, context)
 
 
-def follow_user(context: Context, data_dict: DataDict) -> Dict:
+def follow_user(context: Context, data_dict: DataDict) -> Dict[str, Any]:
     '''Start following another user.
 
     You must provide your API key in the Authorization header.
@@ -1410,7 +1410,7 @@ def follow_user(context: Context, data_dict: DataDict) -> Dict:
     return model_dictize.user_following_user_dictize(follower, context)
 
 
-def follow_dataset(context: Context, data_dict: DataDict) -> Dict:
+def follow_dataset(context: Context, data_dict: DataDict) -> Dict[str, Any]:
     '''Start following a dataset.
 
     You must provide your API key in the Authorization header.
@@ -1512,7 +1512,7 @@ def _group_or_org_member_create(context, data_dict, is_org=False):
                                              member_dict)
 
 
-def group_member_create(context: Context, data_dict: DataDict) -> Dict:
+def group_member_create(context: Context, data_dict: DataDict) -> Dict[str, Any]:
     '''Make a user a member of a group.
 
     You must be authorized to edit the group.
@@ -1532,7 +1532,7 @@ def group_member_create(context: Context, data_dict: DataDict) -> Dict:
     return _group_or_org_member_create(context, data_dict)
 
 
-def organization_member_create(context: Context, data_dict: DataDict) -> Dict:
+def organization_member_create(context: Context, data_dict: DataDict) -> Dict[str, Any]:
     '''Make a user a member of an organization.
 
     You must be authorized to edit the organization.
@@ -1553,7 +1553,7 @@ def organization_member_create(context: Context, data_dict: DataDict) -> Dict:
     return _group_or_org_member_create(context, data_dict, is_org=True)
 
 
-def follow_group(context: Context, data_dict: DataDict) -> Dict:
+def follow_group(context: Context, data_dict: DataDict) -> Dict[str, Any]:
     '''Start following a group.
 
     You must provide your API key in the Authorization header.
@@ -1609,7 +1609,7 @@ def follow_group(context: Context, data_dict: DataDict) -> Dict:
     return model_dictize.user_following_group_dictize(follower, context)
 
 
-def api_token_create(context: Context, data_dict: DataDict) -> Dict:
+def api_token_create(context: Context, data_dict: DataDict) -> Dict[str, Any]:
     """Create new API Token for current user.
 
     Apart from the `user` and `name` field that are required by

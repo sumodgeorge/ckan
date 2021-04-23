@@ -270,9 +270,9 @@ class BasePage(list):
               symbol_last: str = u">>",
               symbol_previous: str = u"<",
               symbol_next: str = u">",
-              link_attr: Dict = {u"class": u"pager_link"},
-              curpage_attr: Dict = {u"class": u"pager_curpage"},
-              dotdot_attr: Dict = {u"class": u"pager_dotdot"},
+              link_attr: Dict[str, str] = {u"class": u"pager_link"},
+              curpage_attr: Dict[str, str] = {u"class": u"pager_curpage"},
+              dotdot_attr: Dict[str, str] = {u"class": u"pager_dotdot"},
               **kwargs: Any) -> Markup:
         """Return string with links to other pages (e.g. "1 2 [3] 4 5 6 7").
 

@@ -33,13 +33,13 @@ TuplizedKey = Tuple[Any, ...]
 
 DataDict = Dict[str, Any]
 ErrorDict = Dict[str, Union[List[Union[str, Dict[str, Any]]], str]]
-TuplizedErrorDict = Dict[Tuple, List[str]]
+TuplizedErrorDict = Dict[Tuple[Any, ...], List[str]]
 
 
 class Context(TypedDict, total=False):
     user: str
-    # model: "model_"
-    model: "PModel"
+    model: "model_"
+    # model: "PModel"
     session: AlchemySession
 
     __auth_user_obj_checked: bool
@@ -87,8 +87,8 @@ class Context(TypedDict, total=False):
     resource_view: "model_.ResourceView"
     relationship: "model_.PackageRelationship"
     api_version: int
-    dataset_counts: Dict
-    limits: Dict
+    dataset_counts: Dict[str, Any]
+    limits: Dict[str, Any]
     metadata_modified: str
     with_capacity: bool
 
@@ -123,9 +123,9 @@ class DataValidator(Protocol):
 
 Validator = Union[ValueValidator, ContextValidator, DataValidator]
 
-# NestedSchema = "Schema"
-NestedSchema = Dict[str, Iterable[Validator]]
-Schema = Dict[str, Union[Iterable[Validator], "NestedSchema"]]
+# NestedSchema = Dict[str, Iterable[Validator]]
+# Schema = Dict[str, Union[Iterable[Validator], "NestedSchema"]]
+Schema = Dict[str, Union[Iterable[Validator], "Schema"]]
 ComplexSchemaFunc = Callable[..., Schema]
 PlainSchemaFunc = Callable[[], Schema]
 
@@ -188,7 +188,7 @@ class PResourceUploader(Protocol):
     mimetype: Optional[str]
     filesize: int
 
-    def __init__(self, resource: Dict) -> None:
+    def __init__(self, resource: Dict[str, Any]) -> None:
         ...
 
     def get_path(self, id: str) -> str:

@@ -54,7 +54,7 @@ class CKANConfigLoader(object):
 
         # # The global_config key is to keep compatibility with Pylons.
         # # It can be safely removed when the Flask migration is completed.
-        self.config[u'global_conf'] = cast(Dict, self.parser.defaults()).copy()
+        self.config[u'global_conf'] = cast(Dict[str, Any], self.parser.defaults()).copy()
 
         self._update_config()
 

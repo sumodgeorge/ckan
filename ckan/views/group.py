@@ -1032,9 +1032,9 @@ class CreateGroupView(MethodView):
     def get(self,
             group_type: str,
             is_organization: bool,
-            data: Optional[Dict] = None,
-            errors: Optional[Dict] = None,
-            error_summary: Optional[Dict] = None) -> str:
+            data: Optional[Dict[str, Any]] = None,
+            errors: Optional[Dict[str, Any]] = None,
+            error_summary: Optional[Dict[str, Any]] = None) -> str:
         extra_vars = {}
         set_org(is_organization)
         context = self._prepare()
@@ -1135,8 +1135,8 @@ class EditGroupView(MethodView):
             group_type: str,
             is_organization: bool,
             data: Optional[Dict[str, Any]] = None,
-            errors: Optional[Dict] = None,
-            error_summary: Optional[Dict] = None) -> str:
+            errors: Optional[Dict[str, Any]] = None,
+            error_summary: Optional[Dict[str, Any]] = None) -> str:
         extra_vars = {}
         set_org(is_organization)
         context = self._prepare(id)

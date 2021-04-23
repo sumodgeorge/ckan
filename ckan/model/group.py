@@ -11,7 +11,7 @@ from ckan.model import package as _package
 from ckan.model import types as _types
 from ckan.model import domain_object
 from ckan.model import user as _user
-from ckan.types import Query
+from ckan.types import Context, Query
 from ckan.model import package as _package
 from typing import Any, Dict, List,  Optional, TYPE_CHECKING, Tuple, Union, overload
 from typing_extensions import Literal
@@ -289,21 +289,29 @@ class Group(core.StatefulObjectMixin,
 
     @overload
     def packages(self, *,
-                 return_query: Literal[True], context: Optional[Dict]=...) -> 'Query[_package.Package]': ...
+                 return_query: Literal[True],
+                 context: Optional[Context]=...
+                 ) -> 'Query[_package.Package]': ...
     @overload
     def packages(self, with_private: bool, limit: Optional[int],
-                 return_query: Literal[True], context: Optional[Dict]=...) -> 'Query[_package.Package]': ...
+                 return_query: Literal[True],
+                 context: Optional[Context]=...
+                 ) -> 'Query[_package.Package]': ...
     @overload
     def packages(self, with_private: bool=..., limit: Optional[int]=...,
-                 return_query: Literal[False]=..., context: Optional[Dict]=...) -> List[_package.Package]: ...
+                 return_query: Literal[False]=...,
+                 context: Optional[Context]=...
+                 ) -> List[_package.Package]: ...
 
     @overload
     def packages(self, with_private: bool=..., limit: Optional[int]=...,
-                 return_query: bool=..., context: Optional[Dict]=...) -> Union[List[_package.Package], 'Query[_package.Package]']: ...
+                 return_query: bool=...,
+                 context: Optional[Context]=...
+                 ) -> Union[List[_package.Package], 'Query[_package.Package]']: ...
 
 
-    def packages(self, with_private=False, limit=None,
-            return_query=False, context=None):
+    def packages(self, with_private: bool = False, limit: Optional[int] = None,
+            return_query: bool = False, context: Optional[Context] = None):
         '''Return this group's active packages.
 
         Returns all packages in this group with VDM state ACTIVE

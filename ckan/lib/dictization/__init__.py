@@ -22,14 +22,15 @@ except NameError:
     long = int  # Python 3
 
 
-# NOTE
-# The functions in this file contain very generic methods for dictizing objects
-# and saving dictized objects. If a specialised use is needed please do NOT extend
-# these functions.  Copy code from here as needed.
+# NOTE The functions in this file contain very generic methods for dictizing
+# objects and saving dictized objects. If a specialised use is needed please do
+# NOT extend these functions.  Copy code from here as needed.
 
-legacy_dict_sort = lambda x: (len(x), dict.items(x))
+legacy_dict_sort: Callable[[Dict[str, Any]],
+                           Any] = lambda x: (len(x), dict.items(x))
 
-def table_dictize(obj: Any, context: Context, **kw) -> Dict[str, Any]:
+
+def table_dictize(obj: Any, context: Context, **kw: Any) -> Dict[str, Any]:
     '''Get any model object and represent it as a dict'''
 
     result_dict: Dict[str, Any] = {}
@@ -70,13 +71,17 @@ def table_dictize(obj: Any, context: Context, **kw) -> Dict[str, Any]:
 
     ##HACK For optimisation to get metadata_modified created faster.
 
-    context['metadata_modified'] = max(result_dict.get('revision_timestamp', ''),
-                                       context.get('metadata_modified', ''))
+    context['metadata_modified'] = max(
+        result_dict.get('revision_timestamp', ''),
+        context.get('metadata_modified', ''))
 
     return result_dict
 
 
-def obj_list_dictize(obj_list: List[Any], context: Context, sort_key: Callable=legacy_dict_sort) -> List[dict]:
+def obj_list_dictize(
+        obj_list: List[Any],
+        context: Context,
+        sort_key: Callable[..., Any] = legacy_dict_sort) -> List[dict]:
     '''Get a list of model object and represent it as a list of dicts'''
 
     result_list = []
@@ -94,22 +99,26 @@ def obj_list_dictize(obj_list: List[Any], context: Context, sort_key: Callable=l
 
     return sorted(result_list, key=sort_key)
 
-def obj_dict_dictize(obj_dict: Dict, context: Context, sort_key: Callable=lambda x:x) -> List[dict]:
+
+def obj_dict_dictize(
+        obj_dict: Dict[str, Any],
+        context: Context,
+        sort_key: Callable[..., Any] = lambda x: x) -> List[Dict[str, Any]]:
     '''Get a dict whose values are model objects
     and represent it as a list of dicts'''
 
-    result_list = []
+    result_list: List[Dict[str, Any]] = []
 
-    for key, obj in obj_dict.items():
+    for obj in obj_dict.values():
         result_list.append(table_dictize(obj, context))
 
     return sorted(result_list, key=sort_key)
 
 
-def get_unique_constraints(table: Table, context: Context) -> List[list]:
+def get_unique_constraints(table: Table, context: Context) -> List[List[str]]:
     '''Get a list of unique constraints for a sqlalchemy table'''
 
-    list_of_constraints = []
+    list_of_constraints: List[List[str]] = []
 
     for contraint in table.constraints:
         if isinstance(contraint, sqlalchemy.UniqueConstraint):
@@ -118,7 +127,11 @@ def get_unique_constraints(table: Table, context: Context) -> List[list]:
 
     return list_of_constraints
 
-def table_dict_save(table_dict: Dict, ModelClass: Any, context: Context, extra_attrs: Iterable[str]=()) -> Any:
+
+def table_dict_save(table_dict: Dict[str, Any],
+                    ModelClass: Any,
+                    context: Context,
+                    extra_attrs: Iterable[str] = ()) -> Any:
     '''Given a dict and a model class, update or create a sqlalchemy object.
     This will use an existing object if "id" is supplied OR if any unique
     constraints are met. e.g supplying just a tag name will get out that tag obj.
@@ -142,7 +155,8 @@ def table_dict_save(table_dict: Dict, ModelClass: Any, context: Context, extra_a
             params = dict((key, table_dict.get(key)) for key in constraint)
             obj = session.query(ModelClass).filter_by(**params).first()
             if obj:
-                if 'name' in params and getattr(obj, 'state', None) == State.DELETED:
+                if 'name' in params and getattr(
+                        obj, 'state', None) == State.DELETED:
                     obj.name = obj.id
                     obj = None
                 else:

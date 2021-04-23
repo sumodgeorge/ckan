@@ -180,7 +180,7 @@ class TrashView(MethodView):
         if u'cancel' in request.form:
             return h.redirect_to(u'admin.trash')
 
-        req_action = request.form.get(u'action')
+        req_action = request.form.get(u'action', '')
         if req_action == u'all':
             d = {
                 u'dataset_purge': self.deleted_packages,

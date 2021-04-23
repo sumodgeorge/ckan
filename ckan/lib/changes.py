@@ -47,8 +47,10 @@ def _extras_to_dict(extras_list: List[Extra]) -> Dict[str, Any]:
     return ret_dict
 
 
-def check_resource_changes(change_list: List[Dict], old: Dict, new: Dict,
-                           old_activity_id: str) -> None:
+def check_resource_changes(
+        change_list: List[Dict[str, Any]],
+        old: Dict[str, Any], new: Dict[str, Any],
+        old_activity_id: str) -> None:
     '''
     Compares two versions of a dataset and records the changes between them
     (just the resources) in change_list. e.g. resources that are added, changed
@@ -304,8 +306,9 @@ def check_resource_changes(change_list: List[Dict], old: Dict, new: Dict,
                                         u'key': field})
 
 
-def check_metadata_changes(change_list: List[Dict], old: Dict,
-                           new: Dict) -> None:
+def check_metadata_changes(
+        change_list: List[Dict[str, Any]],
+        old: Dict[str, Any], new: Dict[str, Any]) -> None:
     '''
     Compares two versions of a dataset and records the changes between them
     (excluding resources) in change_list.

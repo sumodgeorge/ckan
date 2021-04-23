@@ -26,6 +26,7 @@
 
 u'''Collection of :mod:`repoze.who` friendly forms'''
 
+from typing import Any
 from six.moves.urllib.parse import (  # type: ignore
     urlparse, urlunparse, urlencode, parse_qs
 )
@@ -299,7 +300,7 @@ class FriendlyFormPlugin(object):
             # Webob 1.8.5 (py3)
             variables = Request(environ).params
 
-        failed_logins = variables.get(self.login_counter_name)
+        failed_logins: Any = variables.get(self.login_counter_name)
         if force_typecast:
             try:
                 failed_logins = int(failed_logins)

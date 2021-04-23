@@ -78,7 +78,7 @@ class Resource(core.StatefulObjectMixin,
     cache_url: str
     cache_last_update: datetime.datetime
     url_type: str
-    extras: Dict
+    extras: Dict[str, Any]
     state: str
 
     extra_columns: Optional[List[str]] = None
@@ -88,7 +88,7 @@ class Resource(core.StatefulObjectMixin,
     url_changed: Optional[bool]
 
     def __init__(self, url: str=u'', format: str=u'', description: str=u'', hash: str=u'',
-                 extras: Optional[Dict]=None, package_id: Optional[str]=None, **kwargs: Any) -> None:
+                 extras: Optional[Dict[str, Any]]=None, package_id: Optional[str]=None, **kwargs: Any) -> None:
         self.id = _types.make_uuid()
         self.url = url
         self.format = format
@@ -109,7 +109,7 @@ class Resource(core.StatefulObjectMixin,
         if kwargs:
             raise TypeError('unexpected keywords %s' % kwargs)
 
-    def as_dict(self, core_columns_only: bool=False) -> Dict:
+    def as_dict(self, core_columns_only: bool=False) -> Dict[str, Any]:
         _dict = OrderedDict()
         cols = self.get_columns()
         if not core_columns_only:

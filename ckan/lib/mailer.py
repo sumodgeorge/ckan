@@ -21,7 +21,7 @@ import ckan.lib.helpers as h
 from ckan.lib.base import render
 
 from ckan.common import _
-from typing import Dict, Optional
+from typing import Any, Dict, Optional
 
 log = logging.getLogger(__name__)
 
@@ -30,14 +30,14 @@ class MailerException(Exception):
     pass
 
 
-def _mail_recipient(recipient_name,
-                    recipient_email,
-                    sender_name,
-                    sender_url,
-                    subject,
-                    body,
-                    body_html=None,
-                    headers=None):
+def _mail_recipient(recipient_name: str,
+                    recipient_email: str,
+                    sender_name: str,
+                    sender_url: str,
+                    subject: Any,
+                    body: Any,
+                    body_html: Optional[Any] = None,
+                    headers: Optional[Dict[str, Any]] = None) -> None:
 
     if not headers:
         headers = {}
@@ -126,10 +126,10 @@ def mail_recipient(recipient_name: str,
                    subject: str,
                    body: str,
                    body_html: Optional[str] = None,
-                   headers: Dict = {}) -> None:
+                   headers: Dict[str, Any] = {}) -> None:
     '''Sends an email'''
-    site_title = config.get('ckan.site_title')
-    site_url = config.get('ckan.site_url')
+    site_title = config.get('ckan.site_title', '')
+    site_url = config.get('ckan.site_url', '')
     return _mail_recipient(recipient_name, recipient_email,
                            site_title, site_url, subject, body,
                            body_html=body_html, headers=headers)
@@ -139,7 +139,7 @@ def mail_user(recipient: model.User,
               subject: str,
               body: str,
               body_html: Optional[str] = None,
-              headers: Dict = {}) -> None:
+              headers: Dict[str, Any] = {}) -> None:
     '''Sends an email to a CKAN user'''
     if (recipient.email is None) or not len(recipient.email):
         raise MailerException(_("No recipient email address available!"))
@@ -159,7 +159,7 @@ def get_reset_link_body(user: model.User) -> str:
 
 
 def get_invite_body(user: model.User,
-                    group_dict: Optional[Dict] = None,
+                    group_dict: Optional[Dict[str, Any]] = None,
                     role: Optional[str] = None) -> str:
     extra_vars = {
         'reset_link': get_reset_link(user),
@@ -202,7 +202,10 @@ def send_reset_link(user: model.User) -> None:
     mail_user(user, subject, body)
 
 
-def send_invite(user: model.User, group_dict=None, role=None) -> None:
+def send_invite(
+        user: model.User,
+        group_dict: Optional[Dict[str, Any]] = None,
+        role: Optional[str] = None) -> None:
     create_reset_key(user)
     body = get_invite_body(user, group_dict, role)
     extra_vars = {

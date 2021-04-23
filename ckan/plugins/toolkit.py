@@ -328,7 +328,7 @@ For example: ``bar = toolkit.aslist(config.get('ckan.foo.bar', []))``
     @classmethod
     def _render_snippet(cls,
                         template: str,
-                        data: Optional[Dict] = None) -> '_helpers.Markup':
+                        data: Optional[Dict[str, Any]] = None) -> '_helpers.Markup':
         '''Render a template snippet and return the output.
 
         See :doc:`/theming/index`.
@@ -624,7 +624,7 @@ if TYPE_CHECKING:
     mail_user = mailer.mail_user
 
     def render_snippet(template: str,
-                       data: Optional[Dict] = ...) -> _helpers.Markup:
+                       data: Optional[Dict[str, Any]] = ...) -> _helpers.Markup:
         ...
 
     def add_template_directory(config: common.CKANConfig,

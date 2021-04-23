@@ -55,7 +55,7 @@ def compare_domains(urls: Iterable[str]) -> bool:
     return True
 
 
-def on_same_domain(data_dict: Dict) -> bool:
+def on_same_domain(data_dict: Dict[str, Any]) -> bool:
     # compare CKAN domain and resource URL
     ckan_url = config.get('ckan.site_url', '//localhost:5000')
     resource_url = data_dict['resource']['url']
@@ -64,7 +64,7 @@ def on_same_domain(data_dict: Dict) -> bool:
 
 
 def get_preview_plugin(
-        data_dict: Dict,
+        data_dict: Dict[str, Any],
         return_first: bool = False) -> Optional[p.IResourcePreview]:
     '''Determines whether there is an extension that can preview the resource.
 
@@ -141,7 +141,7 @@ def get_view_plugins(view_types: Iterable[str]) -> List[p.IResourceView]:
     return view_plugins
 
 
-def get_allowed_view_plugins(data_dict: Dict) -> List[p.IResourceView]:
+def get_allowed_view_plugins(data_dict: Dict[str, Any]) -> List[p.IResourceView]:
     '''
     Returns a list of view plugins that work against the resource provided
 
@@ -206,10 +206,10 @@ def get_default_view_plugins(
 
 
 def add_views_to_resource(context: Context,
-                          resource_dict: Dict,
-                          dataset_dict: Optional[Dict] = None,
+                          resource_dict: Dict[str, Any],
+                          dataset_dict: Optional[Dict[str, Any]] = None,
                           view_types: List[str] = [],
-                          create_datastore_views: bool = False) -> List[Dict]:
+                          create_datastore_views: bool = False) -> List[Dict[str, Any]]:
     '''
     Creates the provided views (if necessary) on the provided resource
 
@@ -280,9 +280,9 @@ def add_views_to_resource(context: Context,
 
 def add_views_to_dataset_resources(
         context: Context,
-        dataset_dict: Dict,
+        dataset_dict: Dict[str, Any],
         view_types: List[str] = [],
-        create_datastore_views: bool = False) -> List[Dict]:
+        create_datastore_views: bool = False) -> List[Dict[str, Any]]:
     '''
     Creates the provided views on all resources of the provided dataset
 

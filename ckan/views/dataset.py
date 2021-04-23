@@ -53,7 +53,7 @@ dataset = Blueprint(
 
 
 def _setup_template_variables(context: Context,
-                              data_dict: Dict,
+                              data_dict: Dict[str, Any],
                               package_type: Optional[str] = None) -> None:
     return lookup_package_plugin(package_type).setup_template_variables(
         context, data_dict
@@ -85,14 +85,14 @@ def url_with_params(url: str, params: Params) -> str:
     return url + u'?' + urlencode(params)
 
 
-def search_url(params: Params, package_type: str = None) -> str:
+def search_url(params: Params, package_type: Optional[str] = None) -> str:
     if not package_type:
         package_type = u'dataset'
     url = h.url_for(u'{0}.search'.format(package_type))
     return url_with_params(url, params)
 
 
-def drill_down_url(alternative_url: str = None, **by: Dict) -> str:
+def drill_down_url(alternative_url: Optional[str] = None, **by: Any) -> str:
     return h.add_url_param(
         alternative_url=alternative_url,
         controller=u'dataset',
@@ -660,9 +660,9 @@ class CreateView(MethodView):
 
     def get(self,
             package_type: str,
-            data: Optional[Dict] = None,
-            errors: Optional[Dict] = None,
-            error_summary: Optional[Dict] = None) -> str:
+            data: Optional[Dict[str, Any]] = None,
+            errors: Optional[Dict[str, Any]] = None,
+            error_summary: Optional[Dict[str, Any]] = None) -> str:
         context = self._prepare()
         if data and u'type' in data:
             package_type = data[u'type']
@@ -788,9 +788,9 @@ class EditView(MethodView):
     def get(self,
             package_type: str,
             id: str,
-            data: Optional[Dict] = None,
-            errors: Optional[Dict] = None,
-            error_summary: Optional[Dict] = None) -> Union[Response, str]:
+            data: Optional[Dict[str, Any]] = None,
+            errors: Optional[Dict[str, Any]] = None,
+            error_summary: Optional[Dict[str, Any]] = None) -> Union[Response, str]:
         context = self._prepare()
         package_type = _get_package_type(id) or package_type
         try:

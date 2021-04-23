@@ -151,7 +151,7 @@ def current_package_list_with_resources(
     return search.get('results', [])
 
 
-def member_list(context: Context, data_dict: DataDict) -> List[Tuple]:
+def member_list(context: Context, data_dict: DataDict) -> List[Tuple[Any, ...]]:
     '''Return the members of a group.
 
     The user must have permission to 'get' the group.
@@ -1395,7 +1395,7 @@ def tag_show(context: Context, data_dict: DataDict) -> Dict[str, Any]:
                                      include_datasets=include_datasets)
 
 
-def user_show(context: Context, data_dict: DataDict) -> Dict:
+def user_show(context: Context, data_dict: DataDict) -> Dict[str, Any]:
     '''Return a user account.
 
     Either the ``id`` or the ``user_obj`` parameter must be given.
@@ -1501,7 +1501,7 @@ def user_show(context: Context, data_dict: DataDict) -> Dict:
 
 
 @logic.validate(ckan.logic.schema.default_autocomplete_schema)
-def package_autocomplete(context: Context, data_dict: DataDict) -> List[Dict]:
+def package_autocomplete(context: Context, data_dict: DataDict) -> List[Dict[str, Any]]:
     '''Return a list of datasets (packages) that match a string.
 
     Datasets with names or titles that contain the query string will be
@@ -1601,7 +1601,7 @@ def format_autocomplete(context: Context, data_dict: DataDict) -> List[str]:
 
 
 @logic.validate(ckan.logic.schema.default_autocomplete_schema)
-def user_autocomplete(context: Context, data_dict: DataDict) -> List[Dict]:
+def user_autocomplete(context: Context, data_dict: DataDict) -> List[Dict[str, Any]]:
     '''Return a list of user names that contain a string.
 
     :param q: the string to search for
@@ -1661,7 +1661,7 @@ def _group_or_org_autocomplete(context, data_dict, is_org):
     return group_list
 
 
-def group_autocomplete(context: Context, data_dict: DataDict) -> List[Dict]:
+def group_autocomplete(context: Context, data_dict: DataDict) -> List[Dict[str, Any]]:
     '''
     Return a list of group names that contain a string.
 
@@ -1681,7 +1681,7 @@ def group_autocomplete(context: Context, data_dict: DataDict) -> List[Dict]:
 
 
 def organization_autocomplete(context: Context,
-                              data_dict: DataDict) -> List[Dict]:
+                              data_dict: DataDict) -> List[Dict[str, Any]]:
     '''
     Return a list of organization names that contain a string.
 
@@ -1700,7 +1700,7 @@ def organization_autocomplete(context: Context,
     return _group_or_org_autocomplete(context, data_dict, is_org=True)
 
 
-def package_search(context: Context, data_dict: DataDict) -> Dict:
+def package_search(context: Context, data_dict: DataDict) -> Dict[str, Any]:
     '''
     Searches for packages satisfying a given search criteria.
 
@@ -1996,7 +1996,7 @@ def package_search(context: Context, data_dict: DataDict) -> Dict:
 
 
 @logic.validate(ckan.logic.schema.default_resource_search_schema)
-def resource_search(context: Context, data_dict: DataDict) -> Dict:
+def resource_search(context: Context, data_dict: DataDict) -> Dict[str, Any]:
     '''
     Searches for resources satisfying a given search criteria.
 
@@ -2309,7 +2309,7 @@ def tag_autocomplete(context: Context, data_dict: DataDict) -> List[str]:
         return []
 
 
-def task_status_show(context: Context, data_dict: DataDict) -> Dict:
+def task_status_show(context: Context, data_dict: DataDict) -> Dict[str, Any]:
     '''Return a task status.
 
     Either the ``id`` parameter *or* the ``entity_id``, ``task_type`` *and*
@@ -2352,7 +2352,7 @@ def task_status_show(context: Context, data_dict: DataDict) -> Dict:
     return task_status_dict
 
 
-def term_translation_show(context: Context, data_dict: DataDict) -> List[Dict]:
+def term_translation_show(context: Context, data_dict: DataDict) -> List[Dict[str, Any]]:
     '''Return the translations for the given term(s) and language(s).
 
     :param terms: the terms to search for translations of, e.g. ``'Russian'``,
@@ -2405,7 +2405,7 @@ def term_translation_show(context: Context, data_dict: DataDict) -> List[Dict]:
 
 
 # Only internal services are allowed to call get_site_user.
-def get_site_user(context: Context, data_dict: DataDict) -> Dict:
+def get_site_user(context: Context, data_dict: DataDict) -> Dict[str, Any]:
     '''Return the ckan site user
 
     :param defer_commit: by default (or if set to false) get_site_user will
@@ -2435,7 +2435,7 @@ def get_site_user(context: Context, data_dict: DataDict) -> Dict:
             'apikey': user.apikey}
 
 
-def status_show(context: Context, data_dict: DataDict) -> Dict:
+def status_show(context: Context, data_dict: DataDict) -> Dict[str, Any]:
     '''Return a dictionary with information about the site's configuration.
 
     :rtype: dictionary
@@ -2456,7 +2456,7 @@ def status_show(context: Context, data_dict: DataDict) -> Dict:
     }
 
 
-def vocabulary_list(context: Context, data_dict: DataDict) -> List[Dict]:
+def vocabulary_list(context: Context, data_dict: DataDict) -> List[Dict[str, Any]]:
     '''Return a list of all the site's tag vocabularies.
 
     :rtype: list of dictionaries
@@ -2469,7 +2469,7 @@ def vocabulary_list(context: Context, data_dict: DataDict) -> List[Dict]:
     return model_dictize.vocabulary_list_dictize(vocabulary_objects, context)
 
 
-def vocabulary_show(context: Context, data_dict: DataDict) -> Dict:
+def vocabulary_show(context: Context, data_dict: DataDict) -> Dict[str, Any]:
     '''Return a single tag vocabulary.
 
     :param id: the id or name of the vocabulary
@@ -2492,7 +2492,7 @@ def vocabulary_show(context: Context, data_dict: DataDict) -> Dict:
 
 
 @logic.validate(ckan.logic.schema.default_activity_list_schema)
-def user_activity_list(context: Context, data_dict: DataDict) -> List[Dict]:
+def user_activity_list(context: Context, data_dict: DataDict) -> List[Dict[str, Any]]:
     '''Return a user's public activity stream.
 
     You must be authorized to view the user's profile.
@@ -2536,7 +2536,7 @@ def user_activity_list(context: Context, data_dict: DataDict) -> List[Dict]:
 
 
 @logic.validate(ckan.logic.schema.default_activity_list_schema)
-def package_activity_list(context: Context, data_dict: DataDict) -> List[Dict]:
+def package_activity_list(context: Context, data_dict: DataDict) -> List[Dict[str, Any]]:
     '''Return a package's activity stream (not including detail)
 
     You must be authorized to view the package.
@@ -2589,7 +2589,7 @@ def package_activity_list(context: Context, data_dict: DataDict) -> List[Dict]:
 
 
 @logic.validate(ckan.logic.schema.default_activity_list_schema)
-def group_activity_list(context: Context, data_dict: DataDict) -> List[Dict]:
+def group_activity_list(context: Context, data_dict: DataDict) -> List[Dict[str, Any]]:
     '''Return a group's activity stream.
 
     You must be authorized to view the group.
@@ -2643,7 +2643,7 @@ def group_activity_list(context: Context, data_dict: DataDict) -> List[Dict]:
 
 @logic.validate(ckan.logic.schema.default_activity_list_schema)
 def organization_activity_list(context: Context,
-                               data_dict: DataDict) -> List[Dict]:
+                               data_dict: DataDict) -> List[Dict[str, Any]]:
     '''Return a organization's activity stream.
 
     :param id: the id or name of the organization
@@ -2695,7 +2695,7 @@ def organization_activity_list(context: Context,
 
 @logic.validate(ckan.logic.schema.default_dashboard_activity_list_schema)
 def recently_changed_packages_activity_list(context: Context,
-                                            data_dict: DataDict) -> List[Dict]:
+                                            data_dict: DataDict) -> List[Dict[str, Any]]:
     '''Return the activity stream of all recently added or changed packages.
 
     :param offset: where to start getting activity items from
@@ -2810,7 +2810,7 @@ def _follower_list(context, data_dict, default_schema, FollowerClass):
     return model_dictize.user_list_dictize(users, context)
 
 
-def user_follower_list(context: Context, data_dict: DataDict) -> List[Dict]:
+def user_follower_list(context: Context, data_dict: DataDict) -> List[Dict[str, Any]]:
     '''Return the list of users that are following the given user.
 
     :param id: the id or name of the user
@@ -2826,7 +2826,7 @@ def user_follower_list(context: Context, data_dict: DataDict) -> List[Dict]:
         context['model'].UserFollowingUser)
 
 
-def dataset_follower_list(context: Context, data_dict: DataDict) -> List[Dict]:
+def dataset_follower_list(context: Context, data_dict: DataDict) -> List[Dict[str, Any]]:
     '''Return the list of users that are following the given dataset.
 
     :param id: the id or name of the dataset
@@ -2842,7 +2842,7 @@ def dataset_follower_list(context: Context, data_dict: DataDict) -> List[Dict]:
         context['model'].UserFollowingDataset)
 
 
-def group_follower_list(context: Context, data_dict: DataDict) -> List[Dict]:
+def group_follower_list(context: Context, data_dict: DataDict) -> List[Dict[str, Any]]:
     '''Return the list of users that are following the given group.
 
     :param id: the id or name of the group
@@ -2859,7 +2859,7 @@ def group_follower_list(context: Context, data_dict: DataDict) -> List[Dict]:
 
 
 def organization_follower_list(context: Context,
-                               data_dict: DataDict) -> List[Dict]:
+                               data_dict: DataDict) -> List[Dict[str, Any]]:
     '''Return the list of users that are following the given organization.
 
     :param id: the id or name of the organization
@@ -3020,7 +3020,7 @@ def group_followee_count(context: Context, data_dict: DataDict) -> int:
 
 
 @logic.validate(ckan.logic.schema.default_follow_user_schema)
-def followee_list(context: Context, data_dict: DataDict) -> List[Dict]:
+def followee_list(context: Context, data_dict: DataDict) -> List[Dict[str, Any]]:
     '''Return the list of objects that are followed by the given user.
 
     Returns all objects, of any type, that the given user is following
@@ -3084,7 +3084,7 @@ def followee_list(context: Context, data_dict: DataDict) -> List[Dict]:
     return followee_dicts
 
 
-def user_followee_list(context: Context, data_dict: DataDict) -> List[Dict]:
+def user_followee_list(context: Context, data_dict: DataDict) -> List[Dict[str, Any]]:
     '''Return the list of users that are followed by the given user.
 
     :param id: the id of the user
@@ -3115,7 +3115,7 @@ def user_followee_list(context: Context, data_dict: DataDict) -> List[Dict]:
     return model_dictize.user_list_dictize(users, context)
 
 
-def dataset_followee_list(context: Context, data_dict: DataDict) -> List[Dict]:
+def dataset_followee_list(context: Context, data_dict: DataDict) -> List[Dict[str, Any]]:
     '''Return the list of datasets that are followed by the given user.
 
     :param id: the id or name of the user
@@ -3148,7 +3148,7 @@ def dataset_followee_list(context: Context, data_dict: DataDict) -> List[Dict]:
             for dataset in datasets]
 
 
-def group_followee_list(context: Context, data_dict: DataDict) -> List[Dict]:
+def group_followee_list(context: Context, data_dict: DataDict) -> List[Dict[str, Any]]:
     '''Return the list of groups that are followed by the given user.
 
     :param id: the id or name of the user
@@ -3163,7 +3163,7 @@ def group_followee_list(context: Context, data_dict: DataDict) -> List[Dict]:
 
 
 def organization_followee_list(context: Context,
-                               data_dict: DataDict) -> List[Dict]:
+                               data_dict: DataDict) -> List[Dict[str, Any]]:
     '''Return the list of organizations that are followed by the given user.
 
     :param id: the id or name of the user
@@ -3203,7 +3203,7 @@ def _group_or_org_followee_list(context, data_dict, is_org=False):
 
 @logic.validate(ckan.logic.schema.default_dashboard_activity_list_schema)
 def dashboard_activity_list(context: Context,
-                            data_dict: DataDict) -> List[Dict]:
+                            data_dict: DataDict) -> List[Dict[str, Any]]:
     '''Return the authorized (via login or API key) user's dashboard activity
        stream.
 
@@ -3276,7 +3276,7 @@ def dashboard_new_activities_count(context: Context,
     return len([activity for activity in activities if activity['is_new']])
 
 
-def activity_show(context: Context, data_dict: DataDict) -> Dict:
+def activity_show(context: Context, data_dict: DataDict) -> Dict[str, Any]:
     '''Show details of an item of 'activity' (part of the activity stream).
 
     :param id: the id of the activity
@@ -3304,7 +3304,7 @@ def activity_show(context: Context, data_dict: DataDict) -> Dict:
     return activity
 
 
-def activity_data_show(context: Context, data_dict: DataDict) -> Dict:
+def activity_data_show(context: Context, data_dict: DataDict) -> Dict[str, Any]:
     '''Show the data from an item of 'activity' (part of the activity
     stream).
 
@@ -3343,7 +3343,7 @@ def activity_data_show(context: Context, data_dict: DataDict) -> Dict:
     return activity_data
 
 
-def activity_diff(context: Context, data_dict: DataDict) -> Dict:
+def activity_diff(context: Context, data_dict: DataDict) -> Dict[str, Any]:
     '''Returns a diff of the activity, compared to the previous version of the
     object
 
@@ -3443,7 +3443,7 @@ def _unpick_search(sort, allowed_fields=None, total=None):
     return sorts
 
 
-def member_roles_list(context: Context, data_dict: DataDict) -> List[Dict]:
+def member_roles_list(context: Context, data_dict: DataDict) -> List[Dict[str, Any]]:
     '''Return the possible roles for members of groups and organizations.
 
     :param group_type: the group type, either ``"group"`` or ``"organization"``
@@ -3538,7 +3538,7 @@ def config_option_list(context: Context, data_dict: DataDict) -> List[str]:
 
 
 @logic.validate(ckan.logic.schema.job_list_schema)
-def job_list(context: Context, data_dict: DataDict) -> List[Dict]:
+def job_list(context: Context, data_dict: DataDict) -> List[Dict[str, Any]]:
     '''List enqueued background jobs.
 
     :param list queues: Queues to list jobs from. If not given then the
@@ -3562,7 +3562,7 @@ def job_list(context: Context, data_dict: DataDict) -> List[Dict]:
     return dictized_jobs
 
 
-def job_show(context: Context, data_dict: DataDict) -> Dict:
+def job_show(context: Context, data_dict: DataDict) -> Dict[str, Any]:
     '''Show details for a background job.
 
     :param string id: The ID of the background job.
@@ -3580,7 +3580,7 @@ def job_show(context: Context, data_dict: DataDict) -> Dict:
         raise NotFound
 
 
-def api_token_list(context: Context, data_dict: DataDict) -> List[Dict]:
+def api_token_list(context: Context, data_dict: DataDict) -> List[Dict[str, Any]]:
     '''Return list of all available API Tokens for current user.
 
     :returns: collection of all API Tokens

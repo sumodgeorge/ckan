@@ -8,11 +8,11 @@ from ckan.logic import (
     check_access as _check_access,
     get_or_bust as _get_or_bust,
 )
-from typing import Dict, Union
+from typing import Dict, Union, Any
 from ckan.types import Context, DataDict
 
 
-def package_patch(context: Context, data_dict: DataDict) -> Union[str, Dict]:
+def package_patch(context: Context, data_dict: DataDict) -> Union[str, Dict[str, Any]]:
     '''Patch a dataset (package).
 
     :param id: the id or name of the dataset
@@ -53,7 +53,7 @@ def package_patch(context: Context, data_dict: DataDict) -> Union[str, Dict]:
     return _update.package_update(context, patched)
 
 
-def resource_patch(context: Context, data_dict: DataDict) -> Dict:
+def resource_patch(context: Context, data_dict: DataDict) -> Dict[str, Any]:
     '''Patch a resource
 
     :param id: the id of the resource
@@ -82,7 +82,7 @@ def resource_patch(context: Context, data_dict: DataDict) -> Dict:
     return _update.resource_update(context, patched)
 
 
-def group_patch(context: Context, data_dict: DataDict) -> Dict:
+def group_patch(context: Context, data_dict: DataDict) -> Dict[str, Any]:
     '''Patch a group
 
     :param id: the id or name of the group
@@ -113,7 +113,7 @@ def group_patch(context: Context, data_dict: DataDict) -> Dict:
         Context(**context, allow_partial_update=True), patched)
 
 
-def organization_patch(context: Context, data_dict: DataDict) -> Dict:
+def organization_patch(context: Context, data_dict: DataDict) -> Dict[str, Any]:
     '''Patch an organization
 
     :param id: the id or name of the organization
@@ -144,7 +144,7 @@ def organization_patch(context: Context, data_dict: DataDict) -> Dict:
         Context(**context, allow_partial_update=True), patched)
 
 
-def user_patch(context: Context, data_dict: DataDict) -> Dict:
+def user_patch(context: Context, data_dict: DataDict) -> Dict[str, Any]:
     '''Patch a user
 
     :param id: the id or name of the user

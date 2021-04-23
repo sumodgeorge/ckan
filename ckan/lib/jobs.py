@@ -126,12 +126,12 @@ def get_queue(name: str = DEFAULT_QUEUE_NAME) -> rq.Queue:
         return queue
 
 
-def enqueue(fn: Callable,
-            args: Optional[Iterable] = None,
-            kwargs: Optional[Dict] = None,
+def enqueue(fn: Callable[..., Any],
+            args: Optional[Iterable[Any]] = None,
+            kwargs: Optional[Dict[str, Any]] = None,
             title: Optional[str] = None,
             queue: str = DEFAULT_QUEUE_NAME,
-            rq_kwargs: Optional[Dict] = None) -> Job:
+            rq_kwargs: Optional[Dict[str, Any]] = None) -> Job:
     u'''
     Enqueue a job to be run in the background.
 
@@ -194,7 +194,7 @@ def job_from_id(id: str) -> Job:
         raise KeyError(u'There is no job with ID "{}".'.format(id))
 
 
-def dictize_job(job: Job) -> Dict:
+def dictize_job(job: Job) -> Dict[str, Any]:
     u'''Convert a job to a dict.
 
     In contrast to ``rq.job.Job.to_dict`` this function includes only

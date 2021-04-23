@@ -110,7 +110,7 @@ class DomainObject(object):
             _dict[col.name] = val
         return _dict
 
-    def from_dict(self, _dict: Dict) -> Tuple[Set, Dict]:
+    def from_dict(self, _dict: Dict[str, Any]) -> Tuple[Set[Any], Dict[str, Any]]:
         """
         Loads data from dict into table.
 

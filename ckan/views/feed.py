@@ -136,7 +136,7 @@ class CKANFeed(FeedGenerator):
             getattr(entry, key)(value)
 
 
-def output_feed(results: List[Dict], feed_title: str, feed_description: str,
+def output_feed(results: List[Dict[str, Any]], feed_title: str, feed_description: str,
                 feed_link: str, feed_url: str, navigation_urls: Dict[str, str],
                 feed_guid: str) -> Response:
     author_name = config.get(u'ckan.feeds.author_name', u'').strip() or \
@@ -256,7 +256,7 @@ def tag(id: str) -> Response:
         navigation_urls=navigation_urls)
 
 
-def group_or_organization(obj_dict: Dict, is_org: bool) -> Response:
+def group_or_organization(obj_dict: Dict[str, Any], is_org: bool) -> Response:
     data_dict, params = _parse_url_params()
     if is_org:
         key = u'owner_org'

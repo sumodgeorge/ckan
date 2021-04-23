@@ -3,7 +3,7 @@ import cgi
 from ckan.types import Context
 import json
 import logging
-from typing import Dict, Tuple, cast
+from typing import Any, Dict, Tuple, cast
 
 import flask
 from flask.views import MethodView
@@ -295,9 +295,9 @@ class CreateView(MethodView):
     def get(self,
             package_type: str,
             id: str,
-            data: Optional[Dict] = None,
-            errors: Optional[Dict] = None,
-            error_summary: Optional[Dict] = None) -> str:
+            data: Optional[Dict[str, Any]] = None,
+            errors: Optional[Dict[str, Any]] = None,
+            error_summary: Optional[Dict[str, Any]] = None) -> str:
         # get resources for sidebar
         context = cast(Context, {
             u'model': model,
@@ -399,9 +399,9 @@ class EditView(MethodView):
             package_type: str,
             id: str,
             resource_id: str,
-            data: Optional[Dict] = None,
-            errors: Optional[Dict] = None,
-            error_summary: Optional[Dict] = None) -> str:
+            data: Optional[Dict[str, Any]] = None,
+            errors: Optional[Dict[str, Any]] = None,
+            error_summary: Optional[Dict[str, Any]] = None) -> str:
         context = self._prepare(id)
         pkg_dict = get_action(u'package_show')(context, {u'id': id})
 
@@ -625,7 +625,7 @@ def view(package_type: str,
 
 # FIXME: could anyone think about better name?
 class EditResourceViewView(MethodView):
-    def _prepare(self, id, resource_id) -> Tuple[Context, Dict]:
+    def _prepare(self, id, resource_id) -> Tuple[Context, Dict[str, Any]]:
         context = cast(Context, {
             u'model': model,
             u'session': model.Session,
@@ -730,7 +730,7 @@ class EditResourceViewView(MethodView):
             id: str,
             resource_id: str,
             view_id: Optional[str] = None,
-            post_extra: Optional[Dict] = None) -> str:
+            post_extra: Optional[Dict[str, Any]] = None) -> str:
         context, extra_vars = self._prepare(id, resource_id)
         to_preview = extra_vars[u'to_preview']
         if post_extra:

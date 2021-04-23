@@ -149,7 +149,7 @@ _notifications_functions = [
     ]
 
 
-def get_notifications(user_dict: dict, since: datetime.datetime) -> List[Dict]:
+def get_notifications(user_dict: dict, since: datetime.datetime) -> List[Dict[str, Any]]:
     '''Return any email notifications for the given user since `since`.
 
     For example email notifications about activity streams will be returned for
@@ -172,7 +172,7 @@ def get_notifications(user_dict: dict, since: datetime.datetime) -> List[Dict]:
     return notifications
 
 
-def send_notification(user: Dict, email_dict: Dict) -> None:
+def send_notification(user: Dict[str, Any], email_dict: Dict[str, Any]) -> None:
     '''Email `email_dict` to `user`.'''
     import ckan.lib.mailer
 
@@ -187,7 +187,7 @@ def send_notification(user: Dict, email_dict: Dict) -> None:
         raise
 
 
-def get_and_send_notifications_for_user(user: Dict) -> None:
+def get_and_send_notifications_for_user(user: Dict[str, Any]) -> None:
 
     # Parse the email_notifications_since config setting, email notifications
     # from longer ago than this time will not be sent.

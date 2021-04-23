@@ -144,8 +144,8 @@ class ValidationError(ActionError):
 
 
 def parse_params(
-    params: MultiDict,
-    ignore_keys: Optional[Container] = None
+    params: MultiDict[str, Any],
+    ignore_keys: Optional[Container[str]] = None
 ) -> Dict[str, Union[str, List[str]]]:
     '''Takes a dict and returns it with some values standardised.
     This is done on a dict before calling tuplize_dict on it.
@@ -206,7 +206,7 @@ def clean_dict(data_dict: Dict[str, Any]) -> Dict[str, Any]:
     return data_dict
 
 
-def tuplize_dict(data_dict: Dict[str, Any]) -> Dict[Tuple, Any]:
+def tuplize_dict(data_dict: Dict[str, Any]) -> Dict[Tuple[Any, ...], Any]:
     '''Takes a dict with keys of the form 'table__0__key' and converts them
     to a tuple like ('table', 0, 'key').
 
@@ -215,7 +215,7 @@ def tuplize_dict(data_dict: Dict[str, Any]) -> Dict[Tuple, Any]:
 
     May raise a DataError if the format of the key is incorrect.
     '''
-    tuplized_dict = {}
+    tuplized_dict: Dict[Tuple[Any, ...], Any] = {}
     for key, value in six.iteritems(data_dict):
         key_list = cast(List[Union[str, int]], key.split('__'))
         for num, key in enumerate(key_list):
@@ -264,7 +264,7 @@ def _prepopulate_context(context: Optional[Context]) -> Context:
 
 def check_access(action: str,
                  context: Context,
-                 data_dict: Optional[Dict] = None) -> Literal[True]:
+                 data_dict: Optional[Dict[str, Any]] = None) -> Literal[True]:
     '''Calls the authorization function for the provided action
 
     This is the only function that should be called to determine whether a
@@ -529,17 +529,17 @@ def get_action(action: str) -> Action:
 
 
 @overload
-def get_or_bust(data_dict: Dict, keys: str) -> Any:
+def get_or_bust(data_dict: Dict[str, Any], keys: str) -> Any:
     ...
 
 
 @overload
-def get_or_bust(data_dict: Dict, keys: Iterable[str]) -> Tuple[Any, ...]:
+def get_or_bust(data_dict: Dict[str, Any], keys: Iterable[str]) -> Tuple[Any, ...]:
     ...
 
 
-def get_or_bust(data_dict: Dict,
-                keys: Union[str, Iterable[str]]) -> Union[Any, Tuple]:
+def get_or_bust(data_dict: Dict[str, Any],
+                keys: Union[str, Iterable[str]]) -> Union[Any, Tuple[Any]]:
     '''Return the value(s) from the given data_dict for the given key(s).
 
     Usage::

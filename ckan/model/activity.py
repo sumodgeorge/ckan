@@ -62,7 +62,7 @@ class Activity(domain_object.DomainObject):
     activity_detail: 'ActivityDetail'
 
     def __init__(
-            self, user_id: str, object_id: str, activity_type: str, data: Optional[Dict]=None) -> None:
+            self, user_id: str, object_id: str, activity_type: str, data: Optional[Dict[str, Any]]=None) -> None:
         self.id = _types.make_uuid()
         self.timestamp = datetime.datetime.utcnow()
         self.user_id = user_id
@@ -97,7 +97,7 @@ class ActivityDetail(domain_object.DomainObject):
     activity: Activity
     def __init__(
             self, activity_id: str, object_id: str, object_type: str, activity_type: str,
-            data: Optional[Dict]=None) -> None:
+            data: Optional[Dict[str, Any]] = None) -> None:
         self.activity_id = activity_id
         self.object_id = object_id
         self.object_type = object_type
