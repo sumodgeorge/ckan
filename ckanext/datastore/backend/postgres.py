@@ -3,6 +3,7 @@
 import copy
 import logging
 import sys
+from typing import Any, Container, Dict, List, Optional, Union, cast
 import sqlalchemy
 import os
 import pprint
@@ -13,7 +14,7 @@ import json
 from collections import OrderedDict
 
 import six
-from six.moves.urllib.parse import (
+from six.moves.urllib.parse import (  # type: ignore
     urlencode, unquote, urlunparse, parse_qsl, urlparse
 )
 from six import string_types, text_type, StringIO
@@ -79,7 +80,7 @@ _SQL_FUNCTIONS_ALLOWLIST_FILE = os.path.join(
 
 
 if not os.environ.get('DATASTORE_LOAD'):
-    ValidationError = toolkit.ValidationError
+    ValidationError = toolkit.ValidationError  # type: ignore
 else:
     log.warn("Running datastore without CKAN")
 
@@ -469,7 +470,8 @@ def _fts_lang(lang=None):
     return lang or default_fts_lang
 
 
-def _sort(sort, fields_types, rank_columns):
+def _sort(sort: Union[str, List[str]], fields_types: Container[str],
+          rank_columns: Dict[str, Any]) -> List[str]:
     u'''
     :param sort: string or list sort parameter passed to datastore_search,
         use None if not given
@@ -485,15 +487,16 @@ def _sort(sort, fields_types, rank_columns):
             rank_sorting.append(u'{0} DESC'.format(column))
         return rank_sorting
 
-    clauses = datastore_helpers.get_list(sort, False)
+    clauses = datastore_helpers.get_list(sort, False) or []
 
     clause_parsed = []
 
     for clause in clauses:
-        field, sort = _parse_sort_clause(clause, fields_types)
-        clause_parsed.append(
-            u'{0} {1}'.format(identifier(field), sort))
-
+        parsed = _parse_sort_clause(clause, fields_types)
+        if parsed:
+            field, sort = parsed
+            clause_parsed.append(
+                u'{0} {1}'.format(identifier(field), sort))
     return clause_parsed
 
 
@@ -525,6 +528,7 @@ def _get_resources(context, alias):
 
 def create_alias(context, data_dict):
     aliases = datastore_helpers.get_list(data_dict.get('aliases'))
+    alias = None
     if aliases is not None:
         # delete previous aliases
         previous_aliases = _get_aliases(context, data_dict)
@@ -689,8 +693,8 @@ def _insert_links(data_dict, limit, offset):
 
     arguments = dict(parse_qsl(query))
     arguments_start = dict(arguments)
-    arguments_prev = dict(arguments)
-    arguments_next = dict(arguments)
+    arguments_prev: Dict[str, Any] = dict(arguments)
+    arguments_next: Dict[str, Any] = dict(arguments)
     if 'offset' in arguments_start:
         arguments_start.pop('offset')
     arguments_next['offset'] = int(offset) + int(limit)
@@ -768,9 +772,14 @@ def check_fields(context, fields):
             })
 
 
+Indexes = Optional[List[Union[str, List[str]]]]
+
+
 def create_indexes(context, data_dict):
     connection = context['connection']
-    indexes = datastore_helpers.get_list(data_dict.get('indexes'))
+
+    indexes: Indexes = cast(Indexes, datastore_helpers.get_list(
+        data_dict.get('indexes', None)))
     # primary key is not a real primary key
     # it's just a unique key
     primary_key = datastore_helpers.get_list(data_dict.get('primary_key'))
@@ -1243,7 +1252,7 @@ def search_data(context, data_dict):
 
     # FIXME: Remove duplicates on select columns
     select_columns = ', '.join(query_dict['select']).replace('%', '%%')
-    ts_query = query_dict['ts_query'].replace('%', '%%')
+    ts_query = cast(str, query_dict['ts_query']).replace('%', '%%')
     resource_id = data_dict['resource_id'].replace('%', '%%')
     sort = query_dict['sort']
     limit = query_dict['limit']
@@ -1292,7 +1301,8 @@ def search_data(context, data_dict):
                 FROM "{resource}" {ts_query}
                 {where} {sort} LIMIT {limit} OFFSET {offset}
             ) TO STDOUT csv DELIMITER '\t' '''
-
+    else:
+        sql_fmt = u''
     sql_string = sql_fmt.format(
         distinct=distinct,
         select=select_columns,
@@ -1510,7 +1520,7 @@ def upsert(context, data_dict):
         raise
     except DataError as e:
         raise ValidationError({
-            'data': e.message,
+            'data': str(e),
             'info': {
                 'orig': [str(e.orig)]
             }})

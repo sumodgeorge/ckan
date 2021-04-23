@@ -2,6 +2,7 @@
 
 import re
 import logging
+from typing import Container, List
 
 import ckan.plugins as plugins
 from ckan.common import config
@@ -10,7 +11,7 @@ from ckanext.datastore.interfaces import IDatastoreBackend
 log = logging.getLogger(__name__)
 
 
-def get_all_resources_ids_in_datastore():
+def get_all_resources_ids_in_datastore() -> List[str]:
     """
     Helper for getting id of all resources in datastore.
 
@@ -24,7 +25,7 @@ def get_all_resources_ids_in_datastore():
     return backend.get_all_ids()
 
 
-def _parse_sort_clause(clause, fields_types):
+def _parse_sort_clause(clause: str, fields_types: Container[str]):
     clause_match = re.match(u'^(.+?)( +(asc|desc) *)?$', clause, re.I)
 
     if not clause_match:

@@ -22,7 +22,7 @@ from flask_babel import (gettext as flask_ugettext,
 import simplejson as json
 from typing import (
     Any, Dict, Iterable, List, Optional,
-    Tuple, TypeVar, overload)
+    Tuple, TypeVar, Union, overload)
 from typing_extensions import Literal
 if six.PY2:
     import pylons  # type: ignore
@@ -251,7 +251,7 @@ SequenceT = TypeVar('SequenceT', list, tuple)
 
 
 @overload
-def aslist(obj: str,
+def aslist(obj: Union[str, List[str]],
            sep: Optional[str] = None,
            strip: bool = True) -> List[str]:
     ...

@@ -2,6 +2,7 @@
 
 import json
 import logging
+from typing import List, Optional, Union
 
 import ckan.common as converters
 import sqlparse
@@ -38,7 +39,8 @@ def is_valid_table_name(name):
     return is_valid_field_name(name)
 
 
-def get_list(input, strip_values=True):
+def get_list(input: Optional[Union[str, List[str]]],
+             strip_values: bool = True) -> Optional[List[str]]:
     '''Transforms a string or list to a list'''
     if input is None:
         return
@@ -181,7 +183,7 @@ def datastore_dictionary(resource_id):
     try:
         return [
             f for f in get_action('datastore_search')(
-                None, {
+                {}, {
                     u'resource_id': resource_id,
                     u'limit': 0,
                     u'include_total': False})['fields']
