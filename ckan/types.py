@@ -246,4 +246,9 @@ class PModel(Protocol):
     task_status_table: Table
     package_relationship_table: Table
 
+    activity: Any
+    vocabulary: Any
+
+    MIN_RATING: int
+    MAX_RATING: int
     repo: "model_.Repository"

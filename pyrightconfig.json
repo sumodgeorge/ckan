@@ -1,7 +1,8 @@
 {
   "strict": [
-
   ],
+  "useLibraryCodeForTypes": true,
+  "reportMissingTypeStubs": false,
   "include": [
     "ckan",
     "ckanext"

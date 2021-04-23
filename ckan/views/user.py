@@ -238,7 +238,7 @@ class ApiTokenView(MethodView):
         return h.redirect_to(u'user.api_tokens', id=id)
 
 
-def api_token_revoke(id, jti: str) -> Response:
+def api_token_revoke(id: str, jti: str) -> Response:
     context = cast(Context, {u'model': model})
     try:
         logic.get_action(u'api_token_revoke')(context, {u'jti': jti})

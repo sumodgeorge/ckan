@@ -49,7 +49,7 @@ APIKEY_HEADER_NAME_DEFAULT = 'X-CKAN-API-Key'
 
 def abort(status_code: int,
           detail: str = '',
-          headers: Optional[Dict] = None,
+          headers: Optional[Dict[str, Any]] = None,
           comment: Optional[str] = None) -> NoReturn:
     '''Abort the current request immediately by returning an HTTP exception.
 
@@ -119,7 +119,7 @@ def render_snippet(*template_names: str, **kw: Any) -> str:
         raise last_exc or TemplateNotFound(template_names)
 
 
-def render_jinja2(template_name: str, extra_vars: Dict) -> str:
+def render_jinja2(template_name: str, extra_vars: Dict[str, Any]) -> str:
     env = config['pylons.app_globals'].jinja_env
     template = env.get_template(template_name)
     return template.render(**extra_vars)
@@ -127,8 +127,8 @@ def render_jinja2(template_name: str, extra_vars: Dict) -> str:
 
 def render(template_name: str,
            extra_vars: Optional[Dict[str, Any]] = None,
-           *pargs,
-           **kwargs) -> str:
+           *pargs: Any,
+           **kwargs: Any) -> str:
     '''Render a template and return the output.
 
     This is CKAN's main template rendering function.

@@ -16,13 +16,13 @@ from werkzeug.datastructures import ImmutableMultiDict
 
 from werkzeug.local import Local, LocalProxy
 
-from flask_babel import (gettext as flask_ugettext,
+from flask_babel import (gettext as flask_ugettext,  # type: ignore
                          ngettext as flask_ungettext)
 
-import simplejson as json
+import simplejson as json   # type: ignore
 from typing import (
-    Any, Dict, Iterable, List, Optional,
-    Tuple, TypeVar, Union, overload)
+    Any, Dict, Iterable, List, Optional, Iterator,
+    Tuple, TypeVar, Union, cast, overload)
 from typing_extensions import Literal
 if six.PY2:
     import pylons  # type: ignore
@@ -62,7 +62,7 @@ def streaming_response(data: Iterable[Any],
         # in any visible way and we are going to get rid of pylons anyway.
         # Flask allows to do this in easy way.
         if with_context:
-            iter_data = flask.stream_with_context(iter_data)
+            iter_data: Iterator[Any] = flask.stream_with_context(iter_data)
         resp = flask.Response(iter_data, mimetype=mimetype)
     else:
         response.app_iter = iter_data  # type: ignore
@@ -71,21 +71,21 @@ def streaming_response(data: Iterable[Any],
     return resp
 
 
-def ugettext(*args, **kwargs) -> str:
+def ugettext(*args: Any, **kwargs: Any) -> str:
     return flask_ugettext(*args, **kwargs)
 
 
 _ = ugettext
 
 
-def ungettext(*args, **kwargs) -> str:
+def ungettext(*args: Any, **kwargs: Any) -> str:
     if is_flask_request():
         return flask_ungettext(*args, **kwargs)
     else:
         return pylons_ungettext(*args, **kwargs)  # type: ignore
 
 
-class CKANConfig(MutableMapping):
+class CKANConfig(MutableMapping[str, Any]):
     u'''Main CKAN configuration object
 
     This is a dict-like object that also proxies any changes to the
@@ -97,11 +97,11 @@ class CKANConfig(MutableMapping):
     '''
     store: Dict[str, Any]
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args: Any, **kwargs: Any):
         self.store = dict()
         self.update(dict(*args, **kwargs))
 
-    def __getitem__(self, key):
+    def __getitem__(self, key: str):
         return self.store[key]
 
     def __iter__(self):
@@ -126,9 +126,9 @@ class CKANConfig(MutableMapping):
 
         if six.PY2:
             try:
-                pylons.config.clear()
+                pylons.config.clear()  # type: ignore
                 # Pylons set this default itself
-                pylons.config[u'lang'] = None
+                pylons.config[u'lang'] = None  # type: ignore
             except TypeError:
                 pass
 
@@ -141,7 +141,7 @@ class CKANConfig(MutableMapping):
 
         if six.PY2:
             try:
-                pylons.config[key] = value
+                pylons.config[key] = value  # type: ignore
             except TypeError:
                 pass
 
@@ -154,7 +154,7 @@ class CKANConfig(MutableMapping):
 
         if six.PY2:
             try:
-                del pylons.config[key]
+                del pylons.config[key]  # type: ignore
             except TypeError:
                 pass
 
@@ -163,7 +163,7 @@ def _get_request() -> flask.Request:
     if is_flask_request():
         return flask.request
     else:
-        return pylons.request
+        return pylons.request  # type: ignore
 
 
 class CKANRequest(LocalProxy):
@@ -178,15 +178,17 @@ class CKANRequest(LocalProxy):
     able to interact with them transparently.
     '''
     endpoint: str
+    form: ImmutableMultiDict[str, Any]
+    args: ImmutableMultiDict[str, Any]
 
     @property
-    def params(self) -> ImmutableMultiDict:
+    def params(self) -> ImmutableMultiDict[str, Any]:
         u''' Special case as Pylons' request.params is used all over the place.
         All new code meant to be run just in Flask (eg views) should always
         use request.args
         '''
         try:
-            return super(CKANRequest, self).params
+            return super(CKANRequest, self).params  # type: ignore
         except AttributeError:
             return self.args
 
@@ -195,14 +197,14 @@ def _get_c() -> Any:
     if is_flask_request():
         return flask.g
     else:
-        return pylons.c
+        return pylons.c  # type: ignore
 
 
 def _get_session() -> Any:
     if is_flask_request():
         return flask.session
     else:
-        return pylons.session
+        return pylons.session  # type: ignore
 
 
 local = Local()
@@ -247,7 +249,7 @@ def asint(obj: Any) -> int:
 
 
 T = TypeVar('T')
-SequenceT = TypeVar('SequenceT', list, tuple)
+SequenceT = TypeVar('SequenceT', List[Any], Tuple[Any])
 
 
 @overload
@@ -285,14 +287,14 @@ def aslist(obj: Literal[None],
     ...
 
 
-def aslist(obj: Any, sep: Optional[str] = None, strip: bool = True):
+def aslist(obj: Any, sep: Optional[str] = None, strip: bool = True) -> Any:
     if isinstance(obj, six.string_types):
         lst = obj.split(sep)
         if strip:
             lst = [v.strip() for v in lst]
         return lst
     elif isinstance(obj, (list, tuple)):
-        return obj
+        return cast(Any, obj)
     elif obj is None:
         return []
     else:

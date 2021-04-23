@@ -15,6 +15,3 @@ trim_trailing_whitespace = true
 # Python Code Style
 [*.py]
 indent_size = 4
-
-[*.pyi]
-indent_size = 4
