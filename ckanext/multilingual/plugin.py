@@ -9,8 +9,7 @@ import ckan
 import ckan.lib.navl.dictization_functions
 import ckan.model
 
-from ckan.plugins import SingletonPlugin, implements, IPackageController
-from ckan.plugins import IGroupController, IOrganizationController, ITagController, IResourceController
+import ckan.plugins as plugins
 
 from ckan.common import request, config, c
 from ckan.logic import get_action
@@ -165,7 +164,8 @@ def translate_resource_data_dict(data_dict):
             if value in desired_translations:
                 translated_flattened[key] = desired_translations[value]
             elif value in fallback_translations:
-                translated_flattened[key] = fallback_translations.get(value, value)
+                translated_flattened[key] = fallback_translations.get(
+                    value, value)
             else:
                 translated_flattened[key] = value
 
@@ -201,8 +201,8 @@ def translate_resource_data_dict(data_dict):
 KEYS_TO_IGNORE = ['state', 'revision_id', 'id', #title done seperately
                   'metadata_created', 'metadata_modified', 'site_id']
 
-class MultilingualDataset(SingletonPlugin):
-    implements(IPackageController, inherit=True)
+class MultilingualDataset(plugins.SingletonPlugin):
+    plugins.implements(plugins.IPackageController, inherit=True)
     LANGS = config.get('ckan.locale_order', 'en').split(" ")
 
     def before_index(self, search_data):
@@ -244,7 +244,9 @@ class MultilingualDataset(SingletonPlugin):
 
         text_field_items['text_' + default_lang].extend(all_terms)
 
-        for translation in sorted(field_translations, key=lambda tr: all_terms.index(tr['term'])):
+        for translation in sorted(
+                field_translations,
+                key=lambda tr: all_terms.index(tr['term'])):
             lang_field = 'text_' + translation['lang_code']
             text_field_items[lang_field].append(translation['term_translation'])
 
@@ -362,7 +364,7 @@ class MultilingualDataset(SingletonPlugin):
         # Now translate the fields of the dataset itself.
         return translate_data_dict(dataset_dict)
 
-class MultilingualGroup(SingletonPlugin):
+class MultilingualGroup(plugins.SingletonPlugin):
     '''The MultilingualGroup plugin translates group names and other group
     fields on group read pages and on the group index page.
 
@@ -373,14 +375,14 @@ class MultilingualGroup(SingletonPlugin):
     MultilingualDataset plugin.
 
     '''
-    implements(IGroupController, inherit=True)
-    implements(IOrganizationController, inherit=True)
+    plugins.implements(plugins.IGroupController, inherit=True)
+    plugins.implements(plugins.IOrganizationController, inherit=True)
 
     def before_view(self, data_dict):
         translated_data_dict = translate_data_dict(data_dict)
         return translated_data_dict
 
-class MultilingualTag(SingletonPlugin):
+class MultilingualTag(plugins.SingletonPlugin):
     '''The MultilingualTag plugin translates tag names on tag read pages and
     on the tag index page.
 
@@ -391,18 +393,18 @@ class MultilingualTag(SingletonPlugin):
     MultilingualDataset plugin.
 
     '''
-    implements(ITagController, inherit=True)
+    plugins.implements(plugins.ITagController, inherit=True)
 
     def before_view(self, data_dict):
         translated_data_dict = translate_data_dict(data_dict)
         return translated_data_dict
 
-class MultilingualResource(SingletonPlugin):
-   '''The MultilinguaResource plugin translate the selected resource name and description on resource
-   preview page.
+class MultilingualResource(plugins.SingletonPlugin):
+   '''The MultilinguaResource plugin translate the selected resource name and
+   description on resource preview page.
 
    '''
-   implements(IResourceController, inherit=True)
+   plugins.implements(plugins.IResourceController, inherit=True)
 
    def before_show(self, data_dict):
         translated_data_dict = translate_resource_data_dict(data_dict)

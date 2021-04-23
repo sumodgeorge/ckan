@@ -35,8 +35,8 @@ def user_show(next_auth, context, data_dict=None):
     return next_auth(context, data_dict)
 
 
-@chained_action
 @side_effect_free
+@chained_action
 def package_search(original_action, context, data_dict):
     return original_action(context, data_dict)
 

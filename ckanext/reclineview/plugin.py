@@ -1,6 +1,7 @@
 # encoding: utf-8
 
 from logging import getLogger
+from typing import Any, Dict
 
 import six
 
@@ -189,8 +190,8 @@ class ReclineGraphView(ReclineViewBase):
     def setup_template_variables(self, context, data_dict):
         self.datastore_fields = datastore_fields(data_dict['resource'],
                                                  self.datastore_field_types)
-        vars = ReclineViewBase.setup_template_variables(self, context,
-                                                        data_dict)
+        vars: Dict[str, Any] = ReclineViewBase.setup_template_variables(
+            self, context, data_dict)
         vars.update({'graph_types': self.graph_types,
                      'graph_fields': self.datastore_fields})
         return vars
@@ -254,8 +255,8 @@ class ReclineMapView(ReclineViewBase):
 
         self.datastore_fields = map_latlon_fields + map_geojson_fields
 
-        vars = ReclineViewBase.setup_template_variables(self, context,
-                                                        data_dict)
+        vars: Dict[str, Any] = ReclineViewBase.setup_template_variables(
+            self, context, data_dict)
         vars.update({'map_field_types': self.map_field_types,
                      'map_latlon_fields': map_latlon_fields,
                      'map_geojson_fields': map_geojson_fields

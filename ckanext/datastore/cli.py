@@ -1,5 +1,6 @@
 # encoding: utf-8
 
+from ckan.types import Context
 import logging
 import os
 
@@ -123,7 +124,7 @@ def purge():
     action, which drops tables when called without filters.'''
 
     site_user = logic.get_action(u'get_site_user')({u'ignore_auth': True}, {})
-    context = {u'user': site_user[u'name']}
+    context: Context = {u'user': site_user[u'name']}
 
     result = logic.get_action(u'datastore_search')(
         context,

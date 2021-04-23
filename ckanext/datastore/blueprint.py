@@ -1,6 +1,8 @@
 # encoding: utf-8
 
-from six.moves import zip_longest
+from ckan.types import Validator
+from typing import Any, Callable, cast
+from six.moves import zip_longest  # type: ignore
 
 from flask import Blueprint, make_response
 from flask.views import MethodView
@@ -29,8 +31,8 @@ from ckanext.datastore.writer import (
 int_validator = get_validator(u'int_validator')
 boolean_validator = get_validator(u'boolean_validator')
 ignore_missing = get_validator(u'ignore_missing')
-one_of = get_validator(u'one_of')
-default = get_validator(u'default')
+one_of = cast(Callable[[Any], Validator], get_validator(u'one_of'))
+default = cast(Callable[[Any], Validator], get_validator(u'default'))
 unicode_only = get_validator(u'unicode_only')
 
 DUMP_FORMATS = u'csv', u'tsv', u'json', u'xml'
@@ -95,10 +97,10 @@ class DictionaryView(MethodView):
     def _prepare(self, id, resource_id):
         try:
             # resource_edit_base template uses these
-            pkg_dict = get_action(u'package_show')(None, {u'id': id})
-            resource = get_action(u'resource_show')(None, {u'id': resource_id})
+            pkg_dict = get_action(u'package_show')({}, {u'id': id})
+            resource = get_action(u'resource_show')({}, {u'id': resource_id})
             rec = get_action(u'datastore_search')(
-                None, {
+                {}, {
                     u'resource_id': resource_id,
                     u'limit': 0
                 }
@@ -136,7 +138,7 @@ class DictionaryView(MethodView):
         info = info[:len(fields)]
 
         get_action(u'datastore_create')(
-            None, {
+            {}, {
                 u'resource_id': resource_id,
                 u'force': True,
                 u'fields': [{
@@ -174,14 +176,15 @@ def dump_to(
     elif fmt == u'xml':
         writer_factory = xml_writer
         records_format = u'objects'
-
+    else:
+        assert False, u'Unsupported format'
     def start_writer(fields):
         bom = options.get(u'bom', False)
         return writer_factory(output, fields, resource_id, bom)
 
     def result_page(offs, lim):
         return get_action(u'datastore_search')(
-            None,
+            {},
             dict({
                 u'resource_id': resource_id,
                 u'limit': PAGINATE_BY

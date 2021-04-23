@@ -524,10 +524,10 @@ def changes(id, group_type, is_organization):
     item.
     '''
     activity_id = id
-    context = {
+    context = cast(Context, {
         u'model': model, u'session': model.Session,
         u'user': g.user, u'auth_user_obj': g.userobj
-    }
+    })
     try:
         activity_diff = get_action(u'activity_diff')(
             context, {u'id': activity_id, u'object_type': u'group',
@@ -572,10 +572,10 @@ def changes_multiple(is_organization, group_type=None):
     new_id = h.get_request_param(u'new_id')
     old_id = h.get_request_param(u'old_id')
 
-    context = {
+    context = cast(Context, {
         u'model': model, u'session': model.Session,
         u'user': g.user, u'auth_user_obj': g.userobj
-    }
+    })
 
     # check to ensure that the old activity is actually older than
     # the new activity
@@ -599,7 +599,9 @@ def changes_multiple(is_organization, group_type=None):
     # display a warning that the user can't look at a sequence where
     # the newest item is older than the oldest one, etc
     if time_diff.total_seconds() < 0:
-        return changes(h.get_request_param(u'current_new_id'))
+        return changes(
+            h.get_request_param(u'current_new_id'), group_type,
+            is_organization)
 
     done = False
     current_id = new_id

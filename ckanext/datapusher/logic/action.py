@@ -4,8 +4,9 @@ import logging
 import json
 import datetime
 import time
+from typing import Any, Dict
 
-from six.moves.urllib.parse import urljoin
+from six.moves.urllib.parse import urljoin  # type: ignore
 from dateutil.parser import parse as parse_date
 
 import requests
@@ -59,7 +60,7 @@ def datapusher_submit(context, data_dict):
     except logic.NotFound:
         return False
 
-    datapusher_url = config.get('ckan.datapusher.url')
+    datapusher_url: str = config.get('ckan.datapusher.url', '')
 
     callback_url_base = config.get('ckan.datapusher.callback_url_base')
     if callback_url_base:
@@ -143,16 +144,16 @@ def datapusher_submit(context, data_dict):
                     'original_url': resource_dict.get('url'),
                 }
             }))
-        r.raise_for_status()
     except requests.exceptions.ConnectionError as e:
-        error = {'message': 'Could not connect to DataPusher.',
+        error: Dict[str, Any] = {'message': 'Could not connect to DataPusher.',
                  'details': str(e)}
         task['error'] = json.dumps(error)
         task['state'] = 'error'
         task['last_updated'] = str(datetime.datetime.utcnow()),
         p.toolkit.get_action('task_status_update')(context, task)
         raise p.toolkit.ValidationError(error)
-
+    try:
+        r.raise_for_status()
     except requests.exceptions.HTTPError as e:
         m = 'An Error occurred while sending the job: {0}'.format(str(e))
         try:

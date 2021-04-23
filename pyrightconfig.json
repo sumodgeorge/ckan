@@ -7,7 +7,7 @@
     "ckanext"
   ],
   "exclude": [
-    "**/tests*",
+    "**/test*",
     "**/migration",
     "ckan/lib/create_test_data.py"
   ],

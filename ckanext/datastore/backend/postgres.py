@@ -1592,9 +1592,9 @@ def search_sql(context, data_dict):
             function_names))
 
         if any(t.startswith('pg_') for t in table_names):
-            raise toolkit.NotAuthorized({
-                'permissions': ['Not authorized to access system tables']
-            })
+            raise toolkit.NotAuthorized(
+                'Not authorized to access system tables'
+            )
         context['check_access'](table_names)
 
         for f in function_names:
@@ -1602,10 +1602,9 @@ def search_sql(context, data_dict):
                 if name_variant in backend.allowed_sql_functions:
                     break
             else:
-                raise toolkit.NotAuthorized({
-                    'permissions': [
-                        'Not authorized to call function {}'.format(f)]
-                })
+                raise toolkit.NotAuthorized(
+                    'Not authorized to call function {}'.format(f)
+                )
 
         results = context['connection'].execute(sql)
 
@@ -1616,9 +1615,7 @@ def search_sql(context, data_dict):
 
     except ProgrammingError as e:
         if e.orig.pgcode == _PG_ERR_CODE['permission_denied']:
-            raise toolkit.NotAuthorized({
-                'permissions': ['Not authorized to read resource.']
-            })
+            raise toolkit.NotAuthorized('Not authorized to read resource.')
 
         def _remove_explain(msg):
             return (msg.replace('EXPLAIN (VERBOSE, FORMAT JSON) ', '')
@@ -1943,7 +1940,7 @@ class DatastorePostgresqlBackend(DatastoreBackend):
             raise
         except DataError as e:
             raise ValidationError({
-                'data': e.message,
+                'data': str(e),
                 'info': {
                     'orig': [str(e.orig)]
                 }})

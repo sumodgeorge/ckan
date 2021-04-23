@@ -1,6 +1,7 @@
 # encoding: utf-8
 
 import logging
+from typing import Any
 
 from six import string_types
 
@@ -43,7 +44,7 @@ class DatastorePlugin(p.SingletonPlugin):
 
     resource_show_action = None
 
-    def __new__(cls, *args, **kwargs):
+    def __new__(cls: Any, *args, **kwargs):
         idatastore_extensions = p.PluginImplementations(interfaces.IDatastore)
         idatastore_extensions = idatastore_extensions.extensions()
 

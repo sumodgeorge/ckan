@@ -1,6 +1,8 @@
 # encoding: utf-8
 
+from ckan.types import Context
 import logging
+from typing import cast
 
 import ckan.logic as logic
 import ckan.model as model
@@ -68,10 +70,10 @@ class DatapusherPlugin(p.SingletonPlugin):
     # IResourceUrlChange
 
     def notify(self, resource):
-        context = {
+        context = cast(Context, {
             u'model': model,
             u'ignore_auth': True,
-        }
+        })
         resource_dict = toolkit.get_action(u'resource_show')(
             context, {
                 u'id': resource.id,
@@ -87,11 +89,11 @@ class DatapusherPlugin(p.SingletonPlugin):
 
     def _submit_to_datapusher(self, resource_dict):
 
-        context = {
+        context = cast(Context, {
             u'model': model,
             u'ignore_auth': True,
             u'defer_commit': True
-        }
+        })
 
         resource_format = resource_dict.get('format')
 

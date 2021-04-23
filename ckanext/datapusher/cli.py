@@ -1,8 +1,10 @@
 # encoding: utf-8
 
 from __future__ import print_function
+from ckan.types import Context
 
 import logging
+from typing import cast
 
 import click
 
@@ -58,20 +60,20 @@ def submit(package, yes):
     confirm(yes)
 
     if not package:
-        ids = tk.get_action(u'package_list')({
+        ids = tk.get_action(u'package_list')(cast(Context, {
             u'model': model,
             u'ignore_auth': True
-        }, {})
+        }), {})
     else:
         ids = [package]
 
     for id in ids:
         package_show = tk.get_action(u'package_show')
         try:
-            pkg = package_show({
+            pkg = package_show(cast(Context, {
                 u'model': model,
                 u'ignore_auth': True
-            }, {u'id': id})
+            }), {u'id': id})
         except Exception as e:
             error_shout(e)
             error_shout(u"Package '{}' was not found".format(package))
@@ -84,10 +86,10 @@ def submit(package, yes):
 
 def _submit(resources):
     click.echo(u'Submitting {} datastore resources'.format(len(resources)))
-    user = tk.get_action(u'get_site_user')({
+    user = tk.get_action(u'get_site_user')(cast(Context, {
         u'model': model,
         u'ignore_auth': True
-    }, {})
+    }), {})
     datapusher_submit = tk.get_action(u'datapusher_submit')
     for id in resources:
         click.echo(u'Submitting {}...'.format(id), nl=False)

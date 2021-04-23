@@ -18,7 +18,7 @@ class ResourceDataView(MethodView):
     def post(self, id, resource_id):
         try:
             toolkit.get_action(u'datapusher_submit')(
-                None, {
+                {}, {
                     u'resource_id': resource_id
                 }
             )
@@ -31,9 +31,9 @@ class ResourceDataView(MethodView):
 
     def get(self, id, resource_id):
         try:
-            pkg_dict = toolkit.get_action(u'package_show')(None, {u'id': id})
+            pkg_dict = toolkit.get_action(u'package_show')({}, {u'id': id})
             resource = toolkit.get_action(u'resource_show'
-                                          )(None, {
+                                          )({}, {
                                               u'id': resource_id
                                           })
 
@@ -46,7 +46,7 @@ class ResourceDataView(MethodView):
 
         try:
             datapusher_status = toolkit.get_action(u'datapusher_status')(
-                None, {
+                {}, {
                     u'resource_id': resource_id
                 }
             )
