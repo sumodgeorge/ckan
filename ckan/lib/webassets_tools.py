@@ -3,6 +3,7 @@
 import logging
 import os
 import tempfile
+from typing import Optional
 import yaml
 
 from markupsafe import Markup
@@ -13,7 +14,7 @@ from ckan.common import config, g, asbool
 
 
 logger = logging.getLogger(__name__)
-env = None
+env: Optional[Environment] = None
 
 yaml.warnings({u'YAMLLoadWarning': False})  # type: ignore
 
@@ -24,7 +25,7 @@ def create_library(name: str, path: str) -> None:
     config_path = os.path.join(path, u'webassets.yml')
     if not os.path.exists(config_path):
         return
-
+    assert env
     library = YAMLLoader(config_path).load_bundles()
     bundles = {
         u'/'.join([name, key]): bundle
@@ -38,7 +39,7 @@ def create_library(name: str, path: str) -> None:
     # TODO: make PR into webassets with preferable solution
     # Issue: https://github.com/miracle2k/webassets/issues/519
     for name, bundle in bundles.items():
-        env._named_bundles.pop(name, None)
+        env._named_bundles.pop(name, None)  # type: ignore
         env.register(name, bundle)
 
     env.append_path(path)
@@ -88,6 +89,7 @@ def include_asset(name: str) -> None:
     if name in g.webassets[u'included']:
         return
 
+    assert env
     try:
         bundle = env[name]
     except KeyError:
@@ -165,4 +167,5 @@ def get_webassets_path() -> str:
 
 
 def add_public_path(path: str, url: str) -> None:
+    assert env
     env.append_path(path, url)

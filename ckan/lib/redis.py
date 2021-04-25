@@ -8,6 +8,7 @@ Redis utilities.
 from __future__ import absolute_import
 
 import logging
+from typing import Optional
 
 from redis import ConnectionPool, Redis
 
@@ -22,7 +23,7 @@ REDIS_URL_DEFAULT_VALUE = u'redis://localhost:6379/0'
 
 # Redis connection pool. Do not use this directly, use ``connect_to_redis``
 # instead.
-_connection_pool = None
+_connection_pool: Optional[ConnectionPool] = None
 
 
 def connect_to_redis() -> Redis:

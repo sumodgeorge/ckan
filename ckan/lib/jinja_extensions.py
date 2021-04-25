@@ -17,7 +17,7 @@ from six import text_type
 import ckan.lib.base as base
 import ckan.lib.helpers as h
 from ckan.common import config
-from typing import Any, Dict, Optional, Union
+from typing import Any, Dict, List, Optional, Union
 from markupsafe import Markup
 
 
@@ -60,7 +60,7 @@ def regularise_html(html: Optional[str]) -> Optional[str]:
     generally remove surlus whitespace and kill \n this will break <code><pre>
     tags but they should not be being translated '''
     if html is None:
-        return
+        return None
     html = re.sub('\n', ' ', html)
     matches = re.findall(r'(<[^>]*>|%[^%]\([^)]*\)\w|[^<%]+|%)', html)
     for i in range(len(matches)):
@@ -238,8 +238,8 @@ class BaseExtension(ext.Extension):
         stream = parser.stream
         tag = next(stream)
         # get arguments
-        args = []
-        kwargs = []
+        args: List[Any] = []
+        kwargs: List[Any] = []
         while not stream.current.test_any('block_end'):
             if args or kwargs:
                 stream.expect('comma')

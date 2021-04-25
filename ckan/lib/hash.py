@@ -7,7 +7,8 @@ import six
 from ckan.common import config, request
 from typing import Optional
 
-secret = None
+secret: Optional[bytes] = None
+
 
 def get_message_hash(value: str) -> str:
     global secret
@@ -16,6 +17,7 @@ def get_message_hash(value: str) -> str:
         # not be read in yet
         secret = six.ensure_binary(config['beaker.session.secret'])
     return hmac.new(secret, value.encode('utf8'), hashlib.sha1).hexdigest()
+
 
 def get_redirect() -> Optional[str]:
     '''Checks the return_to value against the hash, and if it

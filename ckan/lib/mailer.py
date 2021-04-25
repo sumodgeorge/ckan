@@ -46,7 +46,7 @@ def _mail_recipient(recipient_name: str,
     reply_to = config.get('smtp.reply_to')
     if body_html:
         # multipart
-        msg = MIMEMultipart('alternative')
+        msg: Any = MIMEMultipart('alternative')
         part1 = MIMEText(body.encode('utf-8'), 'plain', 'utf-8')
         part2 = MIMEText(body_html.encode('utf-8'), 'html', 'utf-8')
         msg.attach(part1)

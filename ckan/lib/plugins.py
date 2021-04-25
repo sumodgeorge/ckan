@@ -96,6 +96,7 @@ def lookup_group_controller(group_type: Optional[str]=None) -> Optional[str]:
     """
     if group_type:
         return _group_controllers.get(group_type)
+    return None
 
 
 def register_package_plugins() -> None:

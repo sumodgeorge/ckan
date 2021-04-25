@@ -6,10 +6,10 @@ import logging
 
 from ckan.common import config
 from jinja2.exceptions import TemplateNotFound
-from typing import Optional, Tuple
+from typing import Any, Dict, Optional, Tuple
 log = logging.getLogger(__name__)
 
-_template_info_cache = {}
+_template_info_cache: Dict[str, Any] = {}
 
 def reset_template_info_cache() -> None:
     '''Reset the template cache'''
@@ -22,6 +22,8 @@ def find_template(template_name: str) -> Optional[str]:
     for path in template_paths:
         if os.path.exists(os.path.join(path, template_name.encode('utf-8'))):
             return os.path.join(path, template_name)
+    return None
+
 
 def template_type(template_path: str) -> str:
     return 'jinja2'

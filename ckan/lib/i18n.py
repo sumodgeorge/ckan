@@ -56,7 +56,7 @@ import ckan.i18n
 from ckan.plugins import PluginImplementations
 from ckan.plugins.interfaces import ITranslation
 
-from typing import Any, Dict, List, Set
+from typing import Any, Dict, List, Optional, Set
 from flask.wrappers import Request
 
 if six.PY2:
@@ -158,10 +158,10 @@ def _get_locales() -> List[str]:
     return ordered_list
 
 
-available_locales = None
-locales = None
-locales_dict = None
-_non_translated_locals = None
+available_locales: Optional[List[Optional[Locale]]] = None
+locales: Optional[List[str]] = None
+locales_dict: Optional[Dict[str, Optional[Locale]]] = None
+_non_translated_locals: Optional[List[str]] = None
 
 
 def get_locales() -> List[str]:
@@ -184,7 +184,7 @@ def non_translated_locals() -> List[str]:
     return _non_translated_locals
 
 
-def get_locales_dict() -> Dict[str, Locale]:
+def get_locales_dict() -> Dict[str, Optional[Locale]]:
     ''' Get a dict of the available locales
     e.g.  { 'en' : Locale('en'), 'de' : Locale('de'), ... } '''
     global locales_dict
@@ -196,7 +196,7 @@ def get_locales_dict() -> Dict[str, Locale]:
     return locales_dict
 
 
-def get_available_locales() -> List[Locale]:
+def get_available_locales() -> List[Optional[Locale]]:
     ''' Get a list of the available locales
     e.g.  [ Locale('en'), Locale('de'), ... ] '''
     global available_locales
@@ -248,7 +248,7 @@ def _set_lang(lang):
 
 def handle_request(request: Request, tmpl_context: Any) -> str:
     ''' Set the language for the request '''
-    lang = request.environ.get('CKAN_LANG') or \
+    lang: str = request.environ.get('CKAN_LANG', '') or \
         config.get('ckan.locale_default', 'en')
     if lang != 'en':
         set_lang(lang)

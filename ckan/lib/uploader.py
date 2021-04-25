@@ -24,9 +24,9 @@ MB = 1 << 20
 
 log = logging.getLogger(__name__)
 
-_storage_path = None
-_max_resource_size = None
-_max_image_size = None
+_storage_path: Optional[str] = None
+_max_resource_size: Optional[int] = None
+_max_image_size: Optional[int] = None
 
 
 def _copy_file(input_file: IO, output_file: IO, max_size: int) -> None:
@@ -91,7 +91,7 @@ def get_storage_path() -> str:
             log.critical('''Please specify a ckan.storage_path in your config
                          for your uploads''')
             _storage_path = ''
-
+    assert _storage_path is not None
     return _storage_path
 
 

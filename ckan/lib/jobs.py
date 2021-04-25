@@ -41,7 +41,7 @@ DEFAULT_QUEUE_NAME = u'default'
 DEFAULT_JOB_TIMEOUT = 180
 
 # RQ job queues. Do not use this directly, use ``get_queue`` instead.
-_queues = {}
+_queues: Dict[str, rq.Queue] = {}
 
 
 def _connect():
@@ -260,8 +260,8 @@ class Worker(rq.Worker):
 
     def register_birth(self, *args, **kwargs) -> None:
         result = super(Worker, self).register_birth(*args, **kwargs)
-        names = [remove_queue_name_prefix(n) for n in self.queue_names()]
-        names = u', '.join(u'"{}"'.format(n) for n in names)
+        names_list = [remove_queue_name_prefix(n) for n in self.queue_names()]
+        names = u', '.join(u'"{}"'.format(n) for n in names_list)
         log.info(u'Worker {} (PID {}) has started on queue(s) {} '.format(
                  self.key, self.pid, names))
         return result
@@ -278,7 +278,7 @@ class Worker(rq.Worker):
         # when they are used the next time.
         log.debug(u'Disposing database engine before fork')
         meta.Session.remove()
-        meta.engine.dispose()
+        meta.engine.dispose()  # type: ignore
 
         # The original implementation performs the actual fork
         queue = remove_queue_name_prefix(job.origin)
@@ -318,7 +318,7 @@ class Worker(rq.Worker):
         except Exception:
             log.exception(u'Error while closing database session')
         try:
-            meta.engine.dispose()
+            meta.engine.dispose()  # type: ignore
         except Exception:
             log.exception(u'Error while disposing database engine')
         return result

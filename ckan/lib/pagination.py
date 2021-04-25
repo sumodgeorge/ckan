@@ -98,6 +98,10 @@ class BasePage(list):
         Index of last item on the current page
 
     """
+    previous_page: Optional[int]
+    next_page: Optional[int]
+    first_item: Optional[int]
+    last_item: Optional[int]
 
     def __init__(self,
                  collection: Sequence,
@@ -630,7 +634,7 @@ class Page(BasePage):
             link_attr={},
         )
         params.update(kwargs)
-        return super(Page, self).pager(*args, **params)
+        return super(Page, self).pager(*args, **params)  # type: ignore
 
     # Put each page link into a <li> (for Bootstrap to style it)
 
