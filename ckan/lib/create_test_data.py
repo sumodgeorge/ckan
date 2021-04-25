@@ -1,26 +1,29 @@
 # encoding: utf-8
 
+from ckan.types import Context
 import logging
 from collections import defaultdict
 import datetime
+from typing import List, Set, cast
 
 from six import string_types, text_type
 
 import ckan.model as model
+from ckan.logic import get_action
 
 log = logging.getLogger(__name__)
 
 class CreateTestData(object):
     # keep track of the objects created by this class so that
     # tests can easy call delete() method to delete them all again.
-    pkg_names = []
-    tag_names = []
-    group_names = set()
-    user_refs = []
+    pkg_names: List[str] = []
+    tag_names: List[str] = []
+    group_names: Set[str] = set()
+    user_refs: List[str] = []
 
-    author = u'tester'
+    author: str = u'tester'
 
-    pkg_core_fields = ['name', 'title', 'version', 'url', 'notes',
+    pkg_core_fields: List[str] = ['name', 'title', 'version', 'url', 'notes',
                        'author', 'author_email',
                        'maintainer', 'maintainer_email',
                        'private',
@@ -85,12 +88,12 @@ class CreateTestData(object):
                             'term_translation': translations[term],
                             'lang_code': lang_code,
                             }
-                    context = {
+                    context = cast(Context, {
                         'model': ckan.model,
                         'session': ckan.model.Session,
                         'user': sysadmin_user.name,
-                    }
-                    ckan.logic.action.update.term_translation_update(context,
+                    })
+                    get_action('term_translation_update')(context,
                             data_dict)
 
         ckan.model.Session.commit()
@@ -104,24 +107,24 @@ class CreateTestData(object):
         warandpeace = ckan.model.Package.get('warandpeace')
 
         # Create a couple of vocabularies.
-        context = {
+        context = cast(Context, {
                 'model': ckan.model,
                 'session': ckan.model.Session,
                 'user': sysadmin_user.name
-                }
+                })
         data_dict = {
                 'name': 'Genre',
                 'tags': [{'name': 'Drama'}, {'name': 'Sci-Fi'},
                     {'name': 'Mystery'}],
                 }
-        ckan.logic.action.create.vocabulary_create(context, data_dict)
+        get_action('vocabulary_create')(context, data_dict)
 
         data_dict = {
                 'name': 'Actors',
                 'tags': [{'name': 'keira-knightley'}, {'name': 'jude-law'},
                     {'name': 'alessio-boni'}],
                 }
-        ckan.logic.action.create.vocabulary_create(context, data_dict)
+        get_action('vocabulary_create')(context, data_dict)
 
         # Add some vocab tags to some packages.
         genre_vocab = ckan.model.Vocabulary.get('Genre')
@@ -281,11 +284,13 @@ class CreateTestData(object):
             needs_commit = False
 
         if relationships:
-            def pkg(pkg_name):
-                return model.Package.by_name(text_type(pkg_name))
+            def get_pkg(pkg_name):
+                pkg = model.Package.by_name(text_type(pkg_name))
+                assert pkg
+                return pkg
             for subject_name, relationship, object_name in relationships:
-                pkg(subject_name).add_relationship(
-                    text_type(relationship), pkg(object_name))
+                get_pkg(subject_name).add_relationship(
+                    text_type(relationship), get_pkg(object_name))
                 needs_commit = True
 
             model.repo.commit_and_remove()
@@ -356,14 +361,8 @@ class CreateTestData(object):
     @classmethod
     def create(cls, auth_profile="", package_type=None):
         model.Session.remove()
-        if auth_profile == "publisher":
-            organization_group = model.Group(name=u"organization_group",
-                                             type="organization")
-
         cls.pkg_names = [u'annakarenina', u'warandpeace']
         pkg1 = model.Package(name=cls.pkg_names[0], type=package_type)
-        if auth_profile == "publisher":
-            pkg1.group = organization_group
         model.Session.add(pkg1)
         pkg1.title = u'A Novel By Tolstoy'
         pkg1.version = u'0.7a'
@@ -416,9 +415,6 @@ left arrow <
         pkg2 = model.Package(name=cls.pkg_names[1], type=package_type)
         tag1 = model.Tag(name=u'russian')
         tag2 = model.Tag(name=u'tolstoy')
-
-        if auth_profile == "publisher":
-            pkg2.group = organization_group
 
         # Flexible tag, allows spaces, upper-case,
         # and all punctuation except commas
@@ -541,14 +537,6 @@ left arrow <
             group = model.Group.by_name(text_type(group_name))
             if group:
                 model.Session.delete(group)
-        revs = model.Session.query(model.Revision).filter_by(author=cls.author)
-        for rev in revs:
-            for pkg in rev.packages:
-                pkg.purge()
-            for grp in rev.groups:
-                grp.purge()
-            model.Session.commit()
-            model.Session.delete(rev)
         for user_name in cls.user_refs:
             user = model.User.get(text_type(user_name))
             if user:

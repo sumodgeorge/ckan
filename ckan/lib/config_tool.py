@@ -66,7 +66,7 @@ def parse_option_string(section: str,
         if raise_on_error:
             raise ConfigToolError('Option did not parse: "%s". Must be: '
                                   '"key = value"' % option_string)
-        return
+        return None
     is_commented_out, key, value = option_match.group('commentedout',
                                                       'option', 'value')
     key = key.strip()
@@ -126,7 +126,7 @@ class Changes(dict):
             self[option.section][action] = []
         self[option.section][action].append(option)
 
-    def get(self, section, action) -> List[Option]:
+    def get(self, section, action=None) -> List[Option]:
         try:
             return self[section][action]
         except KeyError:
@@ -139,8 +139,8 @@ def calculate_changes(existing_options_dict: Dict,
     changes = Changes()
 
     for desired_option in desired_options:
-        action = 'edit' if desired_option.id in existing_options_dict \
-                 else 'add'
+        action: Literal['add', 'edit'] = 'edit' if desired_option.id\
+            in existing_options_dict else 'add'
         if edit and action != 'edit':
             raise ConfigToolError(
                 'Key "%s" does not exist in section "%s"' %

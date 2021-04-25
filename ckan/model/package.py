@@ -1,7 +1,7 @@
 # encoding: utf-8
 
 from typing import (
-    ClassVar, Dict,
+    ClassVar, Dict, Iterable,
     List,
     Optional,
     TYPE_CHECKING,
@@ -186,7 +186,7 @@ class Package(core.StatefulObjectMixin,
             meta.Session.add(package_tag)
 
 
-    def add_tags(self, tags: List["Tag"]) -> None:
+    def add_tags(self, tags: Iterable["Tag"]) -> None:
         for tag in tags:
             self.add_tag(tag)
 

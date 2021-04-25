@@ -47,7 +47,7 @@ class ConfigOption(click.ParamType):
 )
 @click.argument(u'config_filepath', type=click.Path(exists=True))
 @click.argument(u'options', nargs=-1, type=ConfigOption())
-def config_tool(config_filepath, options, section, edit, merge_filepath):
+def config_tool(config_filepath, options, section, edit, merge_filepath) -> None:
     u'''Tool for editing options in a CKAN config file
 
     ckan config-tool <default.ini> <key>=<value> [<key>=<value> ...]
