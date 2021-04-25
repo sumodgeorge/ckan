@@ -178,11 +178,11 @@ class CKANRequest(LocalProxy):
     able to interact with them transparently.
     '''
     endpoint: str
-    form: ImmutableMultiDict[str, Any]
-    args: ImmutableMultiDict[str, Any]
+    form: 'ImmutableMultiDict[str, Any]'
+    args: 'ImmutableMultiDict[str, Any]'
 
     @property
-    def params(self) -> ImmutableMultiDict[str, Any]:
+    def params(self) -> 'ImmutableMultiDict[str, Any]':
         u''' Special case as Pylons' request.params is used all over the place.
         All new code meant to be run just in Flask (eg views) should always
         use request.args
