@@ -85,7 +85,7 @@ def ungettext(*args: Any, **kwargs: Any) -> str:
         return pylons_ungettext(*args, **kwargs)  # type: ignore
 
 
-class CKANConfig(MutableMapping[str, Any]):
+class CKANConfig(MutableMapping):
     u'''Main CKAN configuration object
 
     This is a dict-like object that also proxies any changes to the
