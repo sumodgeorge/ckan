@@ -12,7 +12,8 @@ from typing import Dict, Union, Any
 from ckan.types import Context, DataDict
 
 
-def package_patch(context: Context, data_dict: DataDict) -> Union[str, Dict[str, Any]]:
+def package_patch(
+        context: Context, data_dict: DataDict) -> Union[str, Dict[str, Any]]:
     '''Patch a dataset (package).
 
     :param id: the id or name of the dataset
@@ -113,7 +114,8 @@ def group_patch(context: Context, data_dict: DataDict) -> Dict[str, Any]:
         Context(**context, allow_partial_update=True), patched)
 
 
-def organization_patch(context: Context, data_dict: DataDict) -> Dict[str, Any]:
+def organization_patch(
+        context: Context, data_dict: DataDict) -> Dict[str, Any]:
     '''Patch an organization
 
     :param id: the id or name of the organization

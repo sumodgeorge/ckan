@@ -534,7 +534,8 @@ def get_or_bust(data_dict: Dict[str, Any], keys: str) -> Any:
 
 
 @overload
-def get_or_bust(data_dict: Dict[str, Any], keys: Iterable[str]) -> Tuple[Any, ...]:
+def get_or_bust(
+        data_dict: Dict[str, Any], keys: Iterable[str]) -> Tuple[Any, ...]:
     ...
 
 

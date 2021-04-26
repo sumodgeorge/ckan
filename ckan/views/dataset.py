@@ -790,7 +790,8 @@ class EditView(MethodView):
             id: str,
             data: Optional[Dict[str, Any]] = None,
             errors: Optional[Dict[str, Any]] = None,
-            error_summary: Optional[Dict[str, Any]] = None) -> Union[Response, str]:
+            error_summary: Optional[Dict[str, Any]] = None
+            ) -> Union[Response, str]:
         context = self._prepare()
         package_type = _get_package_type(id) or package_type
         try:

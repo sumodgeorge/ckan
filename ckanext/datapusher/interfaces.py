@@ -38,8 +38,9 @@ class IDataPusher(Interface):
         """
         return True
 
-    def after_upload(self, context: Dict[str, Any], resource_dict: Dict[str, Any],
-                     dataset_dict: Dict[str, Any]) -> None:
+    def after_upload(
+            self, context: Dict[str, Any], resource_dict: Dict[str, Any],
+            dataset_dict: Dict[str, Any]) -> None:
         """ After a resource has been successfully upload to the datastore
         this method will be called with the resource dictionary and the
         package dictionary for this resource.

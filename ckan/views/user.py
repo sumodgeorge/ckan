@@ -164,7 +164,8 @@ class ApiTokenView(MethodView):
             id: str,
             data: Optional[Dict[str, Any]] = None,
             errors: Optional[Dict[str, Any]] = None,
-            error_summary: Optional[Dict[str, Any]] = None) -> Union[Response, str]:
+            error_summary: Optional[Dict[str, Any]] = None
+            ) -> Union[Response, str]:
         context = cast(Context, {
             u'model': model,
             u'session': model.Session,

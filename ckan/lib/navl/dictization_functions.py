@@ -95,7 +95,8 @@ def flattened_order_key(key: Sequence[Any]) -> Tuple[Any, ...]:
 
 def flatten_schema(schema: Dict[str, Any],
                    flattened: Optional[Dict[Tuple[Any, ...], Any]] = None,
-                   key: Optional[List[Any]] = None) -> Dict[Tuple[Any, ...], Any]:
+                   key: Optional[List[Any]] = None
+                   ) -> Dict[Tuple[Any, ...], Any]:
     '''convert schema into flat dict, where the keys become tuples
 
     e.g.
@@ -128,7 +129,8 @@ def flatten_schema(schema: Dict[str, Any],
 
 
 def get_all_key_combinations(data: Dict[Tuple[Any, ...], Any],
-                             flattened_schema: Dict[Tuple[Any, ...], Any]) -> Set[Tuple[Any, ...]]:
+                             flattened_schema: Dict[Tuple[Any, ...], Any]
+                             ) -> Set[Tuple[Any, ...]]:
     '''Compare the schema against the given data and get all valid tuples that
     match the schema ignoring the last value in the tuple.
 
@@ -151,7 +153,8 @@ def get_all_key_combinations(data: Dict[Tuple[Any, ...], Any],
 
 
 def make_full_schema(
-        data: Dict[Tuple[Any, ...], Any], schema: Dict[str, Any]) -> Dict[Tuple[Any, ...], Any]:
+        data: Dict[Tuple[Any, ...], Any], schema: Dict[str, Any]
+) -> Dict[Tuple[Any, ...], Any]:
     '''make schema by getting all valid combinations and making sure that all
     keys are available'''
 
@@ -174,7 +177,8 @@ def make_full_schema(
 
 
 def augment_data(
-        data: Dict[Tuple[Any, ...], Any], schema: Schema) -> Dict[Tuple[Any, ...], Any]:
+        data: Dict[Tuple[Any, ...], Any], schema: Schema
+) -> Dict[Tuple[Any, ...], Any]:
     '''Takes 'flattened' data, compares it with the schema, and returns it with
     any problems marked, as follows:
 
@@ -232,8 +236,10 @@ def augment_data(
     return new_data
 
 
-def convert(converter: Callable[..., Any], key: Tuple[Any, ...], converted_data: Dict[Tuple[Any, ...], Any],
-            errors: Dict[Tuple[Any, ...], List[str]], context: Context) -> None:
+def convert(converter: Callable[..., Any], key: Tuple[Any, ...],
+            converted_data: Dict[Tuple[Any, ...], Any],
+            errors: Dict[Tuple[Any, ...], List[str]], context: Context
+            ) -> None:
 
     try:
         value = converter(converted_data.get(key))
@@ -310,8 +316,10 @@ def validate(
     return converted_data, errors_unflattened
 
 
-def _validate(data: Dict[Tuple[Any, ...], Any], schema: Schema,
-              context: Context) -> Tuple[Dict[Tuple[Any, ...], Any], Dict[Tuple[Any, ...], List[Any]]]:
+def _validate(
+        data: Dict[Tuple[Any, ...], Any], schema: Schema,
+        context: Context
+) -> Tuple[Dict[Tuple[Any, ...], Any], Dict[Tuple[Any, ...], List[Any]]]:
     '''validate a flattened dict against a schema'''
     converted_data = augment_data(data, schema)
     full_schema = make_full_schema(data, schema)
@@ -368,7 +376,8 @@ def _validate(data: Dict[Tuple[Any, ...], Any], schema: Schema,
 
 def flatten_list(data: List[Dict[str, Any]],
                  flattened: Optional[Dict[Tuple[Any, ...], Any]] = None,
-                 old_key: Optional[List[Any]] = None) -> Dict[Tuple[Any, ...], Any]:
+                 old_key: Optional[List[Any]] = None
+                 ) -> Dict[Tuple[Any, ...], Any]:
     '''flatten a list of dicts'''
 
     flattened = flattened or {}
@@ -385,7 +394,8 @@ def flatten_list(data: List[Dict[str, Any]],
 
 def flatten_dict(data: Dict[str, Any],
                  flattened: Optional[Dict[Tuple[Any, ...], Any]] = None,
-                 old_key: Optional[List[Any]] = None) -> Dict[Tuple[Any, ...], Any]:
+                 old_key: Optional[List[Any]] = None
+                 ) -> Dict[Tuple[Any, ...], Any]:
     '''Flatten a dict'''
 
     flattened = flattened or {}
@@ -592,7 +602,8 @@ def check_string_key(data_dict: Dict[str, Any], string_key: str,
     return []
 
 
-def filter_glob_match(data_dict: Dict[str, Any], glob_patterns: List[str]) -> None:
+def filter_glob_match(
+        data_dict: Dict[str, Any], glob_patterns: List[str]) -> None:
     """
     remove keys and values from data_dict in-place based on glob patterns.
 

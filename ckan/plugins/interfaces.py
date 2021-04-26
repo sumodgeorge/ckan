@@ -733,7 +733,8 @@ class IResourceController(Interface):
     Hook into the resource view.
     '''
 
-    def before_create(self, context: Context, resource: Dict[str, Any]) -> None:
+    def before_create(
+            self, context: Context, resource: Dict[str, Any]) -> None:
         u'''
         Extensions will receive this before a resource is created.
 
@@ -1681,7 +1682,8 @@ class IFacets(Interface):
         return facets_dict
 
     def organization_facets(self,
-                            facets_dict: Dict[str, Any], organization_type: str,
+                            facets_dict: Dict[str, Any],
+                            organization_type: str,
                             package_type: str) -> Dict[str, Any]:
         u'''Modify and return the ``facets_dict`` for an organization's page.
 

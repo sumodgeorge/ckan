@@ -128,6 +128,7 @@ def get_view_plugin(view_type: Optional[str]) -> Optional[p.IResourceView]:
             return plugin
     return None
 
+
 def get_view_plugins(view_types: Iterable[str]) -> List[p.IResourceView]:
     '''
     Returns a list of the view plugins associated with the given view_types.
@@ -141,7 +142,8 @@ def get_view_plugins(view_types: Iterable[str]) -> List[p.IResourceView]:
     return view_plugins
 
 
-def get_allowed_view_plugins(data_dict: Dict[str, Any]) -> List[p.IResourceView]:
+def get_allowed_view_plugins(
+        data_dict: Dict[str, Any]) -> List[p.IResourceView]:
     '''
     Returns a list of view plugins that work against the resource provided
 
@@ -209,7 +211,8 @@ def add_views_to_resource(context: Context,
                           resource_dict: Dict[str, Any],
                           dataset_dict: Optional[Dict[str, Any]] = None,
                           view_types: List[str] = [],
-                          create_datastore_views: bool = False) -> List[Dict[str, Any]]:
+                          create_datastore_views: bool = False
+                          ) -> List[Dict[str, Any]]:
     '''
     Creates the provided views (if necessary) on the provided resource
 

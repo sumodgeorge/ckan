@@ -51,7 +51,8 @@ NotAuthorized = logic.NotAuthorized
 _get_or_bust = logic.get_or_bust
 
 
-def package_create(context: Context, data_dict: DataDict) -> Union[Dict[str, Any], str]:
+def package_create(
+        context: Context, data_dict: DataDict) -> Union[Dict[str, Any], str]:
     '''Create a new dataset (package).
 
     You must be authorized to create new datasets. If you specify any groups
@@ -355,7 +356,8 @@ def resource_create(context: Context, data_dict: DataDict) -> Dict[str, Any]:
     return resource
 
 
-def resource_view_create(context: Context, data_dict: DataDict) -> Dict[str, Any]:
+def resource_view_create(
+        context: Context, data_dict: DataDict) -> Dict[str, Any]:
     '''Creates a new resource view.
 
     :param resource_id: id of the resource
@@ -502,7 +504,8 @@ def package_create_default_resource_views(
         create_datastore_views=create_datastore_views)
 
 
-def package_relationship_create(context: Context, data_dict: DataDict) -> Dict[str, Any]:
+def package_relationship_create(
+        context: Context, data_dict: DataDict) -> Dict[str, Any]:
     '''Create a relationship between two datasets (packages).
 
     You must be authorized to edit both the subject and the object datasets.
@@ -629,7 +632,8 @@ def member_create(context: Context, data_dict: DataDict) -> Dict[str, Any]:
     return model_dictize.member_dictize(member, context)
 
 
-def package_collaborator_create(context: Context, data_dict: DataDict) -> Dict[str, Any]:
+def package_collaborator_create(
+        context: Context, data_dict: DataDict) -> Dict[str, Any]:
     '''Make a user a collaborator in a dataset.
 
     If the user is already a collaborator in the dataset then their
@@ -1512,7 +1516,8 @@ def _group_or_org_member_create(context, data_dict, is_org=False):
                                              member_dict)
 
 
-def group_member_create(context: Context, data_dict: DataDict) -> Dict[str, Any]:
+def group_member_create(
+        context: Context, data_dict: DataDict) -> Dict[str, Any]:
     '''Make a user a member of a group.
 
     You must be authorized to edit the group.
@@ -1532,7 +1537,8 @@ def group_member_create(context: Context, data_dict: DataDict) -> Dict[str, Any]
     return _group_or_org_member_create(context, data_dict)
 
 
-def organization_member_create(context: Context, data_dict: DataDict) -> Dict[str, Any]:
+def organization_member_create(
+        context: Context, data_dict: DataDict) -> Dict[str, Any]:
     '''Make a user a member of an organization.
 
     You must be authorized to edit the organization.

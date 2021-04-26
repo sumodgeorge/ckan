@@ -1330,7 +1330,8 @@ def has_more_facets(facet: str,
 
 
 @core_helper
-def unselected_facet_items(facet: str, limit: int = 10) -> List[Dict[str, Any]]:
+def unselected_facet_items(
+        facet: str, limit: int = 10) -> List[Dict[str, Any]]:
     '''Return the list of unselected facet items for the given facet, sorted
     by count.
 
@@ -1401,7 +1402,8 @@ def _url_with_params(url: str, params: Optional[Iterable[Tuple[str,
 def sorted_extras(package_extras: List[Dict[str, Any]],
                   auto_clean: bool = False,
                   subs: Dict[str, str] = None,
-                  exclude: Optional[List[str]] = None) -> List[Tuple[str, Any]]:
+                  exclude: Optional[List[str]] = None
+                  ) -> List[Tuple[str, Any]]:
     ''' Used for outputting package extras
 
     :param package_extras: the package extras

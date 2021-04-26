@@ -136,9 +136,10 @@ class CKANFeed(FeedGenerator):
             getattr(entry, key)(value)
 
 
-def output_feed(results: List[Dict[str, Any]], feed_title: str, feed_description: str,
-                feed_link: str, feed_url: str, navigation_urls: Dict[str, str],
-                feed_guid: str) -> Response:
+def output_feed(
+        results: List[Dict[str, Any]], feed_title: str, feed_description: str,
+        feed_link: str, feed_url: str, navigation_urls: Dict[str, str],
+        feed_guid: str) -> Response:
     author_name = config.get(u'ckan.feeds.author_name', u'').strip() or \
         config.get(u'ckan.site_id', u'').strip()
 
