@@ -390,8 +390,8 @@ def resource_view_create(
 
     default: Schema = ckan.logic.schema.default_create_resource_view_schema(
         view_plugin)
-    schema = context.get('schema', default)
-    plugin_schema = view_plugin.info().get('schema', {})
+    schema: Schema = context.get('schema', default)
+    plugin_schema: Schema = view_plugin.info().get('schema', {})
     schema.update(plugin_schema)
 
     data, errors = _validate(data_dict, schema, context)

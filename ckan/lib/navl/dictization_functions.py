@@ -1,6 +1,6 @@
 # encoding: utf-8
 
-from ckan.types import Context, Schema
+from ckan.types import Context, Schema, TuplizedKey
 import copy
 import json
 
@@ -196,7 +196,7 @@ def augment_data(
 
     keys_to_remove = []
     junk = {}
-    extras_keys = {}
+    extras_keys: Dict[TuplizedKey, Any] = {}
     # fill junk and extras
     for key, value in new_data.items():
         if key in full_schema:
@@ -296,8 +296,8 @@ def validate(
                               dict(context, schema_keys=list(schema.keys())))
 
     flattened = flatten_dict(data)
-    converted_data, errors = _validate(flattened, schema, validators_context)
-    converted_data = unflatten(converted_data)
+    flat_data, errors = _validate(flattened, schema, validators_context)
+    converted_data = unflatten(flat_data)
 
     # check config for partial update fix option
     if config.get('ckan.fix_partial_updates', True):
@@ -307,9 +307,9 @@ def validate(
                 converted_data[key] = []
 
     # remove validators that passed
-    for key in list(errors.keys()):
-        if not errors[key]:
-            del errors[key]
+    for k in list(errors.keys()):
+        if not errors[k]:
+            del errors[k]
 
     errors_unflattened = unflatten(errors)
 
@@ -324,7 +324,8 @@ def _validate(
     converted_data = augment_data(data, schema)
     full_schema = make_full_schema(data, schema)
 
-    errors = dict((key, []) for key in full_schema)
+    errors: Dict[TuplizedKey, List[str]] = dict(
+        (key, []) for key in full_schema)
 
     # before run
     for key in sorted(full_schema, key=flattened_order_key):
@@ -439,8 +440,8 @@ def unflatten(data: Dict[Tuple[Any, ...], Any]) -> Dict[str, Any]:
      'cancel': u'Cancel'}
     '''
 
-    unflattened = {}
-    clean_lists = {}
+    unflattened: Dict[str, Any] = {}
+    clean_lists: Dict[int, Any] = {}
 
     for flattend_key in sorted(data.keys(), key=flattened_order_key):
         current_pos: Union[List, Dict[str, Any]] = unflattened
@@ -450,7 +451,7 @@ def unflatten(data: Dict[Tuple[Any, ...], Any]) -> Dict[str, Any]:
                 current_pos = current_pos[key]
             except IndexError:
                 while True:
-                    new_pos = {}
+                    new_pos: Any = {}
                     assert isinstance(current_pos, list)
                     current_pos.append(new_pos)
                     if key < len(current_pos):
@@ -540,7 +541,7 @@ def resolve_string_key(data: Union[Dict[str, Any], List[Any]],
     e.g. `resources__1492a` would select the first matching resource
     with an id field matching "1492a..."
     """
-    parent_path = []
+    parent_path: List[Union[str, int]] = []
     current = data
     for k in string_key.split('__'):
         if isinstance(current, dict):

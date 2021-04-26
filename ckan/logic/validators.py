@@ -24,7 +24,7 @@ from ckan.model.core import State
 
 from ckan.common import _
 from ckan.types import TuplizedKey, Validator, Context, TuplizedErrorDict
-from typing import Any, Container, Dict
+from typing import Any, Container, Dict, Optional, Union
 
 Invalid = df.Invalid
 StopOnError = df.StopOnError
@@ -44,8 +44,7 @@ def owner_org_validator(key: TuplizedKey, data: Dict[TuplizedKey, Any],
         raise df.StopOnError
 
     model = context['model']
-    user = context['user']
-    user = model.User.get(user)
+    user = model.User.get(context['user'])
     package = context.get('package')
 
     if value == '':
@@ -76,9 +75,9 @@ def owner_org_validator(key: TuplizedKey, data: Dict[TuplizedKey, Any],
 
     if not package or (package and package.owner_org != group_id):
         # This is a new dataset or we are changing the organization
-        if not context.get(u'ignore_auth', False) and not(user.sysadmin or
-               authz.has_user_permission_for_group_or_org(
-                   group_id, user.name, 'create_dataset')):
+        if not context.get(u'ignore_auth', False) and (not user or not(
+                user.sysadmin or authz.has_user_permission_for_group_or_org(
+                   group_id, user.name, 'create_dataset'))):
             raise Invalid(_('You cannot add a dataset to this organization'))
 
     data[key] = group_id
@@ -387,7 +386,7 @@ def package_name_validator(key: TuplizedKey, data: Dict[TuplizedKey, Any],
 
     query = session.query(model.Package.state).filter_by(name=data[key])
     if package:
-        package_id = package.id
+        package_id: Union[Optional[str], Missing] = package.id
     else:
         package_id = data.get(key[:-1] + ('id',))
     if package_id and package_id is not missing:
@@ -440,7 +439,7 @@ def group_name_validator(key: TuplizedKey, data: Dict[TuplizedKey, Any],
 
     query = session.query(model.Group.name).filter_by(name=data[key])
     if group:
-        group_id = group.id
+        group_id: Union[Optional[str], Missing] = group.id
     else:
         group_id = data.get(key[:-1] + ('id',))
     if group_id and group_id is not missing:
@@ -859,8 +858,8 @@ def no_loops_in_hierarchy(key: TuplizedKey, data: Dict[TuplizedKey, Any],
         # Must be a new group - has no children, so no chance of loops
         return
     group = context['model'].Group.get(data[('id',)])
-    allowable_parents = group.\
-                        groups_allowed_to_be_its_parent(type=group.type)
+    assert group
+    allowable_parents = group.groups_allowed_to_be_its_parent(type=group.type)
     parent_name = data[key]
     # a blank name signifies top level, which is always allowed
     if parent_name and context['model'].Group.get(parent_name) \

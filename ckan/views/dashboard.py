@@ -31,6 +31,7 @@ def before_request() -> Optional[Response]:
         logic.check_access(u'site_read', context)
     except logic.NotAuthorized:
         base.abort(403, _(u'Not authorized to see this page'))
+    return None
 
 
 def _get_dashboard_context(filter_type=None, filter_id=None, q=None):
