@@ -273,10 +273,10 @@ def package_update(context: Context, data_dict: DataDict) -> Union[str, Dict[str
     # get the schema
 
     package_plugin = lib_plugins.lookup_package_plugin(pkg.type)
-    if 'schema' not in context:
-        context['schema'] = package_plugin.update_package_schema()
-    schema = context['schema']
-
+    if 'schema' in context:
+        schema = context['schema']
+    else:
+        schema = package_plugin.update_package_schema()
     if 'api_version' not in context:
         # check_data_dict() is deprecated. If the package_plugin has a
         # check_data_dict() we'll call it, if it doesn't have the method we'll

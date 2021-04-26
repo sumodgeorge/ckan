@@ -156,10 +156,11 @@ def package_create(
     else:
         package_plugin = lib_plugins.lookup_package_plugin(data_dict['type'])
 
-    if 'schema' not in context:
-        context['schema'] = package_plugin.create_package_schema()
-    schema = context['schema']
-
+    if 'schema' in context:
+        schema = context['schema']
+    else:
+        schema = package_plugin.create_package_schema()
+    context = cast(Context, context)
     _check_access('package_create', context, data_dict)
 
     if 'api_version' not in context:
@@ -288,7 +289,6 @@ def resource_create(context: Context, data_dict: DataDict) -> Dict[str, Any]:
     '''
     model = context['model']
     user = context['user']
-
     package_id = _get_or_bust(data_dict, 'package_id')
     if not data_dict.get('url'):
         data_dict['url'] = ''
@@ -1378,9 +1378,11 @@ def follow_user(context: Context, data_dict: DataDict) -> Dict[str, Any]:
     if not userobj:
         raise NotAuthorized(_("You must be logged in to follow users"))
 
-    if 'schema' not in context:
-        context['schema'] = ckan.logic.schema.default_follow_user_schema()
-    schema = context['schema']
+    if 'schema' in context:
+        schema = context['schema']
+    else:
+        schema = ckan.logic.schema.default_follow_user_schema()
+
 
     context = cast(Context, context)
     validated_data_dict, errors = _validate(data_dict, schema, context)
@@ -1440,9 +1442,11 @@ def follow_dataset(context: Context, data_dict: DataDict) -> Dict[str, Any]:
         raise NotAuthorized(
             _("You must be logged in to follow a dataset."))
 
-    if 'schema' not in context:
-        context['schema'] = ckan.logic.schema.default_follow_dataset_schema()
-    schema = context['schema']
+    if 'schema' in context:
+        schema = context['schema']
+    else:
+        schema = ckan.logic.schema.default_follow_dataset_schema()
+
     context = cast(Context, context)
     validated_data_dict, errors = _validate(data_dict, schema, context)
 

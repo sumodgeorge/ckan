@@ -124,7 +124,6 @@ def datastore_create(context, data_dict):
         resource_dict = p.toolkit.get_action('resource_create')(
             context, data_dict['resource'])
         data_dict['resource_id'] = resource_dict['id']
-
         # create resource from file
         if has_url:
             if not p.plugin_loaded('datapusher'):

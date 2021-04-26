@@ -1050,9 +1050,10 @@ def package_show(context: Context, data_dict: DataDict) -> Dict[str, Any]:
     if not package_dict_validated:
         package_plugin = lib_plugins.lookup_package_plugin(
             package_dict['type'])
-        if 'schema' not in context:
-            context["schema"] = package_plugin.show_package_schema()
-        schema = context['schema']
+        if 'schema' in context:
+            schema = context['schema']
+        else:
+            schema = package_plugin.show_package_schema()
 
         if schema and context.get('validate', True):
             package_dict, errors = lib_plugins.plugin_validate(
