@@ -144,8 +144,8 @@ class ValidationError(ActionError):
 
 
 def parse_params(
-    params: MultiDict[str, Any],
-    ignore_keys: Optional[Container[str]] = None
+    params: 'MultiDict[str, Any]',
+    ignore_keys: Optional['Container[str]'] = None
 ) -> Dict[str, Union[str, List[str]]]:
     '''Takes a dict and returns it with some values standardised.
     This is done on a dict before calling tuplize_dict on it.
