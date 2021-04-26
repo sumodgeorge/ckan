@@ -1,5 +1,5 @@
 # encoding: utf-8
-from ckan.types import Context, Schema
+from ckan.types import Context, ErrorDict, Schema
 import logging
 
 from flask import Blueprint
@@ -309,7 +309,7 @@ class EditView(MethodView):
             auth = authenticator.UsernamePasswordAuthenticator()
 
             if auth.authenticate(request.environ, identity) != g.user:
-                errors = {
+                errors: ErrorDict = {
                     u'oldpassword': [_(u'Password entered was incorrect')]
                 }
                 error_summary = {_(u'Old Password'): _(u'incorrect password')}
@@ -473,7 +473,7 @@ def login() -> Union[Response, str]:
         if response:
             return response
 
-    extra_vars = {}
+    extra_vars: Dict[str, Any] = {}
     if g.user:
         return base.render(u'user/logout_first.html', extra_vars)
 

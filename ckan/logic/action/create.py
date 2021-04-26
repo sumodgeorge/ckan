@@ -35,7 +35,7 @@ from ckan.common import _, config
 # FIXME this looks nasty and should be shared better
 from ckan.logic.action.update import _update_package_relationship
 from typing import Any, Dict, List, Optional, Union, cast
-from ckan.types import Context, DataDict, ErrorDict, Schema
+from ckan.types import Context, DataDict, ErrorDict, Schema, TuplizedErrorDict
 
 log = logging.getLogger(__name__)
 
@@ -156,11 +156,9 @@ def package_create(
     else:
         package_plugin = lib_plugins.lookup_package_plugin(data_dict['type'])
 
-    if 'schema' in context:
-        schema = context['schema']
-    else:
-        schema = package_plugin.create_package_schema()
-    context = cast(Context, context)
+    schema: Schema = context.get(
+        'schema') or package_plugin.create_package_schema()
+
     _check_access('package_create', context, data_dict)
 
     if 'api_version' not in context:
@@ -720,7 +718,7 @@ def _group_or_org_create(context: Context,
     group_type = data_dict.get('type', 'organization' if is_org else 'group')
     group_plugin = lib_plugins.lookup_group_plugin(group_type)
     try:
-        schema = group_plugin.form_to_db_schema_options({
+        schema: Schema = group_plugin.form_to_db_schema_options({
             'type': 'create', 'api': 'api_version' in context,
             'context': context})
     except AttributeError:
@@ -762,10 +760,11 @@ def _group_or_org_create(context: Context,
     else:
         activity_type = 'new group'
 
-    user_id = model.User.by_name(six.ensure_text(user)).id
+    user_obj = model.User.by_name(six.ensure_text(user))
+    assert user_obj
 
     activity_dict: Dict[str, Any] = {
-        'user_id': user_id,
+        'user_id': user_obj.id,
         'object_id': group.id,
         'activity_type': activity_type,
     }
@@ -792,7 +791,7 @@ def _group_or_org_create(context: Context,
     # this needs to be after the repo.commit or else revisions break
     member_dict = {
         'id': group.id,
-        'object': user_id,
+        'object': user_obj.id,
         'object_type': 'user',
         'capacity': 'admin',
     }
@@ -993,13 +992,14 @@ def rating_create(context: Context, data_dict: DataDict) -> Dict[str, Any]:
     if opts_err:
         raise ValidationError({'message': opts_err})
 
-    user = model.User.by_name(user)
+    user_obj = model.User.by_name(user)
     assert package
-    assert user
-    package.set_rating(user, rating_int)
+    assert user_obj
+    package.set_rating(user_obj, rating_int)
     model.repo.commit()
 
     package = model.Package.get(package_ref)
+    assert package
     ret_dict = {'rating average': package.get_average_rating(),
                 'rating count': len(package.ratings)}
     return ret_dict
@@ -1161,10 +1161,10 @@ def user_invite(context: Context, data_dict: DataDict) -> Dict[str, Any]:
             string.ascii_lowercase + string.ascii_uppercase + string.digits)
             for _ in range(12))
         # Occasionally it won't meet the constraints, so check
-        errors = {}
+        validation_errors: TuplizedErrorDict = {}
         ckan.logic.validators.user_password_validator(
-            ('password', ), {('password', ): password}, errors, context)
-        if not errors:
+            ('password', ), {('password', ): password}, validation_errors, context)
+        if not validation_errors:
             break
 
     data['name'] = name
@@ -1400,6 +1400,7 @@ def follow_user(context: Context, data_dict: DataDict) -> Dict[str, Any]:
     if model.UserFollowingUser.is_following(userobj.id,
                                             validated_data_dict['id']):
         followeduserobj = model.User.get(validated_data_dict['id'])
+        assert followeduserobj
         name = followeduserobj.display_name
         message = _('You are already following {0}').format(name)
         raise ValidationError({'message': message})
@@ -1460,6 +1461,7 @@ def follow_dataset(context: Context, data_dict: DataDict) -> Dict[str, Any]:
         # FIXME really package model should have this logic and provide
         # 'display_name' like users and groups
         pkgobj = model.Package.get(validated_data_dict['id'])
+        assert pkgobj
         name = pkgobj.title or pkgobj.name or pkgobj.id
         message = _(
             'You are already following {0}').format(name)
@@ -1477,7 +1479,9 @@ def follow_dataset(context: Context, data_dict: DataDict) -> Dict[str, Any]:
     return model_dictize.user_following_dataset_dictize(follower, context)
 
 
-def _group_or_org_member_create(context, data_dict, is_org=False):
+def _group_or_org_member_create(
+        context: Context, data_dict: Dict[str, Any], is_org: bool = False
+) -> Dict[str, Any]:
     # creator of group/org becomes an admin
     # this needs to be after the repo.commit or else revisions break
     model = context['model']
@@ -1504,7 +1508,7 @@ def _group_or_org_member_create(context, data_dict, is_org=False):
         message = _(u'User {username} does not exist.').format(
             username=username)
         raise ValidationError({'message': message})
-    member_dict = {
+    member_dict: Dict[str, Any] = {
         'id': group.id,
         'object': user_id,
         'object_type': 'user',

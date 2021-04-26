@@ -174,6 +174,7 @@ def identify_user() -> Optional[Response]:
     else:
         g.author = g.remote_addr
     g.author = text_type(g.author)
+    return None
 
 
 def _identify_user_default():

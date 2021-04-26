@@ -97,6 +97,7 @@ def _force_reindex(grp: Dict[str, Any]) -> None:
     appearing on the read page for the group (as they're connected via
     the group name)'''
     group = model.Group.get(grp['name'])
+    assert group
     for dataset in group.packages():
         search.rebuild(dataset.name)
 
@@ -126,7 +127,7 @@ def set_org(is_organization: bool) -> None:
 
 
 def index(group_type: str, is_organization: bool) -> str:
-    extra_vars = {}
+    extra_vars: Dict[str, Any] = {}
     set_org(is_organization)
     page = h.get_page_number(request.params) or 1
     items_per_page = int(config.get(u'ckan.datasets_per_page', 20))
@@ -213,7 +214,7 @@ def index(group_type: str, is_organization: bool) -> str:
 
 def _read(id: Optional[str], limit: int, group_type: str) -> Dict[str, Any]:
     u''' This is common code used by both read and bulk_process'''
-    extra_vars = {}
+    extra_vars: Dict[str, Any] = {}
     context = cast(Context, {
         u'model': model,
         u'session': model.Session,
@@ -387,7 +388,9 @@ def _read(id: Optional[str], limit: int, group_type: str) -> Dict[str, Any]:
     return extra_vars
 
 
-def _update_facet_titles(facets, group_type) -> Dict[str, Any]:
+def _update_facet_titles(
+        facets: 'OrderedDict[str, str]',
+        group_type: str) -> 'OrderedDict[str, str]':
     for plugin in plugins.PluginImplementations(plugins.IFacets):
         facets = plugin.group_facets(facets, group_type, None)
     return facets
@@ -424,7 +427,7 @@ def read(group_type: str,
         u'schema': _db_to_form_schema(group_type=group_type),
         u'for_view': True
     })
-    data_dict = {u'id': id, u'type': group_type}
+    data_dict: Dict[str, Any] = {u'id': id, u'type': group_type}
 
     # unicode format (decoded from utf8)
     q = request.params.get(u'q', u'')
@@ -792,7 +795,7 @@ def unfollow(id: str, group_type: str, is_organization: bool) -> Response:
         error_message = (e.message or e.error_summary or e.error_dict)
         h.flash_error(error_message)
     except (NotFound, NotAuthorized) as e:
-        error_message = e.message
+        error_message = e.message or ''
         h.flash_error(error_message)
     return h.redirect_to(u'group.read', id=id)
 
@@ -1295,7 +1298,7 @@ class MembersGroupView(MethodView):
             group_type: str,
             is_organization: bool,
             id: Optional[str] = None) -> str:
-        extra_vars = {}
+        extra_vars: Dict[str, Any] = {}
         set_org(is_organization)
         context = self._prepare(id)
         user = request.params.get(u'user')

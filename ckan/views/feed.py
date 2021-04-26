@@ -1,8 +1,8 @@
 # encoding: utf-8
 
-from ckan.types import Context, DataDict
+from ckan.types import Context, DataDict, PFeed
 import logging
-from typing import Dict, Optional, Tuple, cast
+from typing import Dict, Optional, Tuple, Type, cast
 
 from six.moves.urllib.parse import urlparse  # type: ignore
 from flask import Blueprint, make_response
@@ -144,7 +144,7 @@ def output_feed(
         config.get(u'ckan.site_id', u'').strip()
 
     # TODO: language
-    feed_class = CKANFeed
+    feed_class: Type[PFeed] = CKANFeed
     for plugin in plugins.PluginImplementations(plugins.IFeed):
         if hasattr(plugin, u'get_feed_class'):
             feed_class = plugin.get_feed_class()
@@ -373,7 +373,7 @@ def custom() -> Response:
     page = h.get_page_number(request.params)
 
     limit = ITEMS_LIMIT
-    data_dict = {
+    data_dict: Dict[str, Any] = {
         u'q': q,
         u'fq': fq,
         u'start': (page - 1) * limit,
@@ -550,7 +550,7 @@ def _create_atom_id(resource_path: str,
     if not authority_name:
         log.warning(u'No authority_name available for feed generation.  '
                     'Generated feed will be invalid.')
-
+        authority_name = ''
     if date_string is None:
         date_string = config.get(u'ckan.feeds.date', u'')
 

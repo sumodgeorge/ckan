@@ -27,8 +27,9 @@ import logging
 import re
 import json
 import smtplib
+from typing import Any
 
-from flask.testing import Client as FlaskClient
+from flask.testing import Client as FlaskClient  # type: ignore
 from flask.wrappers import Response
 from click.testing import CliRunner
 import pytest
@@ -198,7 +199,7 @@ class CKANTestApp(object):
     It adds some convenience methods for CKAN
     """
 
-    _flask_app = None
+    _flask_app: Any = None
 
     @property
     def flask_app(self):

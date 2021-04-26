@@ -15,7 +15,6 @@ import six
 import pysolr
 from ckan.common import config
 from ckan.common import asbool
-import six
 from six import text_type
 
 from .common import SearchIndexError, make_connection
@@ -26,7 +25,7 @@ from ckan.plugins import (PluginImplementations,
 import ckan.logic as logic
 import ckan.lib.plugins as lib_plugins
 import ckan.lib.navl.dictization_functions
-from typing import Any, Dict, NoReturn, Optional, cast
+from typing import Any, Dict, List, NoReturn, Optional, cast
 
 log = logging.getLogger(__name__)
 
@@ -220,12 +219,14 @@ class PackageSearchIndex(SearchIndex):
                 pkg_dict[nkey] = pkg_dict.get(nkey, []) + [resource.get(okey, u'')]
         pkg_dict.pop('resources', None)
 
-        rel_dict = collections.defaultdict(list)
+        rel_dict: Dict[str, List[Any]] = collections.defaultdict(list)
         subjects = pkg_dict.pop("relationships_as_subject", [])
         objects = pkg_dict.pop("relationships_as_object", [])
         for rel in objects:
             type = model.PackageRelationship.forward_to_reverse_type(rel['type'])
-            rel_dict[type].append(model.Package.get(rel['subject_package_id']).name)
+            pkg = model.Package.get(rel['subject_package_id'])
+            assert pkg
+            rel_dict[type].append(pkg.name)
         for rel in subjects:
             type = rel['type']
             rel_dict[type].append(model.Package.get(rel['object_package_id']).name)
@@ -315,7 +316,8 @@ class PackageSearchIndex(SearchIndex):
             )
             raise SearchIndexError(msg)
         except socket.error as e:
-            err = 'Could not connect to Solr using {0}: {1}'.format(conn.url, str(e))
+            err = 'Could not connect to Solr using {0}: {1}'.format(
+                conn.url, str(e))  # type: ignore
             log.error(err)
             raise SearchIndexError(err)
 

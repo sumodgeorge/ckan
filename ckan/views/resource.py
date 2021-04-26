@@ -73,7 +73,7 @@ def read(package_type: str, id: str, resource_id: str) -> str:
         try:
             package = context['session'].query(model.Activity).get(
                 activity_id
-            ).data['package']
+            ).data['package']  # type: ignore
         except AttributeError:
             base.abort(404, _(u'Dataset not found'))
 
@@ -238,7 +238,7 @@ class CreateView(MethodView):
                 msg = _(u'You must add at least one data resource')
                 # On new templates do not use flash message
 
-                errors = {}
+                errors: Dict[str, Any] = {}
                 error_summary = {_(u'Error'): msg}
                 return self.get(package_type, id, data, errors, error_summary)
 
@@ -663,7 +663,7 @@ class EditResourceViewView(MethodView):
         g.pkg = pkg
         g.resource = resource
 
-        extra_vars = dict(
+        extra_vars: Dict[str, Any] = dict(
             data={},
             errors={},
             error_summary={},

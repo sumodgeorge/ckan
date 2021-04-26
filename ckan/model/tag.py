@@ -78,7 +78,7 @@ class Tag(domain_object.DomainObject):
 
     @classmethod
     def by_name(
-            cls, name: str,
+            cls, name: Optional[str],
             autoflush: bool=True,
             for_update: bool=False,
             vocab: Optional['ckan.model.Vocabulary']=None,

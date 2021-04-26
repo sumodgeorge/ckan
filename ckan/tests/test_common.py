@@ -18,7 +18,7 @@ from ckan.tests import helpers
 if six.PY2:
     import pylons
 else:
-    pylons = None
+    pylons = None  # type: ignore
 
 
 def test_del_works():

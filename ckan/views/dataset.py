@@ -193,7 +193,7 @@ def _get_search_details() -> Dict[str, Any]:
 
     fields = []
     fields_grouped = {}
-    search_extras = MultiDict()
+    search_extras: 'MultiDict[str, Any]' = MultiDict()
 
     for (param, value) in request.args.items(multi=True):
         if param not in [u'q', u'page', u'sort'] \
@@ -208,7 +208,7 @@ def _get_search_details() -> Dict[str, Any]:
             else:
                 search_extras.update({param: value})
 
-    search_extras = dict([
+    extras = dict([
         (k, v[0]) if len(v) == 1 else (k, v)
         for k, v in search_extras.lists()
     ])
@@ -216,12 +216,12 @@ def _get_search_details() -> Dict[str, Any]:
         u'fields': fields,
         u'fields_grouped': fields_grouped,
         u'fq': fq,
-        u'search_extras': search_extras,
+        u'search_extras': extras,
     }
 
 
 def search(package_type: str) -> str:
-    extra_vars = {}
+    extra_vars: Dict[str, Any] = {}
 
     try:
         context = cast(Context, {
@@ -796,7 +796,7 @@ class EditView(MethodView):
         package_type = _get_package_type(id) or package_type
         try:
             pkg_dict = get_action(u'package_show')(
-                Context(**context, for_view=True), {
+                cast(Context, dict(**context, for_view=True)), {
                     u'id': id
                 }
             )
@@ -809,6 +809,7 @@ class EditView(MethodView):
             data = old_data
         except (NotFound, NotAuthorized):
             return base.abort(404, _(u'Dataset not found'))
+        assert data is not None
         # are we doing a multiphase add?
         if data.get(u'state', u'').startswith(u'draft'):
             g.form_action = h.url_for(u'{}.new'.format(package_type))
@@ -840,7 +841,7 @@ class EditView(MethodView):
         form_snippet = _get_pkg_template(
             u'package_form', package_type=package_type
         )
-        form_vars = {
+        form_vars: Dict[str, Any] = {
             u'data': data,
             u'errors': errors,
             u'error_summary': error_summary,
@@ -977,7 +978,7 @@ def unfollow(package_type: str, id: str) -> Response:
         error_message = (e.message or e.error_summary or e.error_dict)
         h.flash_error(error_message)
     except (NotFound, NotAuthorized) as e:
-        error_message = e.message
+        error_message = e.message or ''
         h.flash_error(error_message)
     else:
         h.flash_success(

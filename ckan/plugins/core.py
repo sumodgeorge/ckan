@@ -18,7 +18,7 @@ from ckan.plugins import interfaces
 
 from ckan.common import config
 from typing import (
-    Generator, Generic, Iterator, List, Optional, Type, TypeVar, Union)
+    Dict, Generator, Generic, Iterator, List, Optional, Type, TypeVar, Union)
 
 
 __all__ = [
@@ -49,11 +49,11 @@ GROUPS = [
     TEST_PLUGINS_ENTRY_POINT_GROUP,
 ]
 # These lists are used to ensure that the correct extensions are enabled.
-_PLUGINS = []
-_PLUGINS_CLASS = []
+_PLUGINS: List[str] = []
+_PLUGINS_CLASS: List[Type["SingletonPlugin"]] = []
 
 # To aid retrieving extensions by name
-_PLUGINS_SERVICE = {}
+_PLUGINS_SERVICE: Dict[str, "SingletonPlugin"] = {}
 
 
 @contextmanager
@@ -135,12 +135,12 @@ class SingletonPlugin(_pca_SingletonPlugin):
     '''
 
 
-def get_plugin(plugin) -> Optional[SingletonPlugin]:
+def get_plugin(plugin: str) -> Optional[SingletonPlugin]:
     ''' Get an instance of a active plugin by name.  This is helpful for
     testing. '''
     if plugin in _PLUGINS_SERVICE:
         return _PLUGINS_SERVICE[plugin]
-
+    return None
 
 def plugins_update() -> None:
     ''' This is run when plugins have been loaded or unloaded and allows us
@@ -173,7 +173,9 @@ def load_all() -> None:
     load(*plugins)
 
 
-def load(*plugins) -> Union[SingletonPlugin, List[SingletonPlugin]]:
+def load(
+        *plugins: str
+) -> Union[SingletonPlugin, List[SingletonPlugin]]:
     '''
     Load named plugin(s).
     '''

@@ -5,7 +5,7 @@ extend CKAN.
 
 '''
 from inspect import isclass
-from typing import (Any, Callable, Dict, Iterable, List, Optional, Sequence,
+from typing import (Any, Callable, Dict, Iterable, List, Optional, OrderedDict, Sequence,
                     TYPE_CHECKING, Tuple, Type, Union)
 from typing_extensions import TypedDict, Literal
 
@@ -23,6 +23,8 @@ if TYPE_CHECKING:
     from ckan.common import CKANConfig
     from ckan.config.middleware.flask_app import CKANFlask
     import ckan.model as model
+    from .core import SingletonPlugin
+
 
 __all__ = [
     u'Interface',
@@ -71,14 +73,14 @@ class Interface(_pca_Interface):
     '''
 
     @classmethod
-    def provided_by(cls, instance) -> bool:
+    def provided_by(cls, instance: "SingletonPlugin") -> bool:
         u'''Check that the object is an instance of the class that implements
         the interface.
         '''
         return cls.implemented_by(instance.__class__)
 
     @classmethod
-    def implemented_by(cls, other) -> bool:
+    def implemented_by(cls, other: Type["SingletonPlugin"]) -> bool:
         u'''Check whether the class implements the current interface.
         '''
         if not isclass(other):
@@ -135,7 +137,7 @@ class IRoutes(Interface):
     Plugin into the setup of the routes map creation.
 
     '''
-    def before_map(self, map):
+    def before_map(self, map: Any) -> Any:
         u'''
         Called before the routes map is generated. ``before_map`` is before any
         other mappings are created so can override all other mappings.
@@ -145,7 +147,7 @@ class IRoutes(Interface):
         '''
         return map
 
-    def after_map(self, map):
+    def after_map(self, map: Any) -> Any:
         u'''
         Called after routes map is set up. ``after_map`` can be used to
         add fall-back handlers.
@@ -795,7 +797,7 @@ class IResourceController(Interface):
         '''
         pass
 
-    def before_delete(self, context: Context, resource,
+    def before_delete(self, context: Context, resource: 'model.Resource',
                       resources: List[Dict[str, Any]]) -> None:
         u'''
         Extensions will receive this before a resource is deleted.
@@ -846,25 +848,25 @@ class IPluginObserver(Interface):
     Hook into the plugin loading mechanism itself
     '''
 
-    def before_load(self, plugin) -> None:
+    def before_load(self, plugin: 'SingletonPlugin') -> None:
         u'''
         Called before a plugin is loaded.
         This method is passed the plugin class.
         '''
 
-    def after_load(self, service) -> None:
+    def after_load(self, service: Any) -> None:
         u'''
         Called after a plugin has been loaded.
         This method is passed the instantiated service object.
         '''
 
-    def before_unload(self, plugin) -> None:
+    def before_unload(self, plugin: 'SingletonPlugin') -> None:
         u'''
         Called before a plugin is loaded.
         This method is passed the plugin class.
         '''
 
-    def after_unload(self, service) -> None:
+    def after_unload(self, service: Any) -> None:
         u'''
         Called after a plugin has been unloaded.
         This method is passed the instantiated service object.
@@ -911,7 +913,7 @@ class IConfigurer(Interface):
         :param config: ``config`` object
         '''
 
-    def update_config_schema(self, schema: Schema) -> Dict[str, Any]:
+    def update_config_schema(self, schema: Schema) -> Schema:
         u'''
         Return a schema with the runtime-editable config options.
 
@@ -1163,7 +1165,7 @@ class IDatasetForm(Interface):
 
         '''
 
-    def create_package_schema(self) -> Dict[str, Any]:
+    def create_package_schema(self) -> Schema:
         u'''Return the schema for validating new dataset dicts.
 
         CKAN will use the returned schema to validate and convert data coming
@@ -1186,7 +1188,7 @@ class IDatasetForm(Interface):
 
         '''
 
-    def update_package_schema(self) -> Dict[str, Any]:
+    def update_package_schema(self) -> Schema:
         u'''Return the schema for validating updated dataset dicts.
 
         CKAN will use the returned schema to validate and convert data coming
@@ -1209,7 +1211,7 @@ class IDatasetForm(Interface):
 
         '''
 
-    def show_package_schema(self) -> Dict[str, Any]:
+    def show_package_schema(self) -> Schema:
         u'''
         Return a schema to validate datasets before they're shown to the user.
 
@@ -1510,7 +1512,7 @@ class IGroupForm(Interface):
         rendered.  e.g. ``group/new_group_form.html``.
         '''
 
-    def form_to_db_schema(self) -> Dict[str, Any]:
+    def form_to_db_schema(self) -> Schema:
         u'''
         Returns the schema for mapping group data from a form to a format
         suitable for the database.
@@ -1634,8 +1636,8 @@ class IFacets(Interface):
 
     '''
     def dataset_facets(self,
-                       facets_dict: Dict[str, Any],
-                       package_type: str) -> Dict[str, Any]:
+                       facets_dict: 'OrderedDict[str, Any]',
+                       package_type: str) -> 'OrderedDict[str, Any]':
         u'''Modify and return the ``facets_dict`` for the dataset search page.
 
         The ``package_type`` is the type of dataset that these facets apply to.
@@ -1654,8 +1656,8 @@ class IFacets(Interface):
         '''
         return facets_dict
 
-    def group_facets(self, facets_dict: Dict[str, Any], group_type: str,
-                     package_type: Optional[str]) -> Dict[str, Any]:
+    def group_facets(self, facets_dict: 'OrderedDict[str, Any]', group_type: str,
+                     package_type: Optional[str]) -> 'OrderedDict[str, Any]':
         u'''Modify and return the ``facets_dict`` for a group's page.
 
         The ``package_type`` is the type of dataset that these facets apply to.
@@ -1682,9 +1684,9 @@ class IFacets(Interface):
         return facets_dict
 
     def organization_facets(self,
-                            facets_dict: Dict[str, Any],
+                            facets_dict: 'OrderedDict[str, Any]',
                             organization_type: str,
-                            package_type: str) -> Dict[str, Any]:
+                            package_type: str) -> 'OrderedDict[str, Any]':
         u'''Modify and return the ``facets_dict`` for an organization's page.
 
         The ``package_type`` is the type of dataset that these facets apply to.
@@ -1741,7 +1743,7 @@ class IAuthenticator(Interface):
 
     '''
 
-    def identify(self) -> None:
+    def identify(self) -> Optional[Response]:
         u'''Called to identify the user.
 
         If the user is identified then it should set:
