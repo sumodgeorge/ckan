@@ -55,13 +55,17 @@ def group_list_dictize(obj_list: Union[Iterable[model.Group], Iterable[Tuple[mod
         # group_list_dictize recurses via group_dictize (groups in groups)
         group_dictize_context['dataset_counts'] = get_group_dataset_counts()
     if context.get('with_capacity'):
-        group_list = [group_dictize(group, group_dictize_context,
-                                    capacity=capacity, **group_dictize_options)
-                      for group, capacity in obj_list]  # type: ignore
+        group_list = [
+            group_dictize(
+                group, group_dictize_context,
+                capacity=capacity, **group_dictize_options)  # type: ignore
+            for group, capacity
+            in cast(List[Tuple[model.Group, str]], obj_list)]
     else:
-        group_list = [group_dictize(group, group_dictize_context,  # type: ignore
-                                    **group_dictize_options)
-                      for group in obj_list]
+        group_list = [
+            group_dictize(group, group_dictize_context,
+                          **group_dictize_options)  # type: ignore
+            for group in cast(List[model.Group], obj_list)]
 
     return sorted(group_list, key=sort_key, reverse=reverse)
 
@@ -173,9 +177,9 @@ def package_dictize(pkg: model.Package, context: Context) -> Dict[str, Any]:
     # Add display_names to tags. At first a tag's display_name is just the
     # same as its name, but the display_name might get changed later (e.g.
     # translated into another language by the multilingual extension).
-    for tag in result_dict['tags']:
-        assert 'display_name' not in tag
-        tag['display_name'] = tag['name']
+    for tag_dict in result_dict['tags']:
+        assert 'display_name' not in tag_dict
+        tag_dict['display_name'] = tag_dict['name']
 
     # extras - no longer revisioned, so always provide latest
     extra = model.package_extra_table
@@ -438,6 +442,7 @@ def tag_dictize(tag: model.Tag, context: Context, include_datasets: bool=True) -
         if vocab_id:
             model = context['model']
             vocab = model.Vocabulary.get(vocab_id)
+            assert vocab
             tag_query += u'+vocab_{0}:"{1}"'.format(vocab.name, tag.name)
         else:
             tag_query += u'+tags:"{0}"'.format(tag.name)
@@ -492,7 +497,7 @@ def user_dictize(
     session = model.Session
 
     if context.get('with_capacity'):
-        assert not isinstance(user, model.User)
+        assert isinstance(user, tuple)
         user, capacity = user
         result_dict = d.table_dictize(user, context, capacity=capacity)
     else:
@@ -719,6 +724,7 @@ def resource_view_dictize(resource_view: model.ResourceView, context: Context) -
     config = dictized.pop('config', {})
     dictized.update(config)
     resource = context['model'].Resource.get(resource_view.resource_id)
+    assert resource
     package_id = resource.package_id
     dictized['package_id'] = package_id
     return dictized

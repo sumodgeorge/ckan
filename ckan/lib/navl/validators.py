@@ -15,21 +15,20 @@ Invalid = df.Invalid
 
 
 
-def identity_converter(key: Tuple[Any, ...], data: Dict[TuplizedKey, Any], errors: TuplizedErrorDict,
-                       context: Context) -> None:
-    return
+def identity_converter(value: Any) -> Any:
+    return value
 
 
-def keep_extras(key: Tuple[Any, ...], data: Dict[TuplizedKey, Any], errors: TuplizedErrorDict,
-                context: Context) -> None:
+def keep_extras(key: TuplizedKey, data: Dict[TuplizedKey, Any],
+                errors: TuplizedErrorDict, context: Context) -> None:
 
     extras = data.pop(key, {})
     for extras_key, value in six.iteritems(extras):
         data[key[:-1] + (extras_key,)] = value
 
 
-def not_missing(key: Tuple[Any, ...], data: Dict[TuplizedKey, Any], errors: TuplizedErrorDict,
-                context: Context) -> None:
+def not_missing(key: TuplizedKey, data: Dict[TuplizedKey, Any],
+                errors: TuplizedErrorDict, context: Context) -> None:
 
     value = data.get(key)
     if value is missing:
@@ -37,16 +36,15 @@ def not_missing(key: Tuple[Any, ...], data: Dict[TuplizedKey, Any], errors: Tupl
         raise StopOnError
 
 
-def not_empty(key: Tuple[Any, ...], data: Dict[TuplizedKey, Any], errors: TuplizedErrorDict,
-              context: Context) -> None:
+def not_empty(key: TuplizedKey, data: Dict[TuplizedKey, Any],
+              errors: TuplizedErrorDict, context: Context) -> None:
 
     value = data.get(key)
     if not value or value is missing:
         errors[key].append(_('Missing value'))
         raise StopOnError
 
-def if_empty_same_as(other_key: str) -> Callable:
-
+def if_empty_same_as(other_key: str) -> Callable[..., Any]:
     def callable(key, data, errors, context):
         value = data.get(key)
         if not value or value is missing:
@@ -68,8 +66,8 @@ def both_not_empty(other_key: str) -> Callable:
     return callable
 
 
-def empty(key: Tuple[Any, ...], data: Dict[TuplizedKey, Any], errors: TuplizedErrorDict,
-          context: Context) -> None:
+def empty(key: TuplizedKey, data: Dict[TuplizedKey, Any],
+          errors: TuplizedErrorDict, context: Context) -> None:
 
     value = data.pop(key, None)
 
@@ -82,8 +80,8 @@ def empty(key: Tuple[Any, ...], data: Dict[TuplizedKey, Any], errors: TuplizedEr
             'The input field %(name)s was not expected.') % {"name": key_name})
 
 
-def ignore(key: Tuple[Any, ...], data: Dict[TuplizedKey, Any], errors: TuplizedErrorDict,
-           context: Context) -> NoReturn:
+def ignore(key: TuplizedKey, data: Dict[TuplizedKey, Any],
+           errors: TuplizedErrorDict, context: Context) -> NoReturn:
 
     value = data.pop(key, None)
     raise StopOnError
@@ -113,8 +111,8 @@ def configured_default(config_name: str,
     return default(default_value)
 
 
-def ignore_missing(key: Tuple[Any, ...], data: Dict[TuplizedKey, Any], errors: TuplizedErrorDict,
-                   context: Context) -> None:
+def ignore_missing(key: TuplizedKey, data: Dict[TuplizedKey, Any],
+                   errors: TuplizedErrorDict, context: Context) -> None:
     '''If the key is missing from the data, ignore the rest of the key's
     schema.
 
@@ -136,8 +134,8 @@ def ignore_missing(key: Tuple[Any, ...], data: Dict[TuplizedKey, Any], errors: T
         raise StopOnError
 
 
-def ignore_empty(key: Tuple[Any, ...], data: Dict[TuplizedKey, Any], errors: TuplizedErrorDict,
-                 context: Context) -> None:
+def ignore_empty(key: TuplizedKey, data: Dict[TuplizedKey, Any],
+                 errors: TuplizedErrorDict, context: Context) -> None:
 
     value = data.get(key)
 

@@ -81,7 +81,7 @@ class ValidationError(ActionError):
     error_dict: ErrorDict
 
     def __init__(self,
-                 error_dict: ErrorDict,
+                 error_dict: Union[str, ErrorDict],
                  error_summary: Optional[Dict[str, str]] = None,
                  extra_msg: Optional[str] = None) -> None:
         if not isinstance(error_dict, dict):
@@ -216,8 +216,8 @@ def tuplize_dict(data_dict: Dict[str, Any]) -> Dict[Tuple[Any, ...], Any]:
     May raise a DataError if the format of the key is incorrect.
     '''
     tuplized_dict: Dict[Tuple[Any, ...], Any] = {}
-    for key, value in six.iteritems(data_dict):
-        key_list = cast(List[Union[str, int]], key.split('__'))
+    for k, value in six.iteritems(data_dict):
+        key_list = cast(List[Union[str, int]], k.split('__'))
         for num, key in enumerate(key_list):
             if num % 2 == 1:
                 try:
@@ -304,9 +304,9 @@ def check_access(action: str,
     # Auth Auditing.  We remove this call from the __auth_audit stack to show
     # we have called the auth function
     try:
-        audit = context.get('__auth_audit', [])[-1]
+        audit: Optional[Tuple[str, int]] = context.get('__auth_audit', [])[-1]
     except IndexError:
-        audit = ''
+        audit = None
     if audit and audit[0] == action:
         context['__auth_audit'].pop()
 
@@ -339,7 +339,7 @@ def check_access(action: str,
     return True
 
 
-_actions = {}
+_actions: Dict[str, Action] = {}
 
 
 def clear_actions_cache() -> None:
@@ -347,7 +347,7 @@ def clear_actions_cache() -> None:
 
 
 def chained_action(func: Callable) -> Callable:
-    func.chained_action = True
+    func.chained_action = True  # type: ignore
     return func
 
 
@@ -435,7 +435,7 @@ def get_action(action: str) -> Action:
                         v.side_effect_free = True
 
     # Then overwrite them with any specific ones in the plugins:
-    resolved_action_plugins = {}
+    resolved_action_plugins: Dict[str, str] = {}
     fetched_actions = {}
     chained_actions = defaultdict(list)
     for plugin in p.PluginImplementations(p.IActions):
@@ -453,7 +453,7 @@ def get_action(action: str) -> Action:
                 resolved_action_plugins[name] = plugin.name
                 # Extensions are exempted from the auth audit for now
                 # This needs to be resolved later
-                action_function.auth_audit_exempt = True
+                action_function.auth_audit_exempt = True  # type: ignore
                 fetched_actions[name] = action_function
     for name, func_list in six.iteritems(chained_actions):
         if name not in fetched_actions and name not in _actions:
@@ -514,7 +514,7 @@ def get_action(action: str) -> Action:
         # If we have been called multiple times for example during tests then
         # we need to make sure that we do not rewrap the actions.
         if hasattr(_action, '__replaced'):
-            _actions[action_name] = _action.__replaced
+            _actions[action_name] = _action.__replaced  # type: ignore
             continue
 
         fn = make_wrapped(_action, action_name)
@@ -563,8 +563,8 @@ def get_or_bust(data_dict: Dict[str, Any],
     if isinstance(keys, string_types):
         keys = [keys]
 
-    import ckan.logic.schema as schema
-    schema = schema.create_schema_for_required_keys(keys)
+    from ckan.logic.schema import create_schema_for_required_keys
+    schema = create_schema_for_required_keys(keys)
 
     data_dict, errors = _validate(data_dict, schema)
 
@@ -622,7 +622,7 @@ def side_effect_free(action: Action) -> Action:
     your action function with CKAN.)
 
     '''
-    action.side_effect_free = True
+    action.side_effect_free = True  # type: ignore
     return action
 
 
@@ -640,7 +640,7 @@ def auth_sysadmins_check(action: AuthFunction) -> AuthFunction:
     sysadmin.
 
     '''
-    action.auth_sysadmins_check = True
+    action.auth_sysadmins_check = True  # type: ignore
     return action
 
 
@@ -658,7 +658,7 @@ def auth_allow_anonymous_access(action: AuthFunction) -> AuthFunction:
     auth function can still return False if for some reason access is not
     granted).
     '''
-    action.auth_allow_anonymous_access = True
+    action.auth_allow_anonymous_access = True  # type: ignore
     return action
 
 
@@ -669,7 +669,7 @@ def auth_disallow_anonymous_access(action: AuthFunction) -> AuthFunction:
     exception if an authenticated user is not provided in the context, without
     calling the actual auth function.
     '''
-    action.auth_allow_anonymous_access = False
+    action.auth_allow_anonymous_access = False  # type: ignore
     return action
 
 
@@ -677,7 +677,7 @@ def chained_auth_function(func: AuthFunction) -> AuthFunction:
     '''
     Decorator function allowing authentication functions to be chained.
     '''
-    func.chained_auth_function = True
+    func.chained_auth_function = True  # type: ignore
     return func
 
 
@@ -688,7 +688,7 @@ class UnknownValidator(Exception):
     pass
 
 
-_validators_cache = {}
+_validators_cache: Dict[str, Union[Validator, Callable[..., Validator]]] = {}
 
 
 def clear_validators_cache() -> None:
