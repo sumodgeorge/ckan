@@ -8,8 +8,8 @@ from datetime import datetime
 from sqlalchemy import types
 from six import string_types, text_type
 
-from ckan.model import meta
-from typing import Union
+import ckan.model.meta as meta
+from typing import Any, Union
 
 __all__ = ['iso_date_to_datetime_for_sqlite', 'make_uuid', 'UuidType',
            'JsonType', 'JsonDictType']
@@ -22,10 +22,10 @@ def make_uuid() -> str:
 class UuidType(types.TypeDecorator):
     impl = types.Unicode
 
-    def process_bind_param(self, value, engine):
+    def process_bind_param(self, value: Any, engine: Any):
         return text_type(value)
 
-    def process_result_value(self, value, engine):
+    def process_result_value(self, value: Any, engine: Any):
         return value
 
     def copy(self):
@@ -45,7 +45,7 @@ class JsonType(types.TypeDecorator):
     '''
     impl = types.UnicodeText
 
-    def process_bind_param(self, value, engine):
+    def process_bind_param(self, value: Any, engine: Any):
         # ensure we stores nulls in db not json "null"
         if value is None or value == {}:
             return None
@@ -53,7 +53,7 @@ class JsonType(types.TypeDecorator):
         # ensure_ascii=False => allow unicode but still need to convert
         return text_type(json.dumps(value, ensure_ascii=False))
 
-    def process_result_value(self, value, engine):
+    def process_result_value(self, value: Any, engine: Any) -> Any:
         if value is None:
             return {}
 
@@ -65,7 +65,7 @@ class JsonType(types.TypeDecorator):
     def is_mutable(self):
         return True
 
-    def copy_value(self, value):
+    def copy_value(self, value: Any):
         return copy.copy(value)
 
 
@@ -73,7 +73,7 @@ class JsonDictType(JsonType):
 
     impl = types.UnicodeText
 
-    def process_bind_param(self, value, engine):
+    def process_bind_param(self, value: Any, engine: Any):
         # ensure we stores nulls in db not json "null"
         if value is None or value == {}:
             return None

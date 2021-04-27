@@ -6,7 +6,7 @@
   "strictParameterNoneValue": true,
   "reportFunctionMemberAccess": true,
   "reportMissingImports": true,
-  "reportImportCycles": true,
+  "reportImportCycles": false,
   "reportUnusedImport": false,
   "reportUnusedClass": true,
   "reportUnusedFunction": true,

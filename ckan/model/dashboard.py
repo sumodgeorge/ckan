@@ -2,7 +2,7 @@
 
 import datetime
 import sqlalchemy
-from ckan.model import meta
+import ckan.model.meta as meta
 from sqlalchemy.orm.exc import NoResultFound
 
 dashboard_table = sqlalchemy.Table('dashboard', meta.metadata,

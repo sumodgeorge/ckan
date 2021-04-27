@@ -2,13 +2,14 @@
 
 from typing import Generic, List, Optional, Tuple, Type, TypeVar
 
-from ckan.model import meta
 import datetime as _datetime
 import sqlalchemy
 
-from ckan.model import core
 import ckan.model
-from ckan.model import domain_object
+import ckan.model.meta as meta
+import ckan.model.core as core
+import ckan.model.domain_object as domain_object
+
 from ckan.types import Query
 
 
@@ -36,7 +37,9 @@ class ModelFollowingModel(domain_object.DomainObject, Generic[Follower, Followed
         raise NotImplementedError()
 
     @classmethod
-    def get(cls: Type[T], follower_id: str, object_id: str) -> Optional[T]:
+    def get(
+            cls: Type[T], follower_id: Optional[str],
+            object_id: Optional[str]) -> Optional[T]:
         '''Return a ModelFollowingModel object for the given follower_id and
         object_id, or None if no such follower exists.
 
@@ -48,7 +51,8 @@ class ModelFollowingModel(domain_object.DomainObject, Generic[Follower, Followed
         return None
 
     @classmethod
-    def is_following(cls, follower_id: str, object_id: str) -> bool:
+    def is_following(
+            cls, follower_id: Optional[str], object_id: Optional[str]) -> bool:
         '''Return True if follower_id is currently following object_id, False
         otherwise.
 
@@ -61,7 +65,7 @@ class ModelFollowingModel(domain_object.DomainObject, Generic[Follower, Followed
         return cls._get_followees(follower_id).count()
 
     @classmethod
-    def followee_list(cls: Type[T], follower_id: str) -> List[T]:
+    def followee_list(cls: Type[T], follower_id: Optional[str]) -> List[T]:
         '''Return a list of objects followed by the follower.'''
         query = cls._get_followees(follower_id)
         followees = cls._filter_following_objects(query)
@@ -73,7 +77,7 @@ class ModelFollowingModel(domain_object.DomainObject, Generic[Follower, Followed
         return cls._get_followers(object_id).count()
 
     @classmethod
-    def follower_list(cls: Type[T], object_id: str) -> List[T]:
+    def follower_list(cls: Type[T], object_id: Optional[str]) -> List[T]:
         '''Return a list of followers of the object.'''
         query = cls._get_followers(object_id)
         followers = cls._filter_following_objects(query)
@@ -84,15 +88,17 @@ class ModelFollowingModel(domain_object.DomainObject, Generic[Follower, Followed
         return [q[0] for q in query]
 
     @classmethod
-    def _get_followees(cls: Type[T], follower_id: str) -> 'Query[Tuple[T, Follower, Followed]]':
+    def _get_followees(cls: Type[T], follower_id: Optional[str]) -> 'Query[Tuple[T, Follower, Followed]]':
         return cls._get(follower_id)
 
     @classmethod
-    def _get_followers(cls: Type[T], object_id: str) -> 'Query[Tuple[T, Follower, Followed]]':
+    def _get_followers(cls: Type[T], object_id: Optional[str]) -> 'Query[Tuple[T, Follower, Followed]]':
         return cls._get(None, object_id)
 
     @classmethod
-    def _get(cls: Type[T], follower_id: Optional[str]=None, object_id: Optional[str]=None) -> 'Query[Tuple[T, Follower, Followed]]':
+    def _get(
+            cls: Type[T], follower_id: Optional[str] = None,
+            object_id: Optional[str] = None) -> 'Query[Tuple[T, Follower, Followed]]':
         follower_alias = sqlalchemy.orm.aliased(cls._follower_class())
         object_alias = sqlalchemy.orm.aliased(cls._object_class())
 

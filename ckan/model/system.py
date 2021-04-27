@@ -1,6 +1,6 @@
 # encoding: utf-8
 
-from ckan.model import domain_object
+import ckan.model.domain_object as domain_object
 from typing import Optional
 
 

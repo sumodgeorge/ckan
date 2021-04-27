@@ -1,5 +1,6 @@
 # encoding: utf-8
 
+from werkzeug.datastructures import ImmutableMultiDict
 from ckan.types import Context
 import os
 import logging
@@ -117,7 +118,7 @@ def _finish_ok(response_data: Any = None,
     return _finish(status_int, response_data, content_type, headers)
 
 
-def _finish_bad_request(extra_msg: str = None) -> Response:
+def _finish_bad_request(extra_msg: Optional[str] = None) -> Response:
     response_data = _(u'Bad request')
     if extra_msg:
         response_data = u'%s - %s' % (response_data, extra_msg)
@@ -150,7 +151,7 @@ def _get_request_data(try_url_params: bool = False):
         be a list of strings, otherwise just a string.
 
     '''
-    def mixed(multi_dict) -> Dict[str, Any]:
+    def mixed(multi_dict: "ImmutableMultiDict[str, Any]") -> Dict[str, Any]:
         u'''Return a dict with values being lists if they have more than one
            item or a string otherwise
         '''
@@ -163,7 +164,7 @@ def _get_request_data(try_url_params: bool = False):
         raise ValueError(u'Invalid request. Please use POST method '
                          'for your request')
 
-    request_data = {}
+    request_data: Union[Dict[str, Any], Any] = {}
     if request.method in [u'POST', u'PUT'] and request.form:
         values = list(request.form.values())
         if (len(values) == 1 and

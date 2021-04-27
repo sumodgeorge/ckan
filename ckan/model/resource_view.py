@@ -1,12 +1,12 @@
 # encoding: utf-8
 
-from typing import Collection, Dict, KeysView, List, Optional, Tuple
+from typing import Collection, Dict, List, Optional, Tuple
 
 import sqlalchemy as sa
 
-from ckan.model import meta
-from ckan.model import types as _types
-from ckan.model import domain_object
+import ckan.model.meta as meta
+import ckan.model.types as _types
+import ckan.model.domain_object as domain_object
 from ckan.types import Query
 
 __all__ = ['ResourceView', 'resource_view_table']

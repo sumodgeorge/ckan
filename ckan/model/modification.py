@@ -1,6 +1,7 @@
 # encoding: utf-8
 
 import logging
+from typing import Any
 
 from sqlalchemy.orm.exc import UnmappedInstanceError
 
@@ -29,13 +30,13 @@ class DomainObjectModificationExtension(plugins.SingletonPlugin):
 
     plugins.implements(plugins.ISession, inherit=True)
 
-    def before_commit(self, session):
+    def before_commit(self, session: Any):
         self.notify_observers(session, self.notify)
 
-    def after_commit(self, session):
+    def after_commit(self, session: Any):
         pass
 
-    def notify_observers(self, session, method):
+    def notify_observers(self, session: Any, method: Any):
         session.flush()
         if not hasattr(session, '_object_cache'):
             return
@@ -75,7 +76,7 @@ class DomainObjectModificationExtension(plugins.SingletonPlugin):
         for obj in changed_pkgs:
             method(obj, domain_object.DomainObjectOperation.changed)
 
-    def notify(self, entity, operation):
+    def notify(self, entity: Any, operation: Any):
         for observer in plugins.PluginImplementations(
                 plugins.IDomainObjectModification):
             try:

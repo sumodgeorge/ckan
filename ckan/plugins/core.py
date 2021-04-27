@@ -14,11 +14,11 @@ from pyutilib.component.core import Plugin as _pca_Plugin
 from ckan.common import asbool
 from six import string_types
 
-from ckan.plugins import interfaces
+import ckan.plugins.interfaces as interfaces
 
 from ckan.common import config
 from typing import (
-    Dict, Generator, Generic, Iterator, List, Optional, Type, TypeVar, Union)
+    Any, Dict, Generator, Generic, Iterator, List, Optional, Type, TypeVar, Union)
 
 
 __all__ = [
@@ -78,7 +78,7 @@ def use_plugin(
 
 
 class PluginImplementations(ExtensionPoint, Generic[TInterface]):
-    def __init__(self, interface: Type[TInterface], *args):
+    def __init__(self, interface: Type[TInterface], *args: Any):
         super().__init__(interface, *args)  # type: ignore
 
     def __iter__(self) -> Iterator[TInterface]:
@@ -218,7 +218,7 @@ def unload_all() -> None:
     unload(*reversed(_PLUGINS))
 
 
-def unload(*plugins) -> None:
+def unload(*plugins: str) -> None:
     '''
     Unload named plugin(s).
     '''
@@ -246,7 +246,7 @@ def unload(*plugins) -> None:
     plugins_update()
 
 
-def plugin_loaded(name) -> bool:
+def plugin_loaded(name: str) -> bool:
     '''
     See if a particular plugin is loaded.
     '''
@@ -270,7 +270,7 @@ def find_system_plugins() -> List[str]:
     return eps
 
 
-def _get_service(plugin_name):
+def _get_service(plugin_name: Union[str, Any]) -> SingletonPlugin:
     '''
     Return a service (ie an instance of a plugin class).
 

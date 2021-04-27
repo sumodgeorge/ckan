@@ -10,9 +10,9 @@ For more details, check :doc:`maintaining/configuration`.
 from sqlalchemy import types, Column, Table
 from six import text_type
 
-from ckan.model import meta
-from ckan.model import core
-from ckan.model import domain_object
+import ckan.model.meta as meta
+import ckan.model.core as core
+import ckan.model.domain_object as domain_object
 from typing import Any, Optional
 
 __all__ = ['system_info_table', 'SystemInfo',

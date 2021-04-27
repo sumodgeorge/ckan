@@ -108,7 +108,7 @@ class QueryOptions(dict):
     all_fields: bool
     search_tags: bool
 
-    def __init__(self, **kwargs) -> None:
+    def __init__(self, **kwargs: Any) -> None:
         from ckan.lib.search import DEFAULT_OPTIONS
 
         # set values according to the defaults
@@ -134,10 +134,10 @@ class QueryOptions(dict):
                 raise SearchQueryError('Search option %r is not supported' % key)
             self[key] = value
 
-    def __getattr__(self, name):
+    def __getattr__(self, name: str) -> Any:
         return self.get(name)
 
-    def __setattr__(self, name, value):
+    def __setattr__(self, name: str, value: Any):
         self[name] = value
 
 
@@ -322,7 +322,7 @@ class PackageSearchQuery(SearchQuery):
 
     def run(self,
             query: Dict[str, Any],
-            permission_labels: List[str] = None,
+            permission_labels: Optional[List[str]] = None,
             **kwargs: Any) -> Dict[str, Any]:
         '''
         Performs a dataset search using the given query.

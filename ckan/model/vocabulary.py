@@ -3,7 +3,10 @@
 from typing import Optional, TYPE_CHECKING
 from sqlalchemy import types, Column, Table
 
-from ckan.model import meta, types as _types, domain_object
+import ckan.model.meta as meta
+import ckan.model.types as _types
+import ckan.model.domain_object as domain_object
+
 from ckan.types import Query
 
 if TYPE_CHECKING:

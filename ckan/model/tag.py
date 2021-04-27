@@ -5,16 +5,16 @@ from typing import List, Optional, Any
 from sqlalchemy.orm import relation
 from sqlalchemy import types, Column, Table, ForeignKey, and_, UniqueConstraint
 
-from ckan.model import (
-    core,
-    meta,
-    types as _types,
-    domain_object,
-    vocabulary,
-    extension as _extension,
-)
 import ckan  # this import is needed
+
 import ckan.model
+import ckan.model.core as core
+import ckan.model.meta as meta
+import ckan.model.types as _types
+import ckan.model.domain_object as domain_object
+import ckan.model.vocabulary as vocabulary
+import ckan.model.extension as _extension
+
 import ckan.logic
 import ckan.lib.dictization
 import ckan.lib.maintain as maintain
@@ -155,7 +155,9 @@ class Tag(domain_object.DomainObject):
 
     @classmethod
     @maintain.deprecated()
-    def search_by_name(cls, search_term, vocab_id_or_name=None):
+    def search_by_name(
+            cls, search_term: str,
+            vocab_id_or_name: Optional[str] = None) -> Optional['Query[Tag]']:
         '''DEPRECATED
 
         Return all tags whose names contain a given string.
@@ -245,7 +247,10 @@ class PackageTag(core.StatefulObjectMixin,
     package: Optional['ckan.model.Package']
     tag: Optional[Tag]
 
-    def __init__(self, package: Optional['ckan.model.Package']=None, tag: Optional[Tag]=None, state: Optional[str]=None, **kwargs: Any) -> None:
+    def __init__(
+            self, package: Optional['ckan.model.Package'] = None,
+            tag: Optional[Tag] = None, state: Optional[str] = None,
+            **kwargs: Any) -> None:
         self.package = package
         self.tag = tag
         self.state = state
@@ -253,13 +258,17 @@ class PackageTag(core.StatefulObjectMixin,
             setattr(self, k, v)
 
     def __repr__(self):
+        assert self.package
+        assert self.tag
         s = u'<PackageTag package=%s tag=%s>' % (self.package.name, self.tag.name)
         return s.encode('utf8')
 
     @classmethod
     @maintain.deprecated()
-    def by_name(cls, package_name, tag_name, vocab_id_or_name=None,
-            autoflush=True) -> Optional['PackageTag']:
+    def by_name(
+            cls, package_name: str, tag_name: str,
+            vocab_id_or_name: Optional[str] = None,
+            autoflush: bool = True) -> Optional['PackageTag']:
         '''DEPRECATED (and broken - missing the join to Tag)
 
         Return the PackageTag for the given package and tag names, or None.

@@ -37,7 +37,7 @@ TuplizedErrorDict = Dict[Tuple[Any, ...], List[str]]
 
 class Context(TypedDict, total=False):
     user: str
-    model: Model
+    model: "Model"
     session: AlchemySession
 
     __auth_user_obj_checked: bool

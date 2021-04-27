@@ -12,7 +12,7 @@ from six import text_type, string_types
 
 from ckan.common import _, json
 import ckan.lib.maintain as maintain
-from typing import Any, Dict, Generic, Iterator, List, Optional, Tuple, TypeVar, Union
+from typing import Any, Dict, Generic, Iterable, Iterator, List, Optional, Tuple, TypeVar, Union
 
 TLicense = TypeVar('TLicense', bound='DefaultLicense')
 
@@ -150,7 +150,9 @@ class LicenseRegister(object):
                 license['title'] = _(license['title'])
         self._create_license_list(license_data, license_url)
 
-    def _create_license_list(self, license_data: Union[List[TLicense], Dict[str, TLicense]], license_url: str=''):
+    def _create_license_list(
+            self, license_data: Union[Iterable[TLicense], Dict[str, TLicense]],
+            license_url: str=''):
         if isinstance(license_data, dict):
             self.licenses = [License(entity) for entity in license_data.values()]
         elif isinstance(license_data, list):

@@ -1,18 +1,16 @@
 # encoding: utf-8
+from typing import Any, List
 
 from six import text_type
 from sqlalchemy import orm, types, Column, Table, ForeignKey
 from sqlalchemy.ext.associationproxy import association_proxy
 
-from ckan.model import (
-    meta,
-    core,
-    package as _package,
-    extension,
-    domain_object,
-    types as _types,
-)
-from typing import List
+import ckan.model.meta as meta
+import ckan.model.core as core
+import ckan.model.package as _package
+import ckan.model.extension as extension
+import ckan.model.domain_object as domain_object
+import ckan.model.types as _types
 
 
 __all__ = ['PackageExtra', 'package_extra_table']
@@ -53,7 +51,7 @@ meta.mapper(PackageExtra, package_extra_table, properties={
 )
 
 
-def _create_extra(key, value):
+def _create_extra(key: str, value: Any):
     return PackageExtra(key=text_type(key), value=value)
 
 _package.Package.extras = association_proxy(

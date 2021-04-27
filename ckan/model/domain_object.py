@@ -3,13 +3,14 @@
 import datetime
 import six
 from collections import OrderedDict
-from typing import Any, Dict, Generic, List, Optional, Set, Tuple, Type, TypeVar, overload
+from typing import Any, Dict, Generic, List, Optional, Set, Tuple, Type, TypeVar
 
 import sqlalchemy as sa
 from sqlalchemy import orm
 from six import string_types
 
-from ckan.model import meta, core
+import ckan.model.meta as meta
+import ckan.model.core as core
 from ckan.types import Query
 
 
@@ -25,7 +26,7 @@ class Enum(set, Generic[T]):
     def __init__(self, *names: T) -> None:
         super(Enum, self).__init__(names)
 
-    def __getattr__(self, name) -> T:
+    def __getattr__(self, name: Any) -> T:
         if name in self:
             return name
         raise AttributeError

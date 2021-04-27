@@ -9,9 +9,9 @@ from sqlalchemy import MetaData, and_
 import sqlalchemy.orm as orm
 from sqlalchemy.orm.session import SessionExtension  # type: ignore
 
-from ckan.model import extension
+import ckan.model.extension as extension
 from ckan.types import AlchemySession
-from typing import Optional
+from typing import Any, Optional
 from sqlalchemy.engine import Engine
 
 __all__ = ['Session', 'engine_is_sqlite', 'engine_is_pg']
@@ -23,10 +23,10 @@ class CkanCacheExtension(SessionExtension):
     used by the page cache to flush the cache when data in the database
     is altered. '''
 
-    def __init__(self, *args, **kw):
+    def __init__(self, *args: Any, **kw: Any):
         super(CkanCacheExtension, self).__init__(*args, **kw)
 
-    def after_commit(self, session):
+    def after_commit(self, session: Any):
         if hasattr(session, '_object_cache'):
             oc = session._object_cache
             oc_list = oc['new']
@@ -39,7 +39,7 @@ class CkanCacheExtension(SessionExtension):
 
 class CkanSessionExtension(SessionExtension):
 
-    def before_flush(self, session, flush_context, instances):
+    def before_flush(self, session: Any, flush_context: Any, instances: Any):
         if not hasattr(session, '_object_cache'):
             session._object_cache= {'new': set(),
                                     'deleted': set(),
@@ -53,18 +53,18 @@ class CkanSessionExtension(SessionExtension):
         session._object_cache['changed'].update(changed)
 
 
-    def before_commit(self, session):
+    def before_commit(self, session: Any):
         session.flush()
         try:
             obj_cache = session._object_cache
         except AttributeError:
             return
 
-    def after_commit(self, session):
+    def after_commit(self, session: Any):
         if hasattr(session, '_object_cache'):
             del session._object_cache
 
-    def after_rollback(self, session):
+    def after_rollback(self, session: Any):
         if hasattr(session, '_object_cache'):
             del session._object_cache
 

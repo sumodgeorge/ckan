@@ -18,26 +18,25 @@ from sqlalchemy.sql import and_, or_
 from sqlalchemy import orm, types, Column, Table, ForeignKey
 
 from ckan.common import config
-from ckan.model import (
-    meta,
-    core,
-    license as _license,
-    types as _types,
-    domain_object,
-    activity,
-    extension,
-)
+
+import ckan.model.meta as meta
+import ckan.model.core as core
+import ckan.model.license as _license
+import ckan.model.types as _types
+import ckan.model.domain_object as domain_object
+import ckan.model.activity as activity
+import ckan.model.extension as extension
+
 import ckan.lib.maintain as maintain
 from ckan.types import Context, Query
 
 if TYPE_CHECKING:
     from ckan.model import (
-     Activity, Rating,
+     Rating,
      PackageExtra, PackageRelationship, Resource,
      PackageTag, Tag, Vocabulary,
      User, Group,
     )
-    from .license import LicenseRegister, License
 
 
 PrintableRelationship = Tuple["Package", str, Optional[str]]
@@ -125,7 +124,7 @@ class Package(core.StatefulObjectMixin,
     relationships_as_subject: 'PackageRelationship'
     relationships_as_object: 'PackageRelationship'
 
-    _license_register: ClassVar['LicenseRegister']
+    _license_register: ClassVar['_license.LicenseRegister']
 
     text_search_fields: List[str] = ['name', 'title']
 
@@ -166,7 +165,9 @@ class Package(core.StatefulObjectMixin,
     def related_packages(self) -> List["Package"]:
         return [self]
 
-    def add_resource(self, url: str, format: str=u'', description: str=u'', hash: str=u'', **kw: Any) -> None:
+    def add_resource(
+            self, url: str, format: str=u'',
+            description: str=u'', hash: str=u'', **kw: Any) -> None:
         from ckan.model import resource
         self.resources_all.append(resource.Resource(
             package_id=self.id,
@@ -190,7 +191,9 @@ class Package(core.StatefulObjectMixin,
         for tag in tags:
             self.add_tag(tag)
 
-    def add_tag_by_name(self, tag_name: str, vocab: Optional["Vocabulary"]=None, autoflush: bool=True):
+    def add_tag_by_name(
+            self, tag_name: str,
+            vocab: Optional["Vocabulary"]=None, autoflush: bool=True):
         """Add a tag with the given name to this package's tags.
 
         By default the given tag_name will be searched for among the free tags
@@ -218,7 +221,7 @@ class Package(core.StatefulObjectMixin,
         assert tag is not None
         self.add_tag(tag)
 
-    def get_tags(self, vocab: "Vocabulary"=None) -> List["Tag"]:
+    def get_tags(self, vocab: Optional["Vocabulary"] = None) -> List["Tag"]:
         """Return a sorted list of this package's tags
 
         Tags are sorted by their names.
@@ -405,7 +408,7 @@ class Package(core.StatefulObjectMixin,
     ## Licenses are currently integrated into the domain model here.
 
     @classmethod
-    def get_license_register(cls) -> "LicenseRegister":
+    def get_license_register(cls) -> "_license.LicenseRegister":
         if not hasattr(cls, '_license_register'):
             cls._license_register = _license.LicenseRegister()
         return cls._license_register
@@ -415,10 +418,10 @@ class Package(core.StatefulObjectMixin,
         register = cls.get_license_register()
         return [(l.title, l.id) for l in register.values()]
 
-    def get_license(self) -> Optional["License"]:
+    def get_license(self) -> Optional["_license.License"]:
         if self.license_id:
             try:
-                license: Optional['License'] = self.get_license_register()[self.license_id]
+                license: Optional['_license.License'] = self.get_license_register()[self.license_id]
             except KeyError:
                 license = None
         else:
@@ -472,7 +475,8 @@ class Package(core.StatefulObjectMixin,
         groups = [group for (group, cap) in pairs if not capacity or cap == capacity]
         return groups
 
-    def activity_stream_item(self, activity_type: str, user_id: str) -> Optional["Activity"]:
+    def activity_stream_item(
+            self, activity_type: str, user_id: str) -> Optional["activity.Activity"]:
         import ckan.model
         import ckan.logic
 

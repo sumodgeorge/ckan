@@ -4,8 +4,8 @@ import datetime
 
 from sqlalchemy import types, Column, Table, text
 
-from ckan.model import meta
-from ckan.model import domain_object
+import ckan.model.meta as meta
+import ckan.model.domain_object as domain_object
 from typing import Dict
 
 __all__ = ['tracking_summary_table', 'TrackingSummary', 'tracking_raw_table']

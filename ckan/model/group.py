@@ -1,20 +1,21 @@
 # encoding: utf-8
 
 import datetime
+from typing import Any, Dict, List,  Optional, TYPE_CHECKING, Tuple, Union, overload
+from typing_extensions import Literal
 
 from sqlalchemy import orm, types, Column, Table, ForeignKey, or_, and_, text
 from sqlalchemy.ext.associationproxy import AssociationProxy
 
-from ckan.model import meta
-from ckan.model import core
-from ckan.model import package as _package
-from ckan.model import types as _types
-from ckan.model import domain_object
-from ckan.model import user as _user
+import ckan.model.meta as meta
+import ckan.model.core as core
+import ckan.model.package as _package
+import ckan.model.types as _types
+import ckan.model.domain_object as domain_object
+import ckan.model.user as _user
+import ckan.model.package as _package
+
 from ckan.types import Context, Query
-from ckan.model import package as _package
-from typing import Any, Dict, List,  Optional, TYPE_CHECKING, Tuple, Union, overload
-from typing_extensions import Literal
 
 if TYPE_CHECKING:
     from .group_extra import GroupExtra
@@ -303,15 +304,12 @@ class Group(core.StatefulObjectMixin,
                  context: Optional[Context]=...
                  ) -> List[_package.Package]: ...
 
-    @overload
-    def packages(self, with_private: bool=..., limit: Optional[int]=...,
-                 return_query: bool=...,
-                 context: Optional[Context]=...
-                 ) -> Union[List[_package.Package], 'Query[_package.Package]']: ...
-
-
-    def packages(self, with_private: bool = False, limit: Optional[int] = None,
-            return_query: bool = False, context: Optional[Context] = None):
+    def packages(
+            self, with_private: bool = False,
+            limit: Optional[int] = None,
+            return_query: bool = False,
+            context: Optional[Context] = None
+    ) -> Union["Query[_package.Package]", List[_package.Package]]:
         '''Return this group's active packages.
 
         Returns all packages in this group with VDM state ACTIVE

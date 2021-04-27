@@ -2,12 +2,12 @@
 
 from sqlalchemy import orm, types, Column, Table, ForeignKey
 
-from ckan.model import meta
-from ckan.model import core
-from ckan.model import package as _package
-from ckan.model import types as _types
-from ckan.model import domain_object
-from typing import Dict, List, Optional, Tuple
+import ckan.model.meta as meta
+import ckan.model.core as core
+import ckan.model.package as _package
+import ckan.model.types as _types
+import ckan.model.domain_object as domain_object
+from typing import Any, Dict, List, Optional, Tuple
 from ckan.model import package as _package
 from ckan.types import Query
 
@@ -17,7 +17,7 @@ try:
     from ckan.common import _
     _()
 except:
-    def _(*args, **kwargs):
+    def _(*args: Any, **kwargs: Any) -> str:
         return args[0]
 
 __all__ = ['PackageRelationship', 'package_relationship_table',

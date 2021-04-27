@@ -9,17 +9,15 @@ from sqlalchemy import orm
 from ckan.common import config
 from sqlalchemy import types, func, Column, Table, ForeignKey
 
-from ckan.model import (
-    meta,
-    core,
-    types as _types,
-    extension,
-    domain_object,
-)
+import ckan.model.meta as meta
+import ckan.model.core as core
+import ckan.model.types as _types
+import ckan.model.extension as extension
+import ckan.model.domain_object as domain_object
 import ckan.lib.dictization
 from .package import Package
 import ckan.model
-from typing import Any, Dict, List, Optional
+from typing import Any, Callable, ClassVar, Dict, List, Optional
 
 __all__ = ['Resource', 'resource_table']
 
@@ -81,7 +79,7 @@ class Resource(core.StatefulObjectMixin,
     extras: Dict[str, Any]
     state: str
 
-    extra_columns: Optional[List[str]] = None
+    extra_columns: ClassVar[Optional[List[str]]] = None
 
     package: Package
 
@@ -153,7 +151,7 @@ class Resource(core.StatefulObjectMixin,
         if cls.extra_columns is None:
             cls.extra_columns = config.get(
                 'ckan.extra_resource_fields', '').split()
-            for field in cls.extra_columns:
+            for field in cls.extra_columns:  # type: ignore
                 setattr(cls, field, DictProxy(field, 'extras'))
         assert cls.extra_columns is not None
         return cls.extra_columns
@@ -205,12 +203,15 @@ def resource_identifier(obj: Resource) -> str:
 
 class DictProxy(object):
 
-    def __init__(self, target_key, target_dict, data_type=text_type):
+    def __init__(
+            self,
+            target_key: str, target_dict: Any,
+            data_type: Callable[[Any], Any] = text_type):
         self.target_key = target_key
         self.target_dict = target_dict
         self.data_type = data_type
 
-    def __get__(self, obj, type):
+    def __get__(self, obj: Any, type: Any):
 
         if not obj:
             return self
@@ -219,7 +220,7 @@ class DictProxy(object):
         if proxied_dict:
             return proxied_dict.get(self.target_key)
 
-    def __set__(self, obj, value):
+    def __set__(self, obj: Any, value: Any):
 
         proxied_dict = getattr(obj, self.target_dict)
         if proxied_dict is None:
@@ -228,7 +229,7 @@ class DictProxy(object):
 
         proxied_dict[self.target_key] = self.data_type(value)
 
-    def __delete__(self, obj):
+    def __delete__(self, obj: Any):
 
         proxied_dict = getattr(obj, self.target_dict)
         proxied_dict.pop(self.target_key)

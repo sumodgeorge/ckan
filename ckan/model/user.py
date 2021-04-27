@@ -17,10 +17,10 @@ from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.ext.mutable import MutableDict
 from six import text_type
 
-from ckan.model import meta
-from ckan.model import core
-from ckan.model import types as _types
-from ckan.model import domain_object
+import ckan.model.meta as meta
+import ckan.model.core as core
+import ckan.model.types as _types
+import ckan.model.domain_object as domain_object
 from ckan.common import config, asbool
 from ckan.types import Query
 

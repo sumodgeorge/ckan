@@ -18,8 +18,10 @@ from sqlalchemy import (
 
 from ckan.common import config
 import ckan.model
-from ckan.model import meta
-from ckan.model import domain_object, types as _types
+import ckan.model.meta as meta
+import ckan.model.domain_object as domain_object
+import ckan.model.types as _types
+
 from ckan.types import Context, Query
 
 
@@ -362,7 +364,7 @@ def _activities_from_users_followed_by_user_query(user_id: str, limit: int) -> '
         for follower in follower_objects])
 
 
-def _activities_from_datasets_followed_by_user_query(user_id, limit):
+def _activities_from_datasets_followed_by_user_query(user_id: str, limit: int):
     '''Return a query for all activities from datasets that user_id follows.'''
     import ckan.model as model
 

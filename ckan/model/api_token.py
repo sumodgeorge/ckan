@@ -9,7 +9,10 @@ from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.ext.mutable import MutableDict
 
 import ckan.plugins.toolkit as tk
-from ckan.model import meta, User, DomainObject
+import ckan.model.meta as meta
+import ckan.model.user as user
+import ckan.model.domain_object as domain_object
+
 from typing import Any, Dict, Optional
 
 
@@ -33,16 +36,18 @@ api_token_table = Table(
 )
 
 
-class ApiToken(DomainObject):
+class ApiToken(domain_object.DomainObject):
     id: str
     name: str
     user_id: Optional[str]
     created_at: datetime.datetime
     last_access: Optional[datetime.datetime]
     plugin_extras: Dict[str, Any]
-    owner: Optional[User]
+    owner: Optional[user.User]
 
-    def __init__(self, user_id: str = None, name: str = 'Unnamed') -> None:
+    def __init__(
+            self, user_id: Optional[str] = None,
+            name: str = 'Unnamed') -> None:
         self.id = _make_token()
         self.user_id = user_id
         self.name = name
@@ -81,7 +86,7 @@ meta.mapper(
     api_token_table,
     properties={
         u"owner": orm.relation(
-            User, backref=orm.backref(u"api_tokens", cascade=u"all, delete")
+            user.User, backref=orm.backref(u"api_tokens", cascade=u"all, delete")
         )
     },
 )

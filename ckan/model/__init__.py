@@ -1,6 +1,5 @@
 # encoding: utf-8
 
-
 import warnings
 import logging
 import os
@@ -18,7 +17,7 @@ from alembic.command import (
 )
 from alembic.config import Config as AlembicConfig
 
-from ckan.model import meta
+import ckan.model.meta as meta
 
 from ckan.model.meta import (
     Session,

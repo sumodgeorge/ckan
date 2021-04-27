@@ -4,9 +4,9 @@ from datetime import datetime
 from typing import Optional
 from sqlalchemy import types, Column, Table, UniqueConstraint
 
-from ckan.model import meta
-from ckan.model import types as _types
-from ckan.model import domain_object
+import ckan.model.meta as meta
+import ckan.model.types as _types
+import ckan.model.domain_object as domain_object
 
 __all__ = ['TaskStatus', 'task_status_table']
 
