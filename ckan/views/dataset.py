@@ -72,7 +72,7 @@ def _get_pkg_template(template_type: str,
         return method()
 
 
-def _encode_params(params):
+def _encode_params(params: Iterable[Tuple[str, Any]]):
     return [(k, v.encode(u'utf-8') if isinstance(v, string_types) else str(v))
             for k, v in params]
 
@@ -134,8 +134,8 @@ def _sort_by(params_nosort: Params, package_type: str,
 
 def _pager_url(params_nopage: Params,
                package_type: str,
-               q=None,
-               page=None) -> str:
+               q: Any = None,
+               page: Optional[int] = None) -> str:
     params = list(params_nopage)
     params.append((u'page', page))
     return search_url(params, package_type)
@@ -1032,7 +1032,7 @@ def followers(package_type: str,
 
 
 class GroupView(MethodView):
-    def _prepare(self, id) -> Tuple[Context, Dict[str, Any]]:
+    def _prepare(self, id: str) -> Tuple[Context, Dict[str, Any]]:
         context = cast(Context, {
             u'model': model,
             u'session': model.Session,
@@ -1294,7 +1294,7 @@ def collaborators_read(package_type: str, id: str) -> Union[Response, str]:
         u'pkg_dict': pkg_dict})
 
 
-def collaborator_delete(package_type: str, id: str, user_id) -> Response:
+def collaborator_delete(package_type: str, id: str, user_id: str) -> Response:
     context = cast(Context, {u'model': model, u'user': g.user})
 
     try:
@@ -1353,7 +1353,7 @@ class CollaboratorEditView(MethodView):
 
         return h.redirect_to(u'dataset.collaborators_read', id=id)
 
-    def get(self, package_type: str, id) -> Union[Response, str]:
+    def get(self, package_type: str, id: str) -> Union[Response, str]:
         context = cast(Context, {u'model': model, u'user': g.user})
         data_dict = {u'id': id}
 

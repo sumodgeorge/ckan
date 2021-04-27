@@ -40,7 +40,7 @@ class LazyView(object):
             actual_view = actual_view.as_view(self.view_name)
         return actual_view
 
-    def __call__(self, *args, **kwargs):
+    def __call__(self, *args: Any, **kwargs: Any) -> Any:
         return self.view(*args, **kwargs)
 
 

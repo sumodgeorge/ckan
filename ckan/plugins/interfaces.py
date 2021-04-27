@@ -176,35 +176,41 @@ class IMapper(Interface):
     http://docs.sqlalchemy.org/en/rel_0_9/orm/deprecated.html#sqlalchemy.orm.interfaces.MapperExtension
     '''  # noqa
 
-    def before_insert(self, mapper, connection, instance) -> None:
+    def before_insert(
+            self, mapper: Any, connection: Any, instance: Any) -> None:
         u'''
         Receive an object instance before that instance is INSERTed into
         its table.
         '''
 
-    def before_update(self, mapper, connection, instance) -> None:
+    def before_update(
+            self, mapper: Any, connection: Any, instance: Any) -> None:
         u'''
         Receive an object instance before that instance is UPDATEed.
         '''
 
-    def before_delete(self, mapper, connection, instance) -> None:
+    def before_delete(
+            self, mapper: Any, connection: Any, instance: Any) -> None:
         u'''
         Receive an object instance before that instance is PURGEd.
         (whereas usually in ckan 'delete' means to change the state property to
         deleted, so use before_update for that case.)
         '''
 
-    def after_insert(self, mapper, connection, instance) -> None:
+    def after_insert(
+            self, mapper: Any, connection: Any, instance: Any) -> None:
         u'''
         Receive an object instance after that instance is INSERTed.
         '''
 
-    def after_update(self, mapper, connection, instance) -> None:
+    def after_update(
+            self, mapper: Any, connection: Any, instance: Any) -> None:
         u'''
         Receive an object instance after that instance is UPDATEed.
         '''
 
-    def after_delete(self, mapper, connection, instance) -> None:
+    def after_delete(
+            self, mapper: Any, connection: Any, instance: Any) -> None:
         u'''
         Receive an object instance after that instance is PURGEd.
         (whereas usually in ckan 'delete' means to change the state property to
@@ -217,33 +223,35 @@ class ISession(Interface):
     A subset of the SQLAlchemy session extension hooks.
     '''
 
-    def after_begin(self, session, transaction, connection) -> None:
+    def after_begin(
+            self, session: Any, transaction: Any, connection: Any) -> None:
         u'''
         Executed after a transaction is begun on a connection
         '''
 
-    def before_flush(self, session, flush_context, instances) -> None:
+    def before_flush(
+            self, session: Any, flush_context: Any, instances: Any) -> None:
         u'''
         Executed before a flush process has started.
         '''
 
-    def after_flush(self, session, flush_context) -> None:
+    def after_flush(self, session: Any, flush_context: Any) -> None:
         u'''
         Executed after a flush has completed, but before commit has been
         called.
         '''
 
-    def before_commit(self, session) -> None:
+    def before_commit(self, session: Any) -> None:
         u'''
         Executed right before commit is called.
         '''
 
-    def after_commit(self, session) -> None:
+    def after_commit(self, session: Any) -> None:
         u'''
         Executed after a commit has occured.
         '''
 
-    def after_rollback(self, session) -> None:
+    def after_rollback(self, session: Any) -> None:
         u'''
         Executed after a rollback has occured.
         '''
@@ -254,7 +262,7 @@ class IDomainObjectModification(Interface):
     Receives notification of new, changed and deleted datasets.
     '''
 
-    def notify(self, entity, operation: str) -> None:
+    def notify(self, entity: Any, operation: str) -> None:
         u'''
         Send a notification on entity modification.
 
@@ -263,7 +271,7 @@ class IDomainObjectModification(Interface):
         '''
         pass
 
-    def notify_after_commit(self, entity, operation):
+    def notify_after_commit(self, entity: Any, operation: Any) -> None:
         u'''
         ** DEPRECATED **
 
@@ -482,7 +490,7 @@ class IResourcePreview(Interface):
         fixable: str
         quality: Literal[1, 2, 3]
 
-    def can_preview(self, data_dict) -> Union[bool, CanPreviewDict]:
+    def can_preview(self, data_dict: DataDict) -> Union[bool, CanPreviewDict]:
         u'''Return info on whether the plugin can preview the resource.
 
         This can be done in two ways:
@@ -1983,8 +1991,8 @@ class IApiToken(Interface):
         '''
         return schema
 
-    def decode_api_token(self, encoded: str,
-                         **kwargs) -> Optional[Dict[str, Any]]:
+    def decode_api_token(
+            self, encoded: str, **kwargs: Any) -> Optional[Dict[str, Any]]:
         """Make an attempt to decode API Token provided in request.
 
         Decode token if it possible and return dictionary with

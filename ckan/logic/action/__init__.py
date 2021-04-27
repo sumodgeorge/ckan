@@ -7,7 +7,7 @@ import six
 
 from ckan.logic import NotFound
 from ckan.common import _
-from ckan.types import ErrorDict
+from ckan.types import ErrorDict, Model
 from ckan import model
 from ckan.model.domain_object import DomainObject
 from typing import Any, Dict, List, Mapping, cast
@@ -37,7 +37,7 @@ def rename_keys(dict_: Dict[str, Any],
     return new_dict
 
 
-def get_domain_object(model: model, domain_object_ref: str) -> DomainObject:
+def get_domain_object(model: Model, domain_object_ref: str) -> DomainObject:
     '''For an id or name, return the corresponding domain object.
     (First match returned, in order: system, package, group, auth_group, user).
     '''

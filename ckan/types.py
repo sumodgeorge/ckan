@@ -15,7 +15,7 @@ from typing import (
 )
 from sqlalchemy.orm.scoping import ScopedSession
 from sqlalchemy import Table
-from typing_extensions import Protocol, TypedDict
+from typing_extensions import Protocol, TypedDict, TypeAlias
 
 from sqlalchemy.orm import Query
 
@@ -35,17 +35,19 @@ DataDict = Dict[str, Any]
 ErrorDict = Dict[str, Union[List[Union[str, Dict[str, Any]]], str]]
 TuplizedErrorDict = Dict[Tuple[Any, ...], List[str]]
 
-
 class Context(TypedDict, total=False):
     user: str
-    model: "model_"
-    # model: "PModel"
+    model: Model
     session: AlchemySession
 
     __auth_user_obj_checked: bool
     __auth_audit: List[Tuple[str, int]]
     auth_user_obj: Optional["model_.User"]
     user_obj: "model_.User"
+
+    schema_keys: List[Any]
+    revision_id: Optional[Any]
+    revision_date: Optional[Any]
 
     id: str
     user_id: str
@@ -67,7 +69,7 @@ class Context(TypedDict, total=False):
     allow_state_change: bool
     is_member: bool
     use_cache: bool
-
+    include_plugin_extras: bool
     message: str
 
     keep_email: bool
@@ -79,7 +81,7 @@ class Context(TypedDict, total=False):
     schema: "Schema"
     group: "model_.Group"
     package: "model_.Package"
-
+    vocabulary: "model_.Vocabulary"
     tag: "model_.Tag"
     activity: "model_.Activity"
     task_status: "model_.TaskStatus"
@@ -117,7 +119,7 @@ class DataValidator(Protocol):
         data: Dict[TuplizedKey, Any],
         errors: TuplizedErrorDict,
         context: Context,
-    ) -> Any:
+    ) -> None:
         ...
 
 
@@ -252,3 +254,6 @@ class PModel(Protocol):
     MIN_RATING: int
     MAX_RATING: int
     repo: "model_.Repository"
+
+Model: TypeAlias = "model_"
+# Model: TypeAlias = PModel

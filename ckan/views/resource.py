@@ -190,7 +190,7 @@ def download(package_type: str,
 
 
 class CreateView(MethodView):
-    def post(self, package_type: str, id) -> Union[str, Response]:
+    def post(self, package_type: str, id: str) -> Union[str, Response]:
         save_action = request.form.get(u'save')
         data = clean_dict(
             dict_fns.unflatten(tuplize_dict(parse_params(request.form)))
@@ -344,7 +344,7 @@ class CreateView(MethodView):
 
 
 class EditView(MethodView):
-    def _prepare(self, id):
+    def _prepare(self, id: str):
         context = cast(Context, {
             u'model': model,
             u'session': model.Session,
@@ -448,7 +448,7 @@ class EditView(MethodView):
 
 
 class DeleteView(MethodView):
-    def _prepare(self, id):
+    def _prepare(self, id: str):
         context = cast(Context, {
             u'model': model,
             u'session': model.Session,
@@ -625,7 +625,8 @@ def view(package_type: str,
 
 # FIXME: could anyone think about better name?
 class EditResourceViewView(MethodView):
-    def _prepare(self, id, resource_id) -> Tuple[Context, Dict[str, Any]]:
+    def _prepare(
+            self, id: str, resource_id: str) -> Tuple[Context, Dict[str, Any]]:
         context = cast(Context, {
             u'model': model,
             u'session': model.Session,
@@ -765,7 +766,8 @@ class EditResourceViewView(MethodView):
             if not extra_vars[u'errors']:
                 to_preview = True
 
-        data[u'view_type'] = view_type
+        if data is not None:
+            data[u'view_type'] = view_type
         view_plugin = lib_datapreview.get_view_plugin(view_type)
         if not view_plugin:
             return base.abort(404, _(u'View Type Not found'))
@@ -801,7 +803,7 @@ class EditResourceViewView(MethodView):
         return base.render(u'package/new_view.html', extra_vars)
 
 
-def _parse_recline_state(params):
+def _parse_recline_state(params: Dict[str, Any]) -> Optional[Dict[str, Any]]:
     state_version = int(params.get(u'state_version', u'1'))
     if state_version != 1:
         return None

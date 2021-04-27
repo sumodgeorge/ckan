@@ -59,7 +59,7 @@ def _get_group_template(template_type: str,
         return method()
 
 
-def _db_to_form_schema(group_type=None) -> Schema:
+def _db_to_form_schema(group_type: Optional[str] = None) -> Schema:
     u'''This is an interface to manipulate data from the database
      into a format suitable for the form (optional)'''
     return lookup_group_plugin(group_type).db_to_form_schema()
@@ -86,7 +86,7 @@ def _action(action_name: str) -> Action:
     return get_action(_replace_group_org(action_name))
 
 
-def _check_access(action_name: str, *args, **kw) -> Literal[True]:
+def _check_access(action_name: str, *args: Any, **kw: Any) -> Literal[True]:
     u''' select the correct group/org check_access '''
     return check_access(_replace_group_org(action_name), *args, **kw)
 
@@ -250,7 +250,7 @@ def _read(id: Optional[str], limit: int, group_type: str) -> Dict[str, Any]:
     params_nopage = [(k, v) for k, v in request.params.items() if k != u'page']
     sort_by = request.params.get(u'sort', None)
 
-    def search_url(params):
+    def search_url(params: Any) -> str:
         controller = lookup_group_controller(group_type)
         assert controller, (
             'Controller cannot be missing because of the join below'
@@ -263,7 +263,7 @@ def _read(id: Optional[str], limit: int, group_type: str) -> Dict[str, Any]:
                   for k, v in params]
         return url + u'?' + urlencode(params)
 
-    def drill_down_url(**by):
+    def drill_down_url(**by: Any):
         return h.add_url_param(
             alternative_url=None,
             controller=group_type,
@@ -273,7 +273,8 @@ def _read(id: Optional[str], limit: int, group_type: str) -> Dict[str, Any]:
 
     extra_vars["drill_down_url"] = drill_down_url
 
-    def remove_field(key, value=None, replace=None):
+    def remove_field(
+            key: str, value: Optional[str] = None, replace: Optional[str] = None):
         controller = lookup_group_controller(group_type)
         return h.remove_url_param(
             key,
@@ -285,7 +286,7 @@ def _read(id: Optional[str], limit: int, group_type: str) -> Dict[str, Any]:
 
     extra_vars["remove_field"] = remove_field
 
-    def pager_url(q=None, page=None):
+    def pager_url(q: Any = None, page: Optional[int] = None):
         params = list(params_nopage)
         params.append((u'page', page))
         return search_url(params)
@@ -521,7 +522,7 @@ def activity(id: str,
         _get_group_template(u'activity_template', group_type), extra_vars)
 
 
-def changes(id, group_type, is_organization):
+def changes(id: str, group_type: str, is_organization: bool) -> str:
     '''
     Shows the changes to an organization in one particular activity stream
     item.
@@ -564,7 +565,7 @@ def changes(id, group_type, is_organization):
     )
 
 
-def changes_multiple(is_organization, group_type=None):
+def changes_multiple(is_organization: bool, group_type: str) -> str:
     '''
     Called when a user specifies a range of versions they want to look at
     changes between. Verifies that the range is valid and finds the set of
@@ -904,10 +905,12 @@ class BulkProcessView(MethodView):
             _get_group_template(u'bulk_process_template', group_type),
             extra_vars)
 
-    def post(self, id, group_type, is_organization):
+    def post(
+            self, id: str, group_type: str,
+            is_organization: bool) -> Response:
         set_org(is_organization)
         context = self._prepare(group_type)
-        data_dict = {u'id': id, u'type': group_type}
+        data_dict: Dict[str, Any] = {u'id': id, u'type': group_type}
         try:
             check_access(u'bulk_update_public', context, {u'org_id': id})
             # Do not query for the group datasets when dictizing, as they will
@@ -979,7 +982,7 @@ class BulkProcessView(MethodView):
 class CreateGroupView(MethodView):
     u'''Create group view '''
 
-    def _prepare(self, data: Dict[str, Any] = None) -> Context:
+    def _prepare(self, data: Optional[Dict[str, Any]] = None) -> Context:
         if data and u'type' in data:
             group_type = data['type']
         else:

@@ -701,7 +701,7 @@ class RequestResetView(MethodView):
 
 
 class PerformResetView(MethodView):
-    def _prepare(self, id):
+    def _prepare(self, id: str) -> Tuple[Context, Dict[str, Any]]:
         # FIXME 403 error for invalid key is a non helpful page
         context = cast(Context, {
             u'model': model,

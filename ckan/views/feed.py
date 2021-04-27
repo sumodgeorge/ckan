@@ -407,7 +407,7 @@ def custom() -> Response:
         navigation_urls=navigation_urls)
 
 
-def _alternate_url(params: Dict[str, Any], **kwargs) -> str:
+def _alternate_url(params: Dict[str, Any], **kwargs: Any) -> str:
     search_params = params.copy()
     search_params.update(kwargs)
 
@@ -419,7 +419,7 @@ def _alternate_url(params: Dict[str, Any], **kwargs) -> str:
 
 
 def _feed_url(query: Dict[str, Any], controller: str, action: str,
-              **kwargs) -> str:
+              **kwargs: Any) -> str:
     """
     Constructs the url for the given action.  Encoding the query
     parameters.
@@ -429,8 +429,9 @@ def _feed_url(query: Dict[str, Any], controller: str, action: str,
     return h.url_for(controller=controller, action=action, **kwargs)
 
 
-def _navigation_urls(query: Dict[str, Any], controller: str, action: str,
-                     item_count: int, limit: int, **kwargs) -> Dict[str, Any]:
+def _navigation_urls(
+        query: Dict[str, Any], controller: str, action: str,
+        item_count: int, limit: int, **kwargs: Any) -> Dict[str, Any]:
     """
     Constructs and returns first, last, prev and next links for paging
     """

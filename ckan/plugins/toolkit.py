@@ -1,7 +1,8 @@
 # encoding: utf-8
 
+from ckan.common import CKANConfig
 import sys
-from typing import Any, Dict, Optional, TYPE_CHECKING, Tuple, Union, cast
+from typing import Any, Dict, List, Optional, TYPE_CHECKING, Tuple, Union, cast
 from types import ModuleType
 
 
@@ -373,7 +374,9 @@ For example: ``bar = toolkit.aslist(config.get('ckan.foo.bar', []))``
         add_public_path(path, url)
 
     @classmethod
-    def _add_served_directory(cls, config, relative_path, config_var):
+    def _add_served_directory(
+            cls, config: CKANConfig,
+            relative_path: str, config_var: str) -> str:
         ''' Add extra public/template directories to config. '''
         import inspect
         import os
@@ -444,7 +447,7 @@ For example: ``bar = toolkit.aslist(config.get('ckan.foo.bar', []))``
         config.update({config_var: admin_tabs_dict})
 
     @classmethod
-    def _version_str_2_list(cls, v_str):
+    def _version_str_2_list(cls, v_str: str) -> List[int]:
         ''' convert a version string into a list of ints
         eg 1.6.1b --> [1, 6, 1] '''
         import re
@@ -541,7 +544,7 @@ For example: ``bar = toolkit.aslist(config.get('ckan.foo.bar', []))``
             return (endpoint[0], 'index')
         return endpoint[0], endpoint[1]
 
-    def __getattr__(self, name):
+    def __getattr__(self, name: str) -> Any:
         ''' return the function/object requested '''
         if not self._toolkit:
             self._initialize()
@@ -552,7 +555,7 @@ For example: ``bar = toolkit.aslist(config.get('ckan.foo.bar', []))``
                 return self.__class__.__bases__
             raise AttributeError('`%s` not found in plugins toolkit' % name)
 
-    def __dir__(self):
+    def __dir__(self) -> List[str]:
         if not self._toolkit:
             self._initialize()
         return sorted(self._toolkit.keys())
