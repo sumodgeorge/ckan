@@ -11,7 +11,7 @@ import datetime
 import logging
 import re
 import os
-from typing import Any, Callable, List, NoReturn, cast, overload
+from typing import Any, Callable, List, Match, NoReturn, cast
 import pytz
 import tzlocal
 import pprint
@@ -56,7 +56,6 @@ from ckan.common import _, ungettext, c, g, request, session, json
 from ckan.lib.webassets_tools import include_asset, render_assets
 from markupsafe import Markup, escape
 from typing import Dict, Iterable, Optional, Tuple, TypeVar, Union
-from typing_extensions import Protocol
 from flask.wrappers import Response
 
 T = TypeVar("T")
@@ -138,7 +137,7 @@ def core_helper(f: Helper, name: Optional[str] = None) -> Helper:
     """
     Register a function as a builtin helper method.
     """
-    def _get_name(func_or_class):
+    def _get_name(func_or_class: Union[Callable[..., Any], type]):
         # Handles both methods and class instances.
         try:
             return func_or_class.__name__
@@ -149,7 +148,7 @@ def core_helper(f: Helper, name: Optional[str] = None) -> Helper:
     return f
 
 
-def _is_chained_helper(func: Callable) -> bool:
+def _is_chained_helper(func: Callable[..., Any]) -> bool:
     return getattr(func, 'chained_helper', False)
 
 
@@ -248,7 +247,7 @@ def redirect_to(*args: Any, **kw: Any) -> Response:
 
 @maintain.deprecated('h.url is deprecated please use h.url_for')
 @core_helper
-def url(*args, **kw) -> str:
+def url(*args: Any, **kw: Any) -> str:
     '''
     Deprecated: please use `url_for` instead
     '''
@@ -392,7 +391,7 @@ def url_for(*args: Any, **kw: Any) -> str:
     return _local_url(my_url, locale=locale, **kw)
 
 
-def _url_for_flask(*args, **kw):
+def _url_for_flask(*args: Any, **kw: Any) -> str:
     '''Build a URL using the Flask router
 
     This function should not be called directly, use ``url_for`` instead
@@ -475,7 +474,7 @@ def _url_for_flask(*args, **kw):
     return my_url
 
 
-def _url_for_pylons(*args, **kw):
+def _url_for_pylons(*args: Any, **kw: Any) -> str:
     '''Build a URL using the Pylons (Routes) router
 
     This function should not be called directly, use ``url_for`` instead
@@ -523,7 +522,7 @@ def url_for_static_or_external(*args: Any, **kw: Any) -> str:
     '''Returns the URL for static content that doesn't get translated (eg CSS),
     or external URLs
     '''
-    def fix_arg(arg):
+    def fix_arg(arg: Any):
         url = urlparse(str(arg))
         url_is_relative = (url.scheme == '' and url.netloc == '' and
                            not url.path.startswith('/'))
@@ -562,7 +561,7 @@ def is_url(*args: Any, **kw: Any) -> bool:
     return url.scheme in (valid_schemes or default_valid_schemes)
 
 
-def _local_url(url_to_amend, **kw):
+def _local_url(url_to_amend: str, **kw: Any):
     # If the locale keyword param is provided then the url is rewritten
     # using that locale .If return_to is provided this is used as the url
     # (as part of the language changing feature).
@@ -760,7 +759,7 @@ class _Flash(object):
                  message: FlashMessage,
                  category: Optional[str] = None,
                  ignore_duplicate: bool = False,
-                 allow_html=False):
+                 allow_html: bool = False):
         if not category:
             category = self.default_category
         elif self.categories and category not in self.categories:
@@ -821,7 +820,7 @@ def are_there_flash_messages() -> bool:
     return flash.are_there_messages()
 
 
-def _link_active(kwargs) -> bool:
+def _link_active(kwargs: Any) -> bool:
     ''' creates classes for the link_to calls '''
     if is_flask_request():
         return _link_active_flask(kwargs)
@@ -829,7 +828,7 @@ def _link_active(kwargs) -> bool:
         return _link_active_pylons(kwargs)
 
 
-def _link_active_pylons(kwargs) -> bool:
+def _link_active_pylons(kwargs: Any) -> bool:
     highlight_controllers = kwargs.get('highlight_controllers', [])
     if highlight_controllers and c.controller in highlight_controllers:
         return True
@@ -840,7 +839,7 @@ def _link_active_pylons(kwargs) -> bool:
             and c.action in highlight_actions)
 
 
-def _link_active_flask(kwargs) -> bool:
+def _link_active_flask(kwargs: Any) -> bool:
     blueprint, endpoint = p.toolkit.get_endpoint()
 
     highlight_controllers = kwargs.get('highlight_controllers', [])
@@ -851,11 +850,11 @@ def _link_active_flask(kwargs) -> bool:
             kwargs.get('action') == endpoint)
 
 
-def _link_to(text, *args, **kwargs) -> Markup:
+def _link_to(text: str, *args: Any, **kwargs: Any) -> Markup:
     '''Common link making code for several helper functions'''
     assert len(args) < 2, 'Too many unnamed arguments'
 
-    def _link_class(kwargs):
+    def _link_class(kwargs: Dict[str, Any]):
         ''' creates classes for the link_to calls '''
         suppress_active_class = kwargs.pop('suppress_active_class', False)
         if not suppress_active_class and _link_active(kwargs):
@@ -865,7 +864,7 @@ def _link_to(text, *args, **kwargs) -> Markup:
         kwargs.pop('highlight_actions', '')
         return kwargs.pop('class_', '') + active or None
 
-    def _create_link_text(text, **kwargs):
+    def _create_link_text(text: str, **kwargs: Any):
         ''' Update link text to add a icon or span if specified in the
         kwargs '''
         if kwargs.pop('inner_span', None):
@@ -919,7 +918,9 @@ def _make_safe_id_component(idstring: str) -> str:
     return idstring
 
 
-def _input_tag(type, name, value=None, id=None, **attrs):
+def _input_tag(
+        type: str, name: str, value: Optional[str] = None,
+        id: Optional[str] = None, **attrs: Any):
     attrs = _preprocess_dom_attrs(attrs)
     attrs.update(type=type, name=name, value=value)
     if u"id" not in attrs:
@@ -940,7 +941,8 @@ def link_to(label: str, url: str, **attrs: Any) -> Markup:
 @maintain.deprecated(u'h.submit is deprecated. '
                      u'Use h.literal(<markup or dominate.tags>) instead.')
 @core_helper
-def submit(name, value=None, id=None, **attrs) -> Markup:
+def submit(name: str, value: Optional[str] = None,
+           id: Optional[str] = None, **attrs: Any) -> Markup:
     """Create a submit field.
 
     Deprecated: Use h.literal(<markup or dominate.tags>) instead.
@@ -962,7 +964,7 @@ def nav_link(text: str, *args: Any, **kwargs: Any) -> Union[Markup, str]:
         return nav_link_pylons(text, *args, **kwargs)
 
 
-def nav_link_flask(text, *args, **kwargs):
+def nav_link_flask(text: str, *args: Any, **kwargs: Any):
     if len(args) > 1:
         raise Exception('Too many unnamed parameters supplied')
     blueprint, endpoint = p.toolkit.get_endpoint()
@@ -980,7 +982,7 @@ def nav_link_flask(text, *args, **kwargs):
     return link
 
 
-def nav_link_pylons(text, *args, **kwargs):
+def nav_link_pylons(text: str, *args: Any, **kwargs: Any):
     if len(args) > 1:
         raise Exception('Too many unnamed parameters supplied')
     if args:
@@ -1002,7 +1004,7 @@ def nav_link_pylons(text, *args, **kwargs):
 @maintain.deprecated('h.nav_named_link is deprecated please '
                      'use h.nav_link\nNOTE: you will need to pass the '
                      'route_name as a named parameter')
-def nav_named_link(text, named_route, **kwargs):
+def nav_named_link(text: str, named_route: str, **kwargs: Any):
     '''Create a link for a named route.
     Deprecated in ckan 2.0 '''
     return nav_link(text, named_route=named_route, **kwargs)
@@ -1013,7 +1015,7 @@ def nav_named_link(text, named_route, **kwargs):
                      'use h.nav_link\nNOTE: if action is passed as the second '
                      'parameter make sure it is passed as a named parameter '
                      'eg. `action=\'my_action\'')
-def subnav_link(text, action, **kwargs):
+def subnav_link(text: str, action: str, **kwargs: Any):
     '''Create a link for a named route.
     Deprecated in ckan 2.0 '''
     kwargs['action'] = action
@@ -1024,7 +1026,7 @@ def subnav_link(text, action, **kwargs):
 @maintain.deprecated('h.subnav_named_route is deprecated please '
                      'use h.nav_link\nNOTE: you will need to pass the '
                      'route_name as a named parameter')
-def subnav_named_route(text, named_route, **kwargs):
+def subnav_named_route(text: str, named_route: str, **kwargs: Any):
     '''Generate a subnav element based on a named route
     Deprecated in ckan 2.0 '''
     return nav_link(text, named_route=named_route, **kwargs)
@@ -1097,7 +1099,7 @@ def build_nav(menu_item: str, title: str, **kw: Any) -> Markup:
     return _make_menu_item(menu_item, title, icon=None, **kw)
 
 
-def map_pylons_to_flask_route_name(menu_item):
+def map_pylons_to_flask_route_name(menu_item: str):
     '''returns flask routes for old fashioned route names'''
     # Pylons to Flask legacy route names mappings
     mappings = config.get('ckan.legacy_route_mappings')
@@ -1134,7 +1136,7 @@ def build_extra_admin_nav() -> Markup:
     return output
 
 
-def _make_menu_item(menu_item, title, **kw) -> Markup:
+def _make_menu_item(menu_item: str, title: str, **kw: Any) -> Markup:
     ''' build a navigation item used for example breadcrumbs
 
     outputs <li><a href="..."></i> title</a></li>
@@ -1356,7 +1358,7 @@ def unselected_facet_items(
 @core_helper
 @maintain.deprecated('h.get_facet_title is deprecated in 2.0 and will be '
                      'removed.')
-def get_facet_title(name):
+def get_facet_title(name: str) -> str:
     '''Deprecated in ckan 2.0 '''
     # if this is set in the config use this
     config_title = config.get('search.facets.%s.title' % name)
@@ -1401,7 +1403,7 @@ def _url_with_params(url: str, params: Optional[Iterable[Tuple[str,
 @core_helper
 def sorted_extras(package_extras: List[Dict[str, Any]],
                   auto_clean: bool = False,
-                  subs: Dict[str, str] = None,
+                  subs: Optional[Dict[str, str]] = None,
                   exclude: Optional[List[str]] = None
                   ) -> List[Tuple[str, Any]]:
     ''' Used for outputting package extras
@@ -1459,7 +1461,7 @@ def check_access(
                      "in a future version of CKAN. Instead, please use the "
                      "extra_vars param to render() in your controller to pass "
                      "results from action functions to your templates.")
-def get_action(action_name, data_dict=None):
+def get_action(action_name: str, data_dict: Optional[Dict[str, Any]] = None):
     '''Calls an action function from a template. Deprecated in CKAN 2.3.'''
     if data_dict is None:
         data_dict = {}
@@ -1869,7 +1871,9 @@ def parse_rfc_2822_date(date_str: str,
         return datetime.datetime.fromtimestamp(
             email.utils.mktime_tz(time_tuple))
     else:
-        offset = 0 if time_tuple[-1] is None else time_tuple[-1]
+        offset = time_tuple[-1]
+        if offset is None:
+            offset = 0
         tz_info = _RFC2282TzInfo(offset)
     return datetime.datetime(
         *time_tuple[:6], microsecond=0, tzinfo=tz_info)  # type: ignore
@@ -1886,16 +1890,16 @@ class _RFC2282TzInfo(datetime.tzinfo):
 
     '''
 
-    def __init__(self, offset):
+    def __init__(self, offset: int):
         '''
         offset from UTC in seconds.
         '''
         self.offset = datetime.timedelta(seconds=offset)
 
-    def utcoffset(self, dt):
+    def utcoffset(self, dt: Any):
         return self.offset
 
-    def dst(self, dt):
+    def dst(self, dt: Any):
         '''
         Dates parsed from an RFC 2822 string conflate timezone and dst, and so
         it's not possible to determine whether we're in DST or not, hence
@@ -1903,7 +1907,7 @@ class _RFC2282TzInfo(datetime.tzinfo):
         '''
         return None
 
-    def tzname(self, dt):
+    def tzname(self, dt: Any):
         return None
 
 
@@ -2124,10 +2128,10 @@ def follow_count(obj_type: str, obj_id: str) -> int:
     return logic.get_action(action)(context, {'id': obj_id})
 
 
-def _create_url_with_params(params=None,
-                            controller=None,
-                            action=None,
-                            extras=None):
+def _create_url_with_params(params: Optional[Iterable[Tuple[str, Any]]] = None,
+                            controller: Optional[str] = None,
+                            action: Optional[str] = None,
+                            extras: Optional[Dict[str, Any]] = None):
     ''' internal function for building urls with parameters. '''
     if not controller:
         controller = getattr(c, 'controller', False) or request.blueprint
@@ -2172,7 +2176,7 @@ def add_url_param(alternative_url: Optional[str] = None,
 
 
 @core_helper
-def remove_url_param(key: str,
+def remove_url_param(key: Union[List[str], str],
                      value: Optional[str] = None,
                      replace: Optional[str] = None,
                      controller: Optional[str] = None,
@@ -2438,24 +2442,24 @@ def html_auto_link(data: str) -> str:
     `http://` converted to a link
     '''
 
-    LINK_FNS = {
+    LINK_FNS: Dict[str, Callable[[Dict[str, str]], Markup]] = {
         'tag': tag_link,
         'group': group_link,
         'dataset': dataset_link,
         'package': dataset_link,
     }
 
-    def makelink(matchobj):
+    def makelink(matchobj: Match[str]):
         obj = matchobj.group(1)
         name = matchobj.group(2)
         title = '%s:%s' % (obj, name)
         return LINK_FNS[obj]({'name': name.strip('"'), 'title': title})
 
-    def link(matchobj):
+    def link(matchobj: Match[str]):
         return '<a href="%s" target="_blank" rel="nofollow">%s</a>' \
             % (matchobj.group(1), matchobj.group(1))
 
-    def process(matchobj):
+    def process(matchobj: Match[str]):
         data = matchobj.group(2)
         data = RE_MD_INTERNAL_LINK.sub(makelink, data)
         data = RE_MD_EXTERNAL_LINK.sub(link, data)
@@ -2790,7 +2794,7 @@ def get_featured_groups(count: int = 1) -> List[Dict[str, Any]]:
 @core_helper
 def featured_group_org(items: List[str], get_action: str, list_action: str,
                        count: int) -> List[Dict[str, Any]]:
-    def get_group(id):
+    def get_group(id: str):
         context: Context = {'ignore_auth': True,
                             'limits': {'packages': 2},
                             'for_view': True}
@@ -3056,7 +3060,8 @@ def compare_pkg_dicts(old: Dict[str, Any], new: Dict[str, Any],
 
 
 @core_helper
-def compare_group_dicts(old, new, old_activity_id):
+def compare_group_dicts(
+        old: Dict[str, Any], new: Dict[str, Any], old_activity_id: str):
     '''
     Takes two package dictionaries that represent consecutive versions of
     the same organization and returns a list of detailed & formatted summaries
@@ -3072,7 +3077,7 @@ def compare_group_dicts(old, new, old_activity_id):
     to form a detailed summary of the change.
     '''
     from ckan.lib.changes import check_metadata_org_changes
-    change_list = []
+    change_list: List[Dict[str, Any]] = []
 
     check_metadata_org_changes(change_list, old, new)
 

@@ -30,7 +30,7 @@ def convert_to_extras(key: TuplizedKey, data: Dict[TuplizedKey, Any],
 def convert_from_extras(key: TuplizedKey, data: Dict[TuplizedKey, Any],
                         errors: TuplizedErrorDict, context: Context) -> Any:
 
-    def remove_from_extras(data, key):
+    def remove_from_extras(data: Dict[TuplizedKey, Any], key: TuplizedKey):
         to_remove = []
         for data_key, data_value in six.iteritems(data):
             if (data_key[0] == 'extras'
@@ -49,7 +49,7 @@ def convert_from_extras(key: TuplizedKey, data: Dict[TuplizedKey, Any],
         return
     remove_from_extras(data, data_key[1])
 
-def extras_unicode_convert(extras, context):
+def extras_unicode_convert(extras: Dict[Any, Any], context: Context):
     for extra in extras:
         extras[extra] = text_type(extras[extra])
     return extras
@@ -65,7 +65,8 @@ def free_tags_only(key: TuplizedKey, data: Dict[TuplizedKey, Any],
             del data[k]
 
 def convert_to_tags(vocab: Any) -> DataValidator:
-    def func(key, data, errors, context):
+    def func(key: TuplizedKey, data: Dict[TuplizedKey, Any],
+             errors: TuplizedErrorDict, context: Context):
         new_tags = data.get(key)
         if not new_tags:
             return
@@ -92,7 +93,8 @@ def convert_to_tags(vocab: Any) -> DataValidator:
     return func
 
 def convert_from_tags(vocab: Any) -> DataValidator:
-    def func(key, data, errors, context):
+    def func(key: TuplizedKey, data: Dict[TuplizedKey, Any],
+             errors: TuplizedErrorDict, context: Context):
         v = model.Vocabulary.get(vocab)
         if not v:
             raise df.Invalid(_('Tag vocabulary "%s" does not exist') % vocab)
@@ -197,7 +199,7 @@ def convert_to_json_if_string(value: Any, context: Context) -> Any:
         return value
 
 
-def convert_to_list_if_string(value: Any, context=None) -> Any:
+def convert_to_list_if_string(value: Any) -> Any:
     if isinstance(value, string_types):
         return [value]
     else:

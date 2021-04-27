@@ -15,7 +15,7 @@ def validator_args(fn: ComplexSchemaFunc) -> PlainSchemaFunc:
     u'''collect validator names from argument names
     and pass them to wrapped function'''
 
-    args = inspect.getargspec(fn).args
+    args = inspect.signature(fn).parameters
 
     @wraps(fn)
     def wrapper():

@@ -1,6 +1,6 @@
 {
-  "strict": [
-  ],
+  "pythonVersion": "3.6",
+
   "useLibraryCodeForTypes": true,
   "reportMissingTypeStubs": false,
   "strictParameterNoneValue": true,
@@ -24,6 +24,7 @@
   "reportUnnecessaryIsInstance": true,
   "reportUnnecessaryCast": true,
   "reportUnnecessaryComparison": true,
+
   "include": [
     "ckan",
     "ckanext"
@@ -32,6 +33,8 @@
     "**/test*",
     "**/migration",
     "ckan/lib/create_test_data.py"
+  ],
+  "strict": [
   ],
   "reportTypedDictNotRequiredAccess": false
 }

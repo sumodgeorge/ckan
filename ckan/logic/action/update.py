@@ -30,7 +30,7 @@ import ckan.lib.app_globals as app_globals
 
 
 from ckan.common import _, request
-from typing import Any, Dict, List, TYPE_CHECKING, Union, cast
+from typing import Any, Dict, List, Optional, TYPE_CHECKING, Union, cast
 from ckan.types import Context, DataDict, Schema
 
 if TYPE_CHECKING:
@@ -155,6 +155,7 @@ def resource_view_update(context: Context, data_dict: DataDict) -> Dict[str, Any
     view_plugin = ckan.lib.datapreview.get_view_plugin(resource_view.view_type)
     schema = (context.get('schema') or
               schema_.default_update_resource_view_schema(view_plugin))
+    assert view_plugin
     plugin_schema = view_plugin.info().get('schema', {})
     schema.update(plugin_schema)
 
@@ -190,8 +191,6 @@ def resource_view_reorder(context: Context, data_dict: DataDict) -> Dict[str, An
     :returns: the updated order of the view
     :rtype: dictionary
     '''
-    id: str
-    order: List[str]
     model = context['model']
     id, order = _get_or_bust(data_dict, ["id", "order"])
     if not isinstance(order, list):
@@ -273,10 +272,7 @@ def package_update(context: Context, data_dict: DataDict) -> Union[str, Dict[str
     # get the schema
 
     package_plugin = lib_plugins.lookup_package_plugin(pkg.type)
-    if 'schema' in context:
-        schema = context['schema']
-    else:
-        schema = package_plugin.update_package_schema()
+    schema = context.get('schema') or package_plugin.update_package_schema()
     if 'api_version' not in context:
         # check_data_dict() is deprecated. If the package_plugin has a
         # check_data_dict() we'll call it, if it doesn't have the method we'll
@@ -321,7 +317,7 @@ def package_update(context: Context, data_dict: DataDict) -> Union[str, Dict[str
 
     pkg = model_save.package_dict_save(data, context)
 
-    context_org_update = cast(Context, context.copy())
+    context_org_update = context.copy()
     context_org_update['ignore_auth'] = True
     context_org_update['defer_commit'] = True
     _get_action('package_owner_org_update')(context_org_update,
@@ -643,7 +639,8 @@ def package_relationship_update(context: Context, data_dict: DataDict) -> Dict[s
     return _update_package_relationship(entity, comment, context)
 
 
-def _group_or_org_update(context, data_dict, is_org=False):
+def _group_or_org_update(
+        context: Context, data_dict: DataDict, is_org: bool = False):
     model = context['model']
     user = context['user']
     session = context['session']
@@ -687,7 +684,7 @@ def _group_or_org_update(context, data_dict, is_org=False):
         'organization_update' if is_org else 'group_update')
     log.debug('group_update validate_errs=%r user=%s group=%s data_dict=%r',
               errors, context.get('user'),
-              context.get('group').name if context.get('group') else '',
+              context['group'].name if context.get('group') else '',
               data_dict)
 
     if errors:
@@ -714,8 +711,10 @@ def _group_or_org_update(context, data_dict, is_org=False):
     else:
         activity_type = 'changed group'
 
-    activity_dict = {
-            'user_id': model.User.by_name(six.ensure_text(user)).id,
+    user_obj = model.User.by_name(six.ensure_text(user))
+    assert user_obj
+    activity_dict: Optional[Dict[str, Any]] = {
+            'user_id': user_obj.id,
             'object_id': group.id,
             'activity_type': activity_type,
             }
@@ -736,8 +735,8 @@ def _group_or_org_update(context, data_dict, is_org=False):
                 'deleted organization' if is_org else 'deleted group'
     if activity_dict is not None:
         activity_dict['data'] = {
-                'group': dictization.table_dictize(group, context)
-                }
+            'group': dictization.table_dictize(group, context)
+        }
         activity_create_context: Context = {
             'model': model,
             'user': user,
@@ -1126,7 +1125,9 @@ def dashboard_mark_activities_old(context: Context, data_dict: DataDict) -> None
     _check_access('dashboard_mark_activities_old', context,
             data_dict)
     model = context['model']
-    user_id = model.User.get(context['user']).id
+    user_obj = model.User.get(context['user'])
+    assert user_obj
+    user_id = user_obj.id
     model.Dashboard.get(user_id).activity_stream_last_viewed = (
             datetime.datetime.utcnow())
     if not context.get('defer_commit'):
@@ -1212,7 +1213,8 @@ def package_owner_org_update(context: Context, data_dict: DataDict) -> None:
         model.Session.commit()
 
 
-def _bulk_update_dataset(context, data_dict, update_dict):
+def _bulk_update_dataset(
+        context: Context, data_dict: DataDict, update_dict: Dict[str, Any]):
     ''' Bulk update shared code for organizations'''
 
     datasets = data_dict.get('datasets', [])
@@ -1220,8 +1222,9 @@ def _bulk_update_dataset(context, data_dict, update_dict):
 
     model = context['model']
     model.Session.query(model.package_table) \
-        .filter(model.Package.id.in_(datasets)) \
-        .filter(model.Package.owner_org == org_id) \
+        .filter(
+            model.Package.id.in_(datasets)  # type: ignore
+        ) .filter(model.Package.owner_org == org_id) \
         .update(update_dict, synchronize_session=False)
 
     # Handle Activity Stream for Bulk Operations
@@ -1233,6 +1236,7 @@ def _bulk_update_dataset(context, data_dict, update_dict):
         user_id = 'not logged in'
     for dataset in datasets:
         entity = model.Package.get(dataset)
+        assert entity
         activity = entity.activity_stream_item('changed', user_id)
         model.Session.add(activity)
     model.Session.commit()
@@ -1243,10 +1247,10 @@ def _bulk_update_dataset(context, data_dict, update_dict):
     # update the solr index in batches
     BATCH_SIZE = 50
 
-    def process_solr(q):
+    def process_solr(q: str):
         # update the solr index for the query
         query = search.PackageSearchQuery()
-        q = {
+        q_dict = {
             'q': q,
             'fl': 'data_dict',
             'wt': 'json',
@@ -1254,7 +1258,7 @@ def _bulk_update_dataset(context, data_dict, update_dict):
             'rows': BATCH_SIZE
         }
 
-        for result in query.run(q)['results']:
+        for result in query.run(q_dict)['results']:
             data_dict = json.loads(result['data_dict'])
             if data_dict['owner_org'] == org_id:
                 data_dict.update(update_dict)

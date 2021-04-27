@@ -17,10 +17,11 @@ import ckan.lib.dictization.model_dictize as model_dictize
 import ckan.lib.api_token as api_token
 from ckan import authz
 from  ckan.lib.navl.dictization_functions import validate
+from ckan.model.follower import ModelFollowingModel
 
 from ckan.common import _
-from typing import List, cast
-from ckan.types import Context, DataDict, ErrorDict
+from typing import Any, List, Type, cast
+from ckan.types import Context, DataDict, ErrorDict, Schema
 
 
 log = logging.getLogger('ckan.logic')
@@ -167,6 +168,7 @@ def dataset_purge(context: Context, data_dict: DataDict) -> None:
         r.purge()
 
     pkg = model.Package.get(id)
+    assert pkg
     pkg.purge()
     model.repo.commit_and_remove()
 
@@ -387,7 +389,8 @@ def package_collaborator_delete(context: Context, data_dict: DataDict) -> None:
         user_id, package.id))
 
 
-def _group_or_org_delete(context, data_dict, is_org=False):
+def _group_or_org_delete(
+        context: Context, data_dict: DataDict, is_org: bool = False):
     '''Delete a group.
 
     You must be authorized to delete the group.
@@ -452,8 +455,10 @@ def _group_or_org_delete(context, data_dict, is_org=False):
     else:
         activity_type = 'deleted group'
 
+    user_obj = model.User.by_name(six.ensure_text(user))
+    assert user_obj
     activity_dict = {
-        'user_id': model.User.by_name(six.ensure_text(user)).id,
+        'user_id': user_obj.id,
         'object_id': group.id,
         'activity_type': activity_type,
         'data': {
@@ -503,7 +508,8 @@ def organization_delete(context: Context, data_dict: DataDict) -> None:
     '''
     return _group_or_org_delete(context, data_dict, is_org=True)
 
-def _group_or_org_purge(context, data_dict, is_org=False):
+def _group_or_org_purge(
+        context: Context, data_dict: DataDict, is_org: bool = False):
     '''Purge a group or organization.
 
     The group or organization will be completely removed from the database.
@@ -566,6 +572,7 @@ def _group_or_org_purge(context, data_dict, is_org=False):
         model.repo.commit_and_remove()
 
     group = model.Group.get(id)
+    assert group
     group.purge()
     model.repo.commit_and_remove()
 
@@ -686,10 +693,12 @@ def tag_delete(context: Context, data_dict: DataDict) -> None:
     model.repo.commit()
 
 
-def _unfollow(context, data_dict, schema, FollowerClass):
+def _unfollow(
+        context: Context, data_dict: DataDict, schema: Schema,
+        FollowerClass: Type['ModelFollowingModel[Any, Any]']):
     model = context['model']
 
-    if 'user' not in context:
+    if not context.get('user'):
         raise ckan.logic.NotAuthorized(
                 _("You must be logged in to unfollow something."))
     userobj = model.User.get(context['user'])
@@ -745,6 +754,7 @@ def _group_or_org_member_delete(context: Context,
     group = model.Group.get(group_id)
     user_id = data_dict.get('username')
     user_id = data_dict.get('user_id') if user_id is None else user_id
+    assert group
     member_dict = {
         'id': group.id,
         'object': user_id,

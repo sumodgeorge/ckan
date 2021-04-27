@@ -805,7 +805,7 @@ class IResourceController(Interface):
         '''
         pass
 
-    def before_delete(self, context: Context, resource: 'model.Resource',
+    def before_delete(self, context: Context, resource: Dict[str, Any],
                       resources: List[Dict[str, Any]]) -> None:
         u'''
         Extensions will receive this before a resource is deleted.

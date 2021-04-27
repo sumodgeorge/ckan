@@ -1201,7 +1201,7 @@ def user_invite(context: Context, data_dict: DataDict) -> Dict[str, Any]:
     return model_dictize.user_dictize(user, context)
 
 
-def _get_random_username_from_email(email):
+def _get_random_username_from_email(email: str):
     localpart = email.split('@')[0]
     cleaned_localpart = re.sub(r'[^\w]', '-', localpart).lower()
 
@@ -1255,7 +1255,7 @@ def vocabulary_create(context: Context, data_dict: DataDict) -> Dict[str, Any]:
     return model_dictize.vocabulary_dictize(vocabulary, context)
 
 
-def activity_create(context, activity_dict, **kw):
+def activity_create(context: Context, activity_dict: DataDict):
     '''Create a new activity stream activity.
 
     You must be a sysadmin to create new activities.
@@ -1278,13 +1278,6 @@ def activity_create(context, activity_dict, **kw):
     '''
 
     _check_access('activity_create', context, activity_dict)
-
-    # this action had a ignore_auth param which has been removed
-    # removed in 2.2
-    if 'ignore_auth' in kw:
-        raise Exception('Activity Stream calling parameters have changed '
-                        'ignore_auth must be passed in the context not as '
-                        'a param')
 
     if not ckan.common.asbool(
             config.get('ckan.activity_streams_enabled', 'true')):
@@ -1368,23 +1361,18 @@ def follow_user(context: Context, data_dict: DataDict) -> Dict[str, Any]:
     :rtype: dictionary
 
     '''
-    if 'user' not in context:
+    if not context.get('user'):
         raise NotAuthorized(_("You must be logged in to follow users"))
 
     model = context['model']
-    session = context['session']
-
     userobj = model.User.get(context['user'])
     if not userobj:
         raise NotAuthorized(_("You must be logged in to follow users"))
 
-    if 'schema' in context:
-        schema = context['schema']
-    else:
-        schema = ckan.logic.schema.default_follow_user_schema()
+    schema = context.get(
+        'schema') or  ckan.logic.schema.default_follow_user_schema()
 
 
-    context = cast(Context, context)
     validated_data_dict, errors = _validate(data_dict, schema, context)
 
     if errors:
@@ -1431,24 +1419,19 @@ def follow_dataset(context: Context, data_dict: DataDict) -> Dict[str, Any]:
 
     '''
 
-    if 'user' not in context:
+    if not context.get('user'):
         raise NotAuthorized(
             _("You must be logged in to follow a dataset."))
 
     model = context['model']
-    session = context['session']
-
     userobj = model.User.get(context['user'])
     if not userobj:
         raise NotAuthorized(
             _("You must be logged in to follow a dataset."))
 
-    if 'schema' in context:
-        schema = context['schema']
-    else:
-        schema = ckan.logic.schema.default_follow_dataset_schema()
+    schema = context.get(
+        'schema') or ckan.logic.schema.default_follow_dataset_schema()
 
-    context = cast(Context, context)
     validated_data_dict, errors = _validate(data_dict, schema, context)
 
     if errors:
@@ -1580,19 +1563,17 @@ def follow_group(context: Context, data_dict: DataDict) -> Dict[str, Any]:
     :rtype: dictionary
 
     '''
-    if 'user' not in context:
+    if not context.get('user'):
         raise NotAuthorized(
             _("You must be logged in to follow a group."))
 
     model = context['model']
-    session = context['session']
 
     userobj = model.User.get(context['user'])
     if not userobj:
         raise NotAuthorized(
             _("You must be logged in to follow a group."))
 
-    context = cast(Context, context)
     schema = context.get('schema',
                          ckan.logic.schema.default_follow_group_schema())
 
@@ -1606,6 +1587,7 @@ def follow_group(context: Context, data_dict: DataDict) -> Dict[str, Any]:
     if model.UserFollowingGroup.is_following(userobj.id,
                                              validated_data_dict['id']):
         groupobj = model.Group.get(validated_data_dict['id'])
+        assert groupobj
         name = groupobj.display_name
         message = _(
             'You are already following {0}').format(name)

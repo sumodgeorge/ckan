@@ -13,6 +13,7 @@ from six.moves.urllib.parse import urlparse  # type: ignore
 
 import ckan.lib.navl.dictization_functions as df
 import ckan.logic as logic
+import ckan.logic.converters as converters
 import ckan.lib.helpers as h
 from ckan.model import (MAX_TAG_LENGTH, MIN_TAG_LENGTH,
                         PACKAGE_NAME_MIN_LENGTH, PACKAGE_NAME_MAX_LENGTH,
@@ -844,7 +845,7 @@ def if_empty_guess_format(key: TuplizedKey, data: Dict[TuplizedKey, Any],
         if mimetype:
             data[key] = mimetype
 
-def clean_format(format):
+def clean_format(format: str):
     return h.unified_resource_format(format)
 
 
@@ -873,7 +874,7 @@ def filter_fields_and_values_should_have_same_length(key: TuplizedKey,
                                                                 Any],
                                                      errors: TuplizedErrorDict,
                                                      context: Context) -> Any:
-    convert_to_list_if_string = logic.converters.convert_to_list_if_string  # type: ignore
+    convert_to_list_if_string = converters.convert_to_list_if_string  # type: ignore
     fields = convert_to_list_if_string(data.get(('filter_fields',), []))
     values = convert_to_list_if_string(data.get(('filter_values',), []))
 
@@ -887,7 +888,7 @@ def filter_fields_and_values_exist_and_are_valid(key: TuplizedKey,
                                                  data: Dict[TuplizedKey, Any],
                                                  errors: TuplizedErrorDict,
                                                  context: Context) -> Any:
-    convert_to_list_if_string = logic.converters.convert_to_list_if_string  # type: ignore
+    convert_to_list_if_string = converters.convert_to_list_if_string
     fields = convert_to_list_if_string(data.get(('filter_fields',)))
     values = convert_to_list_if_string(data.get(('filter_values',)))
 

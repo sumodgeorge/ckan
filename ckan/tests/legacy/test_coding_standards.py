@@ -507,7 +507,7 @@ class TestActionAuth(object):
     that each auth function has an action.  We check the function only
     accepts (context, data_dict) as parameters. """
 
-    ACTION_FN_SIGNATURES_BLACKLIST = ["create: activity_create"]
+    ACTION_FN_SIGNATURES_BLACKLIST = []
 
     ACTION_NO_AUTH_BLACKLIST = [
         "create: follow_dataset",
