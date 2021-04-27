@@ -21,7 +21,7 @@ def dataset():
 
 @dataset.command()
 @click.argument(u'package')
-def show(package):
+def show(package: str):
     u'''Shows dataset properties.
     '''
     dataset = _get_dataset(package)
@@ -48,7 +48,7 @@ def list():
 
 @dataset.command()
 @click.argument(u'package')
-def delete(package):
+def delete(package: str):
     u'''Changes dataset state to 'deleted'.
     '''
     dataset = _get_dataset(package)
@@ -67,7 +67,7 @@ def delete(package):
 
 @dataset.command()
 @click.argument(u'package')
-def purge(package):
+def purge(package: str):
     u'''Removes dataset from db entirely.
     '''
     dataset = _get_dataset(package)
@@ -79,7 +79,7 @@ def purge(package):
     click.echo(u'%s purged' % name)
 
 
-def _get_dataset(package):
+def _get_dataset(package: str):
     dataset = model.Package.get(text_type(package))
     assert dataset, u'Could not find dataset matching reference: {}'.format(
         package

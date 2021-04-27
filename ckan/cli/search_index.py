@@ -1,6 +1,7 @@
 # encoding: utf-8
 
 import multiprocessing as mp
+from typing import Any, List
 
 import click
 import sqlalchemy as sa
@@ -30,7 +31,8 @@ def search_index():
                    u'is false.')
 @click.argument(u'package_id', required=False)
 def rebuild(
-        verbose, force, refresh, only_missing, quiet, commit_each, package_id
+        verbose: bool, force: bool, refresh: bool, only_missing: bool,
+        quiet: bool, commit_each: bool, package_id: str
 ):
     u''' Rebuild search index '''
     from ckan.lib.search import rebuild, commit
@@ -56,7 +58,7 @@ def check():
 
 @search_index.command(name=u'show', short_help=u'Show index of a dataset')
 @click.argument(u'dataset_name')
-def show(dataset_name):
+def show(dataset_name: str):
     from ckan.lib.search import show
 
     index = show(dataset_name)
@@ -65,7 +67,7 @@ def show(dataset_name):
 
 @search_index.command(name=u'clear', short_help=u'Clear the search index')
 @click.argument(u'dataset_name', required=False)
-def clear(dataset_name):
+def clear(dataset_name: str):
     from ckan.lib.search import clear, clear_all
 
     if dataset_name:
@@ -86,11 +88,11 @@ def rebuild_fast():
     for row in result:
         package_ids.append(row[0])
 
-    def start(ids):
+    def start(ids: List[str]):
         from ckan.lib.search import rebuild
         rebuild(package_ids=ids)
 
-    def chunks(list_, n):
+    def chunks(list_: List[Any], n: int):
         u""" Yield n successive chunks from list_"""
         newn = int(len(list_) / n)
         for i in range(0, n - 1):

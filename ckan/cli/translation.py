@@ -1,5 +1,6 @@
 # encoding: utf-8
 
+from typing import Any, Dict, List, Tuple
 import polib
 import re
 import logging
@@ -82,7 +83,7 @@ def mangle():
     u'check-po', short_help=u'Check po files for common mistakes'
 )
 @click.argument(u'files', nargs=-1, type=click.Path(exists=True))
-def check_po(files):
+def check_po(files: List[str]):
     for file in files:
         errors = check_po_file(file)
         for msgid, msgstr in errors:
@@ -99,7 +100,7 @@ def check_po(files):
     'with the ones on the pot file'
 )
 @click.argument(u'files', nargs=-1, type=click.Path(exists=True))
-def sync_po_msgids(files):
+def sync_po_msgids(files: List[str]):
     i18n_path = get_i18n_path()
     pot_path = os.path.join(i18n_path, u'ckan.pot')
     po = polib.pofile(pot_path)
@@ -111,11 +112,11 @@ def sync_po_msgids(files):
         sync_po_file_msgids(entries_to_change, path)
 
 
-def normalize_string(s):
+def normalize_string(s: str):
     return re.sub(r'\s\s+', ' ', s).strip()
 
 
-def sync_po_file_msgids(entries_to_change, path):
+def sync_po_file_msgids(entries_to_change: Dict[str, Any], path: str):
 
     po = polib.pofile(path)
     cnt = 0
@@ -134,11 +135,11 @@ def sync_po_file_msgids(entries_to_change, path):
     )
 
 
-def get_i18n_path():
+def get_i18n_path() -> str:
     return config.get(u'ckan.i18n_directory', os.path.join(ckan_path, u'i18n'))
 
 
-def simple_conv_specs(s):
+def simple_conv_specs(s: str):
     '''Return the simple Python string conversion specifiers in the string s.
 
     e.g. ['%s', '%i']
@@ -149,7 +150,7 @@ def simple_conv_specs(s):
     return simple_conv_specs_re.findall(s)
 
 
-def mapping_keys(s):
+def mapping_keys(s: str):
     '''Return a sorted list of the mapping keys in the string s.
 
     e.g. ['%(name)s', '%(age)i']
@@ -160,7 +161,7 @@ def mapping_keys(s):
     return sorted(mapping_keys_re.findall(s))
 
 
-def replacement_fields(s):
+def replacement_fields(s: str):
     '''Return a sorted list of the Python replacement fields in the string s.
 
     e.g. ['{}', '{2}', '{object}', '{target}']
@@ -171,13 +172,13 @@ def replacement_fields(s):
     return sorted(repl_fields_re.findall(s))
 
 
-def check_translation(validator, msgid, msgstr):
+def check_translation(validator: Any, msgid: str, msgstr: str):
     if not validator(msgid) == validator(msgstr):
         return msgid, msgstr
 
 
-def check_po_file(path):
-    errors = []
+def check_po_file(path: str):
+    errors: List[Tuple[str, str]] = []
     po = polib.pofile(path)
     for entry in po.translated_entries():
         if entry.msgid_plural and entry.msgstr_plural:

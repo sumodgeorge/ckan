@@ -58,7 +58,7 @@ def clean():
 @db.command()
 @click.option(u'-v', u'--version', help=u'Migration version', default=u'head')
 @applies_to_plugin
-def upgrade(version, plugin):
+def upgrade(version: str, plugin: str):
     """Upgrade the database.
     """
     try:
@@ -74,7 +74,7 @@ def upgrade(version, plugin):
 @db.command()
 @click.option(u'-v', u'--version', help=u'Migration version', default=u'base')
 @applies_to_plugin
-def downgrade(version, plugin):
+def downgrade(version: str, plugin: str):
     """Downgrade the database.
     """
     try:
@@ -89,7 +89,7 @@ def downgrade(version, plugin):
 
 @db.command()
 @applies_to_plugin
-def version(plugin):
+def version(plugin: str):
     """Returns current version of data schema.
     """
     import ckan.model as model
@@ -131,7 +131,7 @@ def duplicate_emails():
         tk.error_shout(e)
 
 
-def _version_hash_to_ordinal(version):
+def _version_hash_to_ordinal(version: str):
     if u'base' == version:
         return 0
     versions_dir = os.path.join(os.path.dirname(migration_repo.__file__),
@@ -148,7 +148,7 @@ def _version_hash_to_ordinal(version):
         version, versions_dir))
 
 
-def _resolve_alembic_config(plugin):
+def _resolve_alembic_config(plugin: str):
     if plugin:
         plugin_obj = p.get_plugin(plugin)
         if plugin_obj is None:

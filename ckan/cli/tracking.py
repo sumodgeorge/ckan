@@ -1,5 +1,6 @@
 # encoding: utf-8
 
+from typing import Any, Optional, Union
 import ckan.model as model
 import click
 import datetime
@@ -18,7 +19,7 @@ def tracking():
 
 @tracking.command()
 @click.argument(u'start_date', required=False)
-def update(start_date):
+def update(start_date: Optional[str]):
     engine = model.meta.engine
     update_all(engine, start_date)
 
@@ -26,16 +27,16 @@ def update(start_date):
 @tracking.command()
 @click.argument(u'output_file', type=click.Path())
 @click.argument(u'start_date', required=False)
-def export(output_file, start_date):
+def export(output_file: Any, start_date: Optional[str]):
     engine = model.meta.engine
 
     update_all(engine, start_date)
     export_tracking(engine, output_file)
 
 
-def update_all(engine, start_date=None):
-    if start_date:
-        start_date = datetime.datetime.strptime(start_date, u'%Y-%m-%d')
+def update_all(engine: Any, start_date_str: Optional[str] = None):
+    if start_date_str:
+        start_date = datetime.datetime.strptime(start_date_str, u'%Y-%m-%d')
     else:
         # No date given. See when we last have data for and get data
         # from 2 days before then in case new data is available.
@@ -63,7 +64,7 @@ def update_all(engine, start_date=None):
     update_tracking_solr(engine, start_date_solrsync)
 
 
-def _total_views(engine):
+def _total_views(engine: Any):
     sql = u'''
         SELECT p.id,
                 p.name,
@@ -76,7 +77,7 @@ def _total_views(engine):
     return [ViewCount(*t) for t in engine.execute(sql).fetchall()]
 
 
-def _recent_views(engine, measure_from):
+def _recent_views(engine: Any, measure_from: Any):
     sql = u'''
         SELECT p.id,
                 p.name,
@@ -94,7 +95,7 @@ def _recent_views(engine, measure_from):
     ]
 
 
-def export_tracking(engine, output_filename):
+def export_tracking(engine: Any, output_filename: str):
     u'''Write tracking summary to a csv file.'''
     HEADINGS = [
         u'dataset id',
@@ -118,7 +119,7 @@ def export_tracking(engine, output_filename):
                         for r in total_views])
 
 
-def update_tracking(engine, summary_date):
+def update_tracking(engine: Any, summary_date: datetime.datetime):
     PACKAGE_URL = u'/dataset/'
     # clear out existing data before adding new
     sql = u'''DELETE FROM tracking_summary
@@ -191,7 +192,7 @@ def update_tracking(engine, summary_date):
     engine.execute(sql)
 
 
-def update_tracking_solr(engine, start_date):
+def update_tracking_solr(engine: Any, start_date: datetime.datetime):
     sql = u'''SELECT package_id FROM tracking_summary
             where package_id!='~~not~found~~'
             and tracking_date >= %s;'''

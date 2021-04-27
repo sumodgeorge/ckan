@@ -37,7 +37,7 @@ def generate():
               help=u"Location to put the generated "
               u"template.",
               default=u'.')
-def extension(output_dir):
+def extension(output_dir: str):
     """Generate empty extension files to expand CKAN.
     """
     try:
@@ -108,7 +108,7 @@ def extension(output_dir):
 @generate.command(name=u'config',
                   short_help=u'Create a ckan.ini file.')
 @click.argument(u'output_path', nargs=1)
-def make_config(output_path):
+def make_config(output_path: str):
     u"""Generate a new CKAN configuration ini file."""
 
     # Output to current directory if no path is specified
@@ -144,7 +144,7 @@ def make_config(output_path):
 @click.option(u"-m",
               u"--message",
               help=u"Message string to use with `revision`.")
-def migration(plugin, message):
+def migration(plugin: str, message: str):
     """Create new alembic revision for DB migration.
     """
     import ckan.model

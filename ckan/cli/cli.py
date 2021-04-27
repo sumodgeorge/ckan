@@ -1,7 +1,9 @@
 # encoding: utf-8
 
+from ckan.plugins.core import SingletonPlugin
 import logging
 from collections import defaultdict
+from typing import Any, Generator, List, Optional
 from pkg_resources import iter_entry_points
 
 import six
@@ -43,24 +45,25 @@ _no_config_commands = [
 
 class CkanCommand(object):
 
-    def __init__(self, conf=None):
+    def __init__(self, conf: Optional[str] = None):
         # Don't import `load_config` by itself, rather call it using
         # module so that it can be patched during tests
         self.config = ckan_cli.load_config(conf)
         self.app = make_app(self.config)
 
 
-def _get_commands_from_plugins(plugins):
+def _get_commands_from_plugins(
+        plugins: "p.PluginImplementations[p.IClick]") -> Generator[Any, None, None]:
     for plugin in plugins:
         for cmd in plugin.get_commands():
-            cmd._ckan_meta = {
+            cmd._ckan_meta = {  # type: ignore
                 u'name': plugin.name,
                 u'type': u'plugin'
             }
             yield cmd
 
 
-def _get_commands_from_entry_point(entry_point=u'ckan.click_command'):
+def _get_commands_from_entry_point(entry_point: str = u'ckan.click_command'):
     registered_entries = {}
     for entry in iter_entry_points(entry_point):
         if entry.name in registered_entries:
@@ -85,7 +88,7 @@ def _get_commands_from_entry_point(entry_point=u'ckan.click_command'):
         yield cmd
 
 
-def _init_ckan_config(ctx, param, value):
+def _init_ckan_config(ctx: Any, param: str, value: str):
     is_help = u'--help' in sys.argv
     no_config = False
     if len(sys.argv) > 1:
@@ -115,7 +118,7 @@ def _init_ckan_config(ctx, param, value):
         ctx.command.add_command(cmd)
 
 
-click_config_option = click.option(
+click_config_option = click.option(  # type: ignore
     u'-c',
     u'--config',
     default=None,
@@ -132,7 +135,7 @@ class CustomGroup(click.Group):
         u'entry_point': u'Entry points',
     }
 
-    def format_commands(self, ctx, formatter):
+    def format_commands(self, ctx: Any, formatter: Any):
         # Without any arguments click skips option callbacks.
         self.parse_args(ctx, [u'help'])
 
@@ -165,7 +168,7 @@ class CustomGroup(click.Group):
 @click.group(cls=CustomGroup)
 @click.help_option(u'-h', u'--help')
 @click_config_option
-def ckan(config, *args, **kwargs):
+def ckan(config: Any, *args: Any, **kwargs: Any):
     pass
 
 

@@ -2,7 +2,7 @@
 
 from ckan.types import Context
 import logging
-from typing import cast
+from typing import Any, Dict, List, cast
 import six
 import click
 from six import text_type
@@ -28,7 +28,7 @@ def user():
 @click.argument(u'username')
 @click.argument(u'args', nargs=-1)
 @click.pass_context
-def add_user(ctx, username, args):
+def add_user(ctx: Any, username: str, args: List[str]):
     u'''Add new user if we use ckan sysadmin add
     or ckan user add
     '''
@@ -82,7 +82,7 @@ def add_user(ctx, username, args):
         raise click.Abort()
 
 
-def get_user_str(user):
+def get_user_str(user: model.User):
     user_str = u'name=%s' % user.name
     if user.name != user.display_name:
         user_str += u' display=%s' % user.display_name
@@ -102,7 +102,7 @@ def list_users():
 @user.command(u'remove', short_help=u'Remove user')
 @click.argument(u'username')
 @click.pass_context
-def remove_user(ctx, username):
+def remove_user(ctx: Any, username: str):
     if not username:
         error_shout(u'Please specify the username to be removed')
         return
@@ -116,7 +116,7 @@ def remove_user(ctx, username):
 
 @user.command(u'show', short_help=u'Show user')
 @click.argument(u'username')
-def show_user(username):
+def show_user(username: str):
     import ckan.model as model
     if not username:
         error_shout(u'Please specify the username for the user')
@@ -127,7 +127,7 @@ def show_user(username):
 
 @user.command(u'setpass', short_help=u'Set password for the user')
 @click.argument(u'username')
-def set_password(username):
+def set_password(username: str):
     import ckan.model as model
     if not username:
         error_shout(u'Need name of the user.')
@@ -162,7 +162,8 @@ def token():
     default=u"{}",
     help=u"Valid JSON object with additional fields for api_token_create",
 )
-def add_token(username, token_name, extras, json):
+def add_token(username: str, token_name: str,
+              extras: List[str], json: Dict[str, Any]):
     """Create a new API Token for the given user.
 
     Arbitrary fields can be passed in the form `key=value` or using
@@ -201,7 +202,7 @@ def add_token(username, token_name, extras, json):
 
 @token.command(u"revoke")
 @click.argument(u"id")
-def revoke_token(id):
+def revoke_token(id: str):
     """Remove API Token with the given ID"""
     if not model.ApiToken.revoke(id):
         error_shout(u"API Token not found")
@@ -211,7 +212,7 @@ def revoke_token(id):
 
 @token.command(u"list")
 @click.argument(u"username")
-def list_tokens(username):
+def list_tokens(username: str):
     """List all API Tokens for the given user"""
     try:
         tokens = logic.get_action(u"api_token_list")(

@@ -30,11 +30,11 @@ class CKANConfigLoader(object):
         self._update_defaults(defaults)
         self._create_config_object()
 
-    def _update_defaults(self, new_defaults) -> None:
+    def _update_defaults(self, new_defaults: Dict[str, Any]) -> None:
         for key, value in new_defaults.items():
             self.parser._defaults[key] = value  # type: ignore
 
-    def _read_config_file(self, filename) -> None:
+    def _read_config_file(self, filename: str) -> None:
         defaults = {u'here': os.path.dirname(os.path.abspath(filename))}
         self._update_defaults(defaults)
         self.parser.read(filename)

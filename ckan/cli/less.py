@@ -1,5 +1,6 @@
 # encoding: utf-8
 
+from typing import Tuple
 import click
 import subprocess
 import os
@@ -23,7 +24,7 @@ def less():
     _compile_less(root, command, u'main')
 
 
-def _compile_less(root, command, color):
+def _compile_less(root: str, command: Tuple[str, ...], color: str):
     click.echo(u'compile {}.css'.format(color))
     command = command + (u'--', u'--' + color)
 

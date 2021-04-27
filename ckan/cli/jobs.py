@@ -1,5 +1,6 @@
 # encoding: utf-8
 
+from typing import List
 import click
 
 import ckan.lib.jobs as bg_jobs
@@ -16,7 +17,7 @@ def jobs():
 @jobs.command(short_help=u"Start a worker.",)
 @click.option(u"--burst", is_flag=True, help=u"Start worker in burst mode.")
 @click.argument(u"queues", nargs=-1)
-def worker(burst, queues):
+def worker(burst: bool, queues: List[str]):
     """Start a worker that fetches jobs from queues and executes them. If
     no queue names are given then the worker listens to the default
     queue, this is equivalent to
@@ -41,7 +42,7 @@ def worker(burst, queues):
 
 @jobs.command(name=u"list", short_help=u"List jobs.")
 @click.argument(u"queues", nargs=-1)
-def list_jobs(queues):
+def list_jobs(queues: List[str]):
     """List currently enqueued jobs from the given queues. If no queue
     names are given then the jobs from all queues are listed.
     """
@@ -61,7 +62,7 @@ def list_jobs(queues):
 
 @jobs.command(short_help=u"Show details about a specific job.")
 @click.argument(u"id")
-def show(id):
+def show(id: str):
     try:
         job = p.toolkit.get_action(u"job_show")(
             {u"ignore_auth": True}, {u"id": id}
@@ -82,7 +83,7 @@ def show(id):
 
 @jobs.command(short_help=u"Cancel a specific job.")
 @click.argument(u"id")
-def cancel(id):
+def cancel(id: str):
     """Cancel a specific job. Jobs can only be canceled while they are
     enqueued. Once a worker has started executing a job it cannot be
     aborted anymore.
@@ -101,7 +102,7 @@ def cancel(id):
 
 @jobs.command(short_help=u"Cancel all jobs.")
 @click.argument(u"queues", nargs=-1)
-def clear(queues):
+def clear(queues: List[str]):
     """Cancel all jobs on the given queues. If no queue names are given
     then ALL queues are cleared.
 
@@ -112,13 +113,13 @@ def clear(queues):
     queues = p.toolkit.get_action(u"job_clear")(
         {u"ignore_auth": True}, data_dict
     )
-    queues = (u'"{}"'.format(q) for q in queues)
+    queues = [u'"{}"'.format(q) for q in queues]
     click.secho(u"Cleared queue(s) {}".format(u", ".join(queues)), fg=u"green")
 
 
 @jobs.command(short_help=u"Enqueue a test job.")
 @click.argument(u"queues", nargs=-1)
-def test(queues):
+def test(queues: List[str]):
     """Enqueue a test job. If no queue names are given then the job is
     added to the default queue. If queue names are given then a
     separate test job is added to each of the queues.

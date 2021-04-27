@@ -1,6 +1,7 @@
 # encoding: utf-8
 
 import logging
+from typing import Any
 
 import click
 
@@ -20,7 +21,7 @@ def seed():
 
 @seed.command(short_help=u'Annakarenina and warandpeace.')
 @click.pass_context
-def basic(ctx):
+def basic(ctx: Any):
     flask_app = ctx.meta['flask_app']
     with flask_app.test_request_context():
         CreateTestData.create_basic_test_data()
@@ -28,7 +29,7 @@ def basic(ctx):
 
 @seed.command(short_help=u'Realistic data to test search.')
 @click.pass_context
-def search(ctx):
+def search(ctx: Any):
     flask_app = ctx.meta['flask_app']
     with flask_app.test_request_context():
         CreateTestData.create_search_test_data()
@@ -36,7 +37,7 @@ def search(ctx):
 
 @seed.command(short_help=u'Government style data.')
 @click.pass_context
-def gov(ctx):
+def gov(ctx: Any):
     flask_app = ctx.meta['flask_app']
     with flask_app.test_request_context():
         CreateTestData.create_gov_test_data()
@@ -44,7 +45,7 @@ def gov(ctx):
 
 @seed.command(short_help=u'Package relationships data.')
 @click.pass_context
-def family(ctx):
+def family(ctx: Any):
     flask_app = ctx.meta['flask_app']
     with flask_app.test_request_context():
         CreateTestData.create_family_test_data()
@@ -52,7 +53,7 @@ def family(ctx):
 
 @seed.command(short_help=u'Create a user "tester" with api key "tester".')
 @click.pass_context
-def user(ctx):
+def user(ctx: Any):
     flask_app = ctx.meta['flask_app']
     with flask_app.test_request_context():
         CreateTestData.create_test_user()
@@ -63,7 +64,7 @@ def user(ctx):
 
 @seed.command(short_help=u'Test translations of terms.')
 @click.pass_context
-def translations(ctx):
+def translations(ctx: Any):
     flask_app = ctx.meta['flask_app']
     with flask_app.test_request_context():
         CreateTestData.create_translations_test_data()
@@ -71,7 +72,7 @@ def translations(ctx):
 
 @seed.command(short_help=u'Some test vocabularies.')
 @click.pass_context
-def vocabs(ctx):
+def vocabs(ctx: Any):
     flask_app = ctx.meta['flask_app']
     with flask_app.test_request_context():
         CreateTestData.create_vocabs_test_data()
@@ -79,7 +80,7 @@ def vocabs(ctx):
 
 @seed.command(short_help=u'Hierarchy of groups.')
 @click.pass_context
-def hierarchy(ctx):
+def hierarchy(ctx: Any):
     flask_app = ctx.meta['flask_app']
     with flask_app.test_request_context():
         CreateTestData.create_group_hierarchy_test_data()

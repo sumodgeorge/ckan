@@ -1,5 +1,6 @@
 # encoding: utf-8
 
+from typing import Any
 import click
 
 
@@ -50,19 +51,19 @@ def plugin_info():
         click.echo()
 
 
-def _template_helpers(plugin_class):
+def _template_helpers(plugin_class: Any):
     u''' Return readable helper function info. '''
     helpers = plugin_class.get_helpers()
     return _function_info(helpers)
 
 
-def _actions(plugin_class):
+def _actions(plugin_class: Any):
     u''' Return readable action function info. '''
     actions = plugin_class.get_actions()
     return _function_info(actions)
 
 
-def _function_info(functions):
+def _function_info(functions: Any):
     u''' Take a dict of functions and output readable info '''
     import inspect
     output = []

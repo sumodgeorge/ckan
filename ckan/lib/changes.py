@@ -6,10 +6,12 @@ dataset
 '''
 
 import logging
-from typing import Any, Dict, List
+from typing import Any, Dict, List, Set
 from typing_extensions import TypedDict
 log = logging.getLogger(__name__)
 
+Data = Dict[str, Any]
+ChangeList = List[Dict[str, Any]]
 
 class Extra(TypedDict):
     key: str
@@ -382,7 +384,7 @@ def check_metadata_changes(
     _extra_fields(change_list, old, new)
 
 
-def check_metadata_org_changes(change_list, old, new):
+def check_metadata_org_changes(change_list: ChangeList, old: Data, new: Data):
     '''
     Compares two versions of a organization and records the changes between
     them in change_list.
@@ -400,7 +402,7 @@ def check_metadata_org_changes(change_list, old, new):
         _image_url_change(change_list, old, new)
 
 
-def _title_change(change_list, old, new):
+def _title_change(change_list: ChangeList, old: Data, new: Data):
     '''
     Appends a summary of a change to a dataset's title between two versions
     (old and new) to change_list.
@@ -410,7 +412,7 @@ def _title_change(change_list, old, new):
                         u'old_title': old.get(u'title')})
 
 
-def _org_change(change_list, old, new):
+def _org_change(change_list: ChangeList, old: Data, new: Data):
     '''
     Appends a summary of a change to a dataset's organization between
     two versions (old and new) to change_list.
@@ -422,33 +424,33 @@ def _org_change(change_list, old, new):
                             u'method': u'change',
                             u'pkg_id': new.get(u'id'),
                             u'title': new.get(u'title'),
-                            u'old_org_id': old.get(u'organization').get(u'id'),
+                            u'old_org_id': old[u'organization'].get(u'id'),
                             u'old_org_title':
-                            old.get(u'organization').get(u'title'),
-                            u'new_org_id': new.get(u'organization').get(u'id'),
+                            old[u'organization'].get(u'title'),
+                            u'new_org_id': new[u'organization'].get(u'id'),
                             u'new_org_title':
-                                new.get(u'organization').get(u'title')})
+                                new[u'organization'].get(u'title')})
     # if the dataset was not in an organization before and it is now
     elif not old.get(u'owner_org') and new.get(u'owner_org'):
         change_list.append({u'type': u'org',
                             u'method': u'add',
                             u'pkg_id': new.get(u'id'),
                             u'title': new.get(u'title'),
-                            u'new_org_id': new.get(u'organization').get(u'id'),
+                            u'new_org_id': new[u'organization'].get(u'id'),
                             u'new_org_title':
-                            new.get(u'organization').get(u'title')})
+                            new[u'organization'].get(u'title')})
     # if the user removed the organization
     else:
         change_list.append({u'type': u'org',
                             u'method': u'remove',
                             u'pkg_id': new.get(u'id'),
                             u'title': new.get(u'title'),
-                            u'old_org_id': old.get(u'organization').get(u'id'),
+                            u'old_org_id': old[u'organization'].get(u'id'),
                             u'old_org_title':
-                            old.get(u'organization').get(u'title')})
+                            old[u'organization'].get(u'title')})
 
 
-def _maintainer_change(change_list, old, new):
+def _maintainer_change(change_list: ChangeList, old: Data, new: Data):
     '''
     Appends a summary of a change to a dataset's maintainer field between two
     versions (old and new) to change_list.
@@ -473,7 +475,7 @@ def _maintainer_change(change_list, old, new):
                             u'method': u'add'})
 
 
-def _maintainer_email_change(change_list, old, new):
+def _maintainer_email_change(change_list: ChangeList, old: Data, new: Data):
     '''
     Appends a summary of a change to a dataset's maintainer e-mail address
     field between two versions (old and new) to change_list.
@@ -501,7 +503,7 @@ def _maintainer_email_change(change_list, old, new):
                             u'method': u'add'})
 
 
-def _author_change(change_list, old, new):
+def _author_change(change_list: ChangeList, old: Data, new: Data):
     '''
     Appends a summary of a change to a dataset's author field between two
     versions (old and new) to change_list.
@@ -524,7 +526,7 @@ def _author_change(change_list, old, new):
                             new.get(u'author'), u'method': u'add'})
 
 
-def _author_email_change(change_list, old, new):
+def _author_email_change(change_list: ChangeList, old: Data, new: Data):
     '''
     Appends a summary of a change to a dataset's author e-mail address field
     between two versions (old and new) to change_list.
@@ -548,7 +550,7 @@ def _author_email_change(change_list, old, new):
                             u'method': u'add'})
 
 
-def _notes_change(change_list, old, new):
+def _notes_change(change_list: ChangeList, old: Data, new: Data):
     '''
     Appends a summary of a change to a dataset's description between two
     versions (old and new) to change_list.
@@ -571,7 +573,8 @@ def _notes_change(change_list, old, new):
                             u'method': u'add'})
 
 
-def _tag_change(change_list, new_tags, old_tags, new):
+def _tag_change(change_list: ChangeList,
+                new_tags: Set[Any], old_tags: Set[Any], new: Data):
     '''
     Appends a summary of a change to a dataset's tag list between two
     versions (old and new) to change_list.
@@ -602,7 +605,7 @@ def _tag_change(change_list, new_tags, old_tags, new):
                             u'tags': added_tags_list})
 
 
-def _license_change(change_list, old, new):
+def _license_change(change_list: ChangeList, old: Data, new: Data):
     '''
     Appends a summary of a change to a dataset's license between two versions
     (old and new) to change_list.
@@ -622,7 +625,7 @@ def _license_change(change_list, old, new):
                         old.get(u'license_title')})
 
 
-def _name_change(change_list, old, new):
+def _name_change(change_list: ChangeList, old: Data, new: Data):
     '''
     Appends a summary of a change to a dataset's name (and thus the URL it
     can be accessed at) between two versions (old and new) to
@@ -633,7 +636,7 @@ def _name_change(change_list, old, new):
                         old.get(u'name'), u'new_name': new.get(u'name')})
 
 
-def _url_change(change_list, old, new):
+def _url_change(change_list: ChangeList, old: Data, new: Data):
     '''
     Appends a summary of a change to a dataset's source URL (metadata field,
     not its actual URL in the datahub) between two versions (old and
@@ -659,7 +662,7 @@ def _url_change(change_list, old, new):
                             u'new_url': new.get(u'url')})
 
 
-def _version_change(change_list, old, new):
+def _version_change(change_list: ChangeList, old: Data, new: Data):
     '''
     Appends a summary of a change to a dataset's version field (inputted
     by the user, not from version control) between two versions (old
@@ -686,7 +689,7 @@ def _version_change(change_list, old, new):
                             u'new_version': new.get(u'version')})
 
 
-def _extension_fields(change_list, old, new):
+def _extension_fields(change_list: ChangeList, old: Data, new: Data):
     '''
     Checks whether any fields that have been added to the package
     dictionaries by CKAN extensions have been changed between versions.
@@ -739,20 +742,20 @@ def _extension_fields(change_list, old, new):
                                 u'value': new.get(field)})
 
 
-def _extra_fields(change_list, old, new):
+def _extra_fields(change_list: ChangeList, old: Data, new: Data):
     '''
     Checks whether a user has added, removed, or changed any extra fields
     from the web interface (or API?) and appends a summary of each change to
     change_list.
     '''
     if u'extras' in new:
-        extra_fields_new = _extras_to_dict(new.get(u'extras'))
+        extra_fields_new = _extras_to_dict(new.get(u'extras', []))
         extra_new_set = set(extra_fields_new.keys())
 
         # if the old version has extra fields, we need
         # to compare the new version's extras to the old ones
         if u'extras' in old:
-            extra_fields_old = _extras_to_dict(old.get(u'extras'))
+            extra_fields_old = _extras_to_dict(old.get(u'extras', []))
             extra_old_set = set(extra_fields_old.keys())
 
             # if some fields were added
@@ -864,7 +867,7 @@ def _extra_fields(change_list, old, new):
                                 u'key_list': deleted_fields})
 
 
-def _description_change(change_list, old, new):
+def _description_change(change_list: ChangeList, old: Data, new: Data):
     '''
     Appends a summary of a change to a organization's description between two
     versions (old and new) to change_list.
@@ -888,7 +891,7 @@ def _description_change(change_list, old, new):
                             u'method': u'add'})
 
 
-def _image_url_change(change_list, old, new):
+def _image_url_change(change_list: ChangeList, old: Data, new: Data):
     '''
     Appends a summary of a change to a organization's image URL between two
     versions (old and new) to change_list.

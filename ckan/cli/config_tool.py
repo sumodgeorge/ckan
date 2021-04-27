@@ -1,6 +1,7 @@
 # encoding: utf-8
 
 import logging
+from typing import Any, List
 
 import click
 
@@ -13,7 +14,7 @@ log = logging.getLogger(__name__)
 class ConfigOption(click.ParamType):
     name = u'config-option'
 
-    def convert(self, value, param, ctx):
+    def convert(self, value: str, param: str, ctx: Any):
         if u'=' not in value:
             self.fail(
                 u'An option does not have an equals sign. '
@@ -48,7 +49,9 @@ class ConfigOption(click.ParamType):
 @click.argument(u'config_filepath', type=click.Path(exists=True))
 @click.argument(u'options', nargs=-1, type=ConfigOption())
 def config_tool(
-        config_filepath, options, section, edit, merge_filepath) -> None:
+        config_filepath: str,
+        options: List[Any], section: str, edit: bool,
+        merge_filepath: str) -> None:
     u'''Tool for editing options in a CKAN config file
 
     ckan config-tool <default.ini> <key>=<value> [<key>=<value> ...]

@@ -222,7 +222,7 @@ def is_authorized(action: str, context: Context, data_dict: Optional[DataDict]=N
         # access straight away
         if not getattr(auth_function, 'auth_allow_anonymous_access', False) \
            and not context.get('auth_user_obj'):
-            if isinstance(auth_function, functools.partial):
+            if isinstance(auth_function, functools.partial):  # type: ignore
                 name = auth_function.func.__name__  # type: ignore
             else:
                 name = auth_function.__name__
