@@ -45,7 +45,8 @@ def not_empty(key: TuplizedKey, data: Dict[TuplizedKey, Any],
         raise StopOnError
 
 def if_empty_same_as(other_key: str) -> Callable[..., Any]:
-    def callable(key, data, errors, context):
+    def callable(key: TuplizedKey, data: Dict[TuplizedKey, Any],
+                 errors: TuplizedErrorDict, context: Context):
         value = data.get(key)
         if not value or value is missing:
             data[key] = data[key[:-1] + (other_key,)]
@@ -55,7 +56,8 @@ def if_empty_same_as(other_key: str) -> Callable[..., Any]:
 
 def both_not_empty(other_key: str) -> Callable:
 
-    def callable(key, data, errors, context):
+    def callable(key: TuplizedKey, data: Dict[TuplizedKey, Any],
+                 errors: TuplizedErrorDict, context: Context):
         value = data.get(key)
         other_value = data.get(key[:-1] + (other_key,))
         if (not value or value is missing and
@@ -90,7 +92,8 @@ def default(default_value: Any) -> Callable:
     '''When key is missing or value is an empty string or None, replace it with
     a default value'''
 
-    def callable(key, data, errors, context):
+    def callable(key: TuplizedKey, data: Dict[TuplizedKey, Any],
+                 errors: TuplizedErrorDict, context: Context):
 
         value = data.get(key)
         if value is None or value == '' or value is missing:
@@ -201,7 +204,7 @@ def limit_to_configured_maximum(config_option: str,
     defined by a configuration option, or if that is not set, a given int
     default_limit.
     '''
-    def callable(value):
+    def callable(value: Any):
         value = convert_int(value)
         limit = int(config.get(config_option, default_limit))
         if value > limit:

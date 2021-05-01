@@ -3,6 +3,7 @@
 import logging
 import math
 import os
+from typing import Any, List, Optional, Union
 
 import six
 
@@ -30,14 +31,18 @@ if six.PY3:
 
 class CkanAuthTktCookiePlugin(repoze_auth_tkt.AuthTktCookiePlugin):
 
+    httponly: bool
+    samesite: str
+
     userid_type_decoders = _ckan_userid_type_decoders
 
-    def __init__(self, httponly, samesite, *args, **kwargs):
+    def __init__(
+            self, httponly: bool, samesite: str, *args: Any, **kwargs: Any):
         super(CkanAuthTktCookiePlugin, self).__init__(*args, **kwargs)
         self.httponly = httponly
         self.samesite = samesite
 
-    def _get_cookies(self, *args, **kwargs):
+    def _get_cookies(self, *args: Any, **kwargs: Any) -> List[SimpleCookie]:
         u'''
         Override method in superclass to ensure HttpOnly is set appropriately.
         '''
@@ -70,14 +75,14 @@ class CkanAuthTktCookiePlugin(repoze_auth_tkt.AuthTktCookiePlugin):
         return cookies
 
 
-def make_plugin(secret=None,
-                secretfile=None,
-                cookie_name='auth_tkt',
-                secure=False,
-                include_ip=False,
-                timeout=None,
-                reissue_time=None,
-                userid_checker=None):
+def make_plugin(secret: Optional[str] = None,
+                secretfile: Optional[str] = None,
+                cookie_name: str = 'auth_tkt',
+                secure: bool = False,
+                include_ip: bool = False,
+                timeout: Optional[Union[str, int]] = None,
+                reissue_time: Optional[Union[str, int]] = None,
+                userid_checker: Optional[Any] = None):
     from repoze.who.utils import resolveDotted
 
     # ckan specifics:

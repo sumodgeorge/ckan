@@ -131,7 +131,8 @@ class PackageSearchIndex(SearchIndex):
 
             schema = package_plugin.show_package_schema()
             validated_pkg_dict, errors = lib_plugins.plugin_validate(
-                package_plugin, {'model': model, 'session': model.Session},
+                package_plugin, cast(Context, {
+                    'model': model, 'session': model.Session}),
                 pkg_dict, schema, 'package_show')
             pkg_dict['validated_data_dict'] = json.dumps(validated_pkg_dict,
                 cls=ckan.lib.navl.dictization_functions.MissingNullEncoder)
@@ -229,7 +230,9 @@ class PackageSearchIndex(SearchIndex):
             rel_dict[type].append(pkg.name)
         for rel in subjects:
             type = rel['type']
-            rel_dict[type].append(model.Package.get(rel['object_package_id']).name)
+            pkg = model.Package.get(rel['object_package_id'])
+            assert pkg
+            rel_dict[type].append(pkg.name)
         for key, value in six.iteritems(rel_dict):
             if key not in pkg_dict:
                 pkg_dict[key] = value

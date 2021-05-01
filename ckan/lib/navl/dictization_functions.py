@@ -7,7 +7,7 @@ import json
 import six
 from six import text_type
 from ckan.common import config, _
-from typing import (Any, Callable, Dict, List, Optional,
+from typing import (Any, Callable, Dict, Iterable, List, Optional,
                     Sequence, Set, Tuple, Union, cast)
 
 
@@ -375,7 +375,7 @@ def _validate(
     return converted_data, errors
 
 
-def flatten_list(data: List[Dict[str, Any]],
+def flatten_list(data: List[Union[Dict[str, Any], Any]],
                  flattened: Optional[Dict[Tuple[Any, ...], Any]] = None,
                  old_key: Optional[List[Any]] = None
                  ) -> Dict[Tuple[Any, ...], Any]:
@@ -473,14 +473,15 @@ def unflatten(data: Dict[Tuple[Any, ...], Any]) -> Dict[str, Any]:
 
 class MissingNullEncoder(json.JSONEncoder):
     '''json encoder that treats missing objects as null'''
-    def default(self, obj):
+    def default(self, obj: Any):
         if isinstance(obj, Missing):
             return None
         return json.JSONEncoder.default(self, obj)
 
 
-def check_dict(data_dict: Dict[str, Any], select_dict: Dict[str, Any],
-               parent_path: Tuple = ()) -> List[Tuple]:
+def check_dict(data_dict: Union[Dict[str, Any], Any],
+               select_dict: Dict[str, Any],
+               parent_path: Tuple[Any, ...] = ()) -> List[Tuple]:
     """
     return list of key tuples from select_dict whose values don't match
     corresponding values in data_dict.
@@ -505,8 +506,9 @@ def check_dict(data_dict: Dict[str, Any], select_dict: Dict[str, Any],
     return unmatched
 
 
-def check_list(data_list: List, select_list: List,
-               parent_path: Tuple = ()) -> List[Tuple]:
+def check_list(data_list: Union[List[Any], Any],
+               select_list: List[Any],
+               parent_path: Tuple[Any, ...] = ()) -> List[Tuple[Any, ...]]:
     """
     return list of key tuples from select_list whose values don't match
     corresponding values in data_list.
@@ -541,7 +543,7 @@ def resolve_string_key(data: Union[Dict[str, Any], List[Any]],
     e.g. `resources__1492a` would select the first matching resource
     with an id field matching "1492a..."
     """
-    parent_path: List[Union[str, int]] = []
+    parent_path: List[Any] = []
     current = data
     for k in string_key.split('__'):
         if isinstance(current, dict):
@@ -617,7 +619,8 @@ def filter_glob_match(
         for p in glob_patterns])
 
 
-def _filter_glob_match(data, parsed_globs):
+def _filter_glob_match(data: Union[List[Any], Dict[str, Any], Any],
+                       parsed_globs: Iterable[Tuple[bool, Sequence[str]]]):
     if isinstance(data, dict):
         protected = {}
         children = {}
@@ -683,7 +686,7 @@ def _filter_glob_match(data, parsed_globs):
 
 
 def update_merge_dict(data_dict: Dict[str, Any],
-                      update_dict: Dict[str, Any],
+                      update_dict: Union[Dict[str, Any], Any],
                       parent_path: Tuple[Any, ...] = ()) -> None:
     """
     update data_dict keys and values in-place based on update_dict.
@@ -705,9 +708,9 @@ def update_merge_dict(data_dict: Dict[str, Any],
             data_dict[k] = v
 
 
-def update_merge_list(data_list: List,
-                      update_list: List,
-                      parent_path: Tuple = ()) -> None:
+def update_merge_list(data_list: List[Any],
+                      update_list: Union[List[Any], Any],
+                      parent_path: Tuple[Any, ...] = ()) -> None:
     """
     update data_list entries in-place based on update_list.
 

@@ -14,11 +14,14 @@ which builds the dictionary by iterating over the table columns.
 import copy
 import six
 
-from typing import Any, Callable, Dict, Iterable, List, Optional, Tuple, Union, cast
+from typing import Any, Callable, Dict, Iterable, List, Optional, Tuple, Union, cast, overload
 from six.moves.urllib.parse import urlsplit  # type: ignore
+from sqlalchemy.sql.schema import Table
+from sqlalchemy.sql.selectable import Select
 
 from ckan.common import config
 from sqlalchemy.sql import select
+from typing_extensions import Literal
 
 import ckan.logic as logic
 import ckan.plugins as plugins
@@ -28,7 +31,7 @@ import ckan.authz as authz
 import ckan.lib.search as search
 import ckan.lib.munge as munge
 import ckan.model as model
-from ckan.types import Context
+from ckan.types import Context, Query
 
 ## package save
 
@@ -126,7 +129,7 @@ def resource_dictize(res: model.Resource, context: Context) -> Dict[str, Any]:
     return resource
 
 
-def _execute(q, table, context: Context):
+def _execute(q: Select, table: Table, context: Context) -> Any:
     '''
     Takes an SqlAlchemy query (q) that is (at its base) a Select on an
     object table (table), and it returns the object.
@@ -253,7 +256,29 @@ def package_dictize(pkg: model.Package, context: Context) -> Dict[str, Any]:
     return result_dict
 
 
-def _get_members(context, group, member_type):
+@overload
+def _get_members(context: Context, group: model.Group,
+                 member_type: Literal['users'],
+                 ) -> List[Tuple[model.User, str]]:
+    ...
+
+
+@overload
+def _get_members(context: Context, group: model.Group,
+                 member_type: Literal['groups'],
+                 ) -> List[Tuple[model.Group, str]]:
+    ...
+
+
+@overload
+def _get_members(context: Context, group: model.Group,
+                 member_type: Literal['tags'],
+                 ) -> List[Tuple[model.Tag, str]]:
+    ...
+
+
+def _get_members(context: Context, group: model.Group,
+                 member_type: str) -> List[Tuple[Any, str]]:
 
     model = context['model']
     Entity = getattr(model, member_type[:-1].capitalize())
@@ -307,7 +332,8 @@ def group_dictize(group: model.Group, context: Context,
     context['with_capacity'] = True
 
     if packages_field:
-        def get_packages_for_this_group(group_, just_the_count=False):
+        def get_packages_for_this_group(group_: model.Group,
+                                        just_the_count: bool = False):
             # Ask SOLR for the list of packages for this org/group
             q = {
                 'facet': 'false',
@@ -474,8 +500,10 @@ def tag_dictize(tag: model.Tag, context: Context, include_datasets: bool=True) -
 
     return tag_dict
 
-def user_list_dictize(obj_list: List[model.User], context: Context,
-                      sort_key: Callable=lambda x:x['name'], reverse: bool=False) -> List[Dict[str, Any]]:
+def user_list_dictize(obj_list: Union[List[model.User], List[Tuple[model.User, str]]],
+                      context: Context,
+                      sort_key: Callable[[Any], Any] = lambda x:x['name'],
+                      reverse: bool=False) -> List[Dict[str, Any]]:
 
     result_list = []
 
@@ -610,10 +638,12 @@ def package_to_api(pkg: model.Package, context: Context) -> Dict[str, Any]:
     for resource in dictized["resources"]:
         resource_dict_to_api(resource, pkg.id, context)
 
-    def make_api_1(package_id):
-        return pkg.get(package_id).name
+    def make_api_1(package_id: str):
+        package = pkg.get(package_id)
+        assert package
+        return package.name
 
-    def make_api_2(package_id):
+    def make_api_2(package_id: str):
         return package_id
 
     if api_version == 1:
@@ -679,32 +709,32 @@ def activity_list_dictize(activity_list: List[model.Activity], context: Context,
             for activity in activity_list]
 
 
-def package_to_api1(pkg, context: Context):
+def package_to_api1(pkg: model.Package, context: Context):
     # DEPRICIATED set api_version in context and use package_to_api()
     context['api_version'] = 1
     return package_to_api(pkg, context)
 
-def package_to_api2(pkg, context: Context):
+def package_to_api2(pkg: model.Package, context: Context):
     # DEPRICIATED set api_version in context and use package_to_api()
     context['api_version'] = 2
     return package_to_api(pkg, context)
 
-def group_to_api1(group, context: Context):
+def group_to_api1(group: model.Group, context: Context):
     # DEPRICIATED set api_version in context and use group_to_api()
     context['api_version'] = 1
     return group_to_api(group, context)
 
-def group_to_api2(group, context: Context):
+def group_to_api2(group: model.Group, context: Context):
     # DEPRICIATED set api_version in context and use group_to_api()
     context['api_version'] = 2
     return group_to_api(group, context)
 
-def tag_to_api1(tag, context: Context):
+def tag_to_api1(tag: model.Tag, context: Context):
     # DEPRICIATED set api_version in context and use tag_to_api()
     context['api_version'] = 1
     return tag_to_api(tag, context)
 
-def tag_to_api2(tag, context: Context):
+def tag_to_api2(tag: model.Tag, context: Context):
     # DEPRICIATED set api_version in context and use tag_to_api()
     context['api_version'] = 2
     return tag_to_api(tag, context)

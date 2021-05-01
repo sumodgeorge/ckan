@@ -26,7 +26,7 @@
 
 u'''Collection of :mod:`repoze.who` friendly forms'''
 
-from typing import Any
+from typing import Any, List, Optional, cast
 from six.moves.urllib.parse import (  # type: ignore
     urlparse, urlunparse, urlencode, parse_qs
 )
@@ -45,7 +45,7 @@ from repoze.who.interfaces import IChallenger, IIdentifier
 __all__ = [u'FriendlyFormPlugin']
 
 
-def construct_url(environ):
+def construct_url(environ: Any) -> str:
     return Request(environ).url
 
 
@@ -76,14 +76,18 @@ class FriendlyFormPlugin(object):
 
     '''
 
+    login_counter_name: str
+
     classifications = {
         IIdentifier: [u'browser'],
         IChallenger: [u'browser'],
     }
 
-    def __init__(self, login_form_url, login_handler_path, post_login_url,
-                 logout_handler_path, post_logout_url, rememberer_name,
-                 login_counter_name=None, charset=u'iso-8859-1'):
+    def __init__(self, login_form_url: str, login_handler_path: str,
+                 post_login_url: str, logout_handler_path: str,
+                 post_logout_url: str, rememberer_name: str,
+                 login_counter_name: Optional[str] = None,
+                 charset: str=u'iso-8859-1'):
         u'''
 
         :param login_form_url: The URL/path where the login form is located.
@@ -122,13 +126,11 @@ class FriendlyFormPlugin(object):
         self.logout_handler_path = logout_handler_path
         self.post_logout_url = post_logout_url
         self.rememberer_name = rememberer_name
-        self.login_counter_name = login_counter_name
-        if not login_counter_name:
-            self.login_counter_name = u'__logins'
+        self.login_counter_name = login_counter_name or u'__logins'
         self.charset = charset
 
     # IIdentifier
-    def identify(self, environ):
+    def identify(self, environ: Any):
         u'''
         Override the parent's identifier to introduce a login counter
         (possibly along with a post-login page) and load the login counter into
@@ -168,7 +170,7 @@ class FriendlyFormPlugin(object):
                 pass
 
             referer = environ.get(u'HTTP_REFERER', script_name)
-            destination = form.get(u'came_from', referer)
+            destination = cast(str, form.get(u'came_from', referer))
 
             if self.post_login_url:
                 # There's a post-login page, so we have to replace the
@@ -212,7 +214,8 @@ class FriendlyFormPlugin(object):
                 environ[u'QUERY_STRING'] = urlencode(query, doseq=True)
 
     # IChallenger
-    def challenge(self, environ, status, app_headers, forget_headers):
+    def challenge(self, environ: Any, status: Any,
+                  app_headers: Any, forget_headers: Any):
         u'''
         Override the parent's challenge to avoid challenging the user on
         logout, introduce a post-logout page and/or pass the login counter
@@ -260,20 +263,20 @@ class FriendlyFormPlugin(object):
         return HTTPFound(location=destination, headers=headers)
 
     # IIdentifier
-    def remember(self, environ, identity):
+    def remember(self, environ: Any, identity: Any):
         rememberer = self._get_rememberer(environ)
         return rememberer.remember(environ, identity)
 
     # IIdentifier
-    def forget(self, environ, identity):
+    def forget(self, environ: Any, identity: Any):
         rememberer = self._get_rememberer(environ)
         return rememberer.forget(environ, identity)
 
-    def _get_rememberer(self, environ):
+    def _get_rememberer(self, environ: Any):
         rememberer = environ[u'repoze.who.plugins'][self.rememberer_name]
         return rememberer
 
-    def _get_full_path(self, path, environ):
+    def _get_full_path(self, path: str, environ: Any):
         u'''
         Return the full path to ``path`` by prepending the SCRIPT_NAME.
 
@@ -284,7 +287,7 @@ class FriendlyFormPlugin(object):
             path = environ.get(u'SCRIPT_NAME', u'') + path
         return path
 
-    def _get_logins(self, environ, force_typecast=False):
+    def _get_logins(self, environ: Any, force_typecast: bool = False):
         u'''
         Return the login counter from the query string in the ``environ``.
 
@@ -308,7 +311,7 @@ class FriendlyFormPlugin(object):
                 failed_logins = 0
         return failed_logins
 
-    def _set_logins_in_url(self, url, logins):
+    def _set_logins_in_url(self, url: str, logins: List[str]):
         u'''
         Insert the login counter variable with the ``logins`` value into
         ``url`` and return the new URL.
@@ -316,7 +319,7 @@ class FriendlyFormPlugin(object):
         '''
         return self._insert_qs_variable(url, self.login_counter_name, logins)
 
-    def _insert_qs_variable(self, url, var_name, var_value):
+    def _insert_qs_variable(self, url: str, var_name: str, var_value: List[str]):
         u'''
         Insert the variable ``var_name`` with value ``var_value`` in the query
         string of ``url`` and return the new URL.

@@ -609,13 +609,15 @@ def follower_dict_save(
 
 def follower_dict_save(
     data_dict: Dict[str, Any], context: Context,
-    FollowerClass: Type['follower_.ModelFollowingModel']
+    FollowerClass: Type['follower_.ModelFollowingModel[Any, Any]']
 ) -> 'follower_.ModelFollowingModel':
     model = context['model']
     session = context['session']
-    follower_obj = FollowerClass(follower_id=model.User.get(
-        context['user']).id,
-                                 object_id=data_dict['id'])
+    user = model.User.get(context['user'])
+    assert user
+    follower_obj = FollowerClass(
+        follower_id=user.id,
+        object_id=data_dict['id'])
     session.add(follower_obj)
     return follower_obj
 
@@ -637,9 +639,11 @@ def resource_view_dict_save(data_dict: Dict[str, Any], context: Context) -> 'mod
 
 def api_token_save(data_dict: Dict[str, Any], context: Context) -> 'model.ApiToken':
     model = context[u"model"]
+    user = model.User.get(data_dict['user'])
+    assert user
     return d.table_dict_save(
         {
-            u"user_id": model.User.get(data_dict['user']).id,
+            u"user_id": user.id,
             u"name": data_dict[u"name"]
         },
         model.ApiToken, context

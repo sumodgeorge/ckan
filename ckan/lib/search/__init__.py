@@ -274,6 +274,7 @@ def check() -> None:
                                                    len(pkgs)))
     for pkg_id in pkgs_not_indexed:
         pkg = model.Session.query(model.Package).get(pkg_id)
+        assert pkg
         print((pkg.metadata_modified.strftime('%Y-%m-%d'), pkg.name))
 
 
@@ -294,7 +295,7 @@ def clear_all() -> None:
     log.debug("Clearing search index...")
     package_index.clear()
 
-def _get_schema_from_solr(file_offset):
+def _get_schema_from_solr(file_offset: str):
     solr_url, solr_user, solr_password = SolrSettings.get()
 
     headers = {}
