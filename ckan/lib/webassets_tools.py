@@ -3,7 +3,7 @@
 import logging
 import os
 import tempfile
-from typing import Optional
+from typing import Any, Dict, Optional
 import yaml
 
 from markupsafe import Markup
@@ -58,9 +58,9 @@ def webassets_init() -> None:
     base_path = os.path.join(public_folder, u'base')
 
     env = Environment()
-    env.directory = static_path
+    env.directory = static_path  # type: ignore
     env.debug = asbool(config.get(u'debug', False))
-    env.url = u'/webassets/'
+    env.url = u'/webassets/'  # type: ignore
 
     add_public_path(base_path, u'/base/')
 
@@ -75,7 +75,7 @@ def webassets_init() -> None:
     create_library(u'css', os.path.join(base_path, u'css'))
 
 
-def _make_asset_collection():
+def _make_asset_collection() -> Dict[str, Any]:
     return {u'style': [], u'script': [], u'included': set()}
 
 
@@ -125,7 +125,7 @@ def include_asset(name: str) -> None:
     g.webassets[u'included'].add(name)
 
 
-def _to_tag(url, type_):
+def _to_tag(url: str, type_: str):
     if type_ == u'style':
         return u'<link href="{}" rel="stylesheet"/>'.format(url)
     elif type_ == u'script':

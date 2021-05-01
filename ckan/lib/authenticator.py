@@ -14,7 +14,9 @@ log = logging.getLogger(__name__)
 @implementer(IAuthenticator)
 class UsernamePasswordAuthenticator(object):
 
-    def authenticate(self, environ: Any, identity: Mapping) -> Optional[str]:
+    def authenticate(
+            self, environ: Any,
+            identity: 'Mapping[str, Any]') -> Optional[str]:
         if not ('login' in identity and 'password' in identity):
             return None
 

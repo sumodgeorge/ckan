@@ -1,7 +1,7 @@
 # encoding: utf-8
 
 
-from ckan.types import Context
+from ckan.types import Context, DataDict, Schema
 import logging
 import os
 import sys
@@ -303,7 +303,9 @@ def set_default_group_plugin() -> None:
         _group_controllers['organization'] = 'organization'
 
 
-def plugin_validate(plugin, context, data_dict, schema, action):
+def plugin_validate(
+        plugin: Any, context: Context,
+        data_dict: DataDict, schema: Schema, action: Any):
     """
     Backwards compatibility with 2.x dataset group and org plugins:
     return a default validate method if one has not been provided.

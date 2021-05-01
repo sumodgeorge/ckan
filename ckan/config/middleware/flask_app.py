@@ -57,15 +57,15 @@ from logging.handlers import SMTPHandler
 from flask.blueprints import Blueprint
 from flask.wrappers import Response
 from werkzeug.local import LocalProxy
-from typing import Any, Dict, List, Optional, Tuple, Union, cast
+from typing import Any, Dict, Iterable, List, Optional, Tuple, Union, cast
 log = logging.getLogger(__name__)
 
 
 class I18nMiddleware(object):
-    def __init__(self, app):
+    def __init__(self, app: CKANApp):
         self.app = app
 
-    def __call__(self, environ, start_response):
+    def __call__(self, environ: Any, start_response: Any):
 
         handle_i18n(environ)
         return self.app(environ, start_response)
@@ -86,22 +86,22 @@ class RepozeAdapterMiddleware(object):
     with some alternative solution.
 
     """
-    def __init__(self, app):
+    def __init__(self, app: CKANApp):
         self.app = app
 
-    def __call__(self, environ, start_response):
+    def __call__(self, environ: Any, start_response: Any) -> Any:
         request = webob.Request(environ)
         response = request.get_response(self.app)
         return response(environ, start_response)
 
 
 class CKANBabel(Babel):
-    def __init__(self, *pargs, **kwargs):
+    def __init__(self, *pargs: Any, **kwargs: Any):
         super(CKANBabel, self).__init__(*pargs, **kwargs)
         self._i18n_path_idx = 0
 
     @property
-    def domain(self):
+    def domain(self) -> str:
         default = super(CKANBabel, self).domain
         multiple = self.app.config.get('BABEL_MULTIPLE_DOMAINS')
         if not multiple:
@@ -113,7 +113,7 @@ class CKANBabel(Babel):
             return default
 
     @property
-    def translation_directories(self):
+    def translation_directories(self) -> Iterable[str]:
         self._i18n_path_idx = 0
         for path in super(CKANBabel, self).translation_directories:
             yield path
@@ -196,11 +196,11 @@ def make_flask_stack(conf: Union[Config, CKANConfig]) -> CKANApp:
 
     # Use Beaker as the Flask session interface
     class BeakerSessionInterface(SessionInterface):
-        def open_session(self, app, request):
+        def open_session(self, app: Any, request: Any):
             if 'beaker.session' in request.environ:
                 return request.environ['beaker.session']
 
-        def save_session(self, app, session, response):
+        def save_session(self, app: Any, session: Any, response: Any):
             session.save()
 
     namespace = 'beaker.session.'
@@ -229,7 +229,7 @@ def make_flask_stack(conf: Union[Config, CKANConfig]) -> CKANApp:
     app.context_processor(c_object)
 
     @app.context_processor
-    def ungettext_alias():
+    def ungettext_alias():  # type: ignore
         u'''
         Provide `ungettext` as an alias of `ngettext` for backwards
         compatibility
@@ -409,8 +409,7 @@ def helper_functions() -> Dict[str, helpers.HelperAttributeDict]:
     u'''Make helper functions (`h`) available to Flask templates'''
     if not helpers.helper_functions:
         helpers.load_plugin_helpers()
-    return cast(Dict[str, helpers.HelperAttributeDict],
-                dict(h=helpers.helper_functions))
+    return dict(h=helpers.helper_functions)
 
 
 def c_object() -> Dict[str, LocalProxy]:
@@ -427,7 +426,7 @@ class CKAN_Rule(Rule):
     We use it to be able to flag routes defined in extensions as such
     '''
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args: Any, **kwargs: Any):
         self.ckan_core = True
         super(CKAN_Rule, self).__init__(*args, **kwargs)
 
@@ -436,7 +435,7 @@ class CKAN_AppCtxGlobals(_AppCtxGlobals):
 
     '''Custom Flask AppCtxGlobal class (flask.g).'''
 
-    def __getattr__(self, name):
+    def __getattr__(self, name: str):
         '''
         If flask.g doesn't have attribute `name`, fall back to CKAN's
         app_globals object.
@@ -510,10 +509,10 @@ class CKANFlask(MultiStaticFlask):
             r.match_compare_key = lambda: top_compare_key
 
 
-def _register_core_blueprints(app):
+def _register_core_blueprints(app: CKANApp):
     u'''Register all blueprints defined in the `views` folder
     '''
-    def is_blueprint(mm):
+    def is_blueprint(mm: Any):
         return isinstance(mm, Blueprint)
 
     path = os.path.join(os.path.dirname(__file__), '..', '..', 'views')
@@ -525,10 +524,10 @@ def _register_core_blueprints(app):
             log.debug(u'Registered core blueprint: {0!r}'.format(blueprint[0]))
 
 
-def _register_error_handler(app):
+def _register_error_handler(app: CKANApp):
     u'''Register error handler'''
 
-    def error_handler(e) -> Tuple[str, Optional[int]]:
+    def error_handler(e: Exception) -> Tuple[str, Optional[int]]:
         log.error(e, exc_info=sys.exc_info)  # type: ignore
         if isinstance(e, HTTPException):
             extra_vars = {
@@ -550,10 +549,10 @@ def _register_error_handler(app):
             _setup_error_mail_handler(app)
 
 
-def _setup_error_mail_handler(app):
+def _setup_error_mail_handler(app: CKANApp):
 
     class ContextualFilter(logging.Filter):
-        def filter(self, log_record) -> bool:
+        def filter(self, log_record: Any) -> bool:
             log_record.url = request.path
             log_record.method = request.method
             log_record.ip = request.environ.get("REMOTE_ADDR")
@@ -592,7 +591,7 @@ Headers:            %(headers)s
     app.logger.addHandler(mail_handler)
 
 
-def _setup_webassets(app):
+def _setup_webassets(app: CKANApp):
     app.use_x_sendfile = toolkit.asbool(
         config.get('ckan.webassets.use_x_sendfile')
     )
@@ -600,5 +599,5 @@ def _setup_webassets(app):
     webassets_folder = get_webassets_path()
 
     @app.route('/webassets/<path:path>', endpoint='webassets.index')
-    def webassets(path):
+    def webassets(path: str):  # type: ignore
         return send_from_directory(webassets_folder, path)

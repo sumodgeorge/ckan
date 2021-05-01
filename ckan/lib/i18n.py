@@ -229,7 +229,7 @@ def get_identifier_from_locale_class(locale: Locale) -> str:
          locale.variant))
 
 
-def _set_lang(lang):
+def _set_lang(lang: str):
     ''' Allows a custom i18n directory to be specified.
     Creates a fake config file to pass to pylons.i18n.set_lang, which
     sets the Pylons root path to desired i18n_directory.
@@ -269,7 +269,7 @@ def handle_request(request: Request, tmpl_context: Any) -> str:
     return lang
 
 
-def _add_extra_translations(dirname, locales, domain):
+def _add_extra_translations(dirname: str, locales: str, domain: str):
     translator = Translations.load(dirname=dirname, locales=locales,
                                    domain=domain)
     try:
@@ -303,7 +303,7 @@ def set_lang(language_code: str) -> None:
         _set_lang(language_code)
 
 
-def _get_js_translation_entries(filename):
+def _get_js_translation_entries(filename: str) -> Set[str]:
     '''
     Extract IDs of PO entries that are used in JavaScript files.
 
@@ -322,7 +322,9 @@ def _get_js_translation_entries(filename):
     return js_entries
 
 
-def _build_js_translation(lang, source_filenames, entries, dest_filename):
+def _build_js_translation(
+        lang: str, source_filenames: List[str],
+        entries: Set[Any], dest_filename: str):
     '''
     Build JavaScript translations for a single language.
 

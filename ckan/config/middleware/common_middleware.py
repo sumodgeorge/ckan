@@ -1,6 +1,8 @@
 # encoding: utf-8
 
 """Additional middleware used by the Flask app stack."""
+from typing import Any
+from ckan.types import CKANApp, Config
 import hashlib
 
 import six
@@ -8,16 +10,16 @@ from six.moves.urllib.parse import unquote, urlparse  # type: ignore
 
 import sqlalchemy as sa
 
-from ckan.common import config
+from ckan.common import CKANConfig, config
 
 
 class TrackingMiddleware(object):
 
-    def __init__(self, app, config):
+    def __init__(self, app: CKANApp, config: CKANConfig):
         self.app = app
         self.engine = sa.create_engine(config.get('sqlalchemy.url'))
 
-    def __call__(self, environ, start_response):
+    def __call__(self, environ: Any, start_response: Any) -> Any:
         path = environ['PATH_INFO']
         method = environ.get('REQUEST_METHOD')
         if path == '/_tracking' and method == 'POST':
@@ -53,10 +55,10 @@ class HostHeaderMiddleware(object):
         Prevent the `Host` header from the incoming request to be used
         in the `Location` header of a redirect.
     '''
-    def __init__(self, app):
+    def __init__(self, app: CKANApp):
         self.app = app
 
-    def __call__(self, environ, start_response):
+    def __call__(self, environ: Any, start_response: Any) -> Any:
         path_info = environ[u'PATH_INFO']
         if path_info in ['/login_generic', '/user/login',
                          '/user/logout', '/user/logged_in',

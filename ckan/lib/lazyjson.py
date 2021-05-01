@@ -16,7 +16,7 @@ class LazyJSONObject(RawJSON):
     string passed when possible. Accepts and produces only
     unicode strings containing a single JSON object.
     '''
-    def __init__(self, json_string):
+    def __init__(self, json_string: str):
         assert isinstance(json_string, text_type), json_string
         self._json_string: Optional[str] = json_string
         self._json_dict: Optional[Dict[str, Any]] = None
@@ -43,8 +43,8 @@ class LazyJSONObject(RawJSON):
             separators=(u',', u':'))
 
 
-def _loads_method(name):
-    def method(self, *args, **kwargs):
+def _loads_method(name: str):
+    def method(self: Any, *args: Any, **kwargs: Any):
         return getattr(self._loads(), name)(*args, **kwargs)
     return method
 

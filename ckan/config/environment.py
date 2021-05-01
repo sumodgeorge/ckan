@@ -27,7 +27,7 @@ from ckan.lib.i18n import build_js_translations
 
 from ckan.common import CKANConfig, _, ungettext, config
 from ckan.exceptions import CkanConfigurationException
-from typing import Dict, Union, cast
+from typing import Any, Dict, Optional, Union, cast
 from ckan.types import Config
 
 if six.PY2:
@@ -57,7 +57,7 @@ def load_environment(conf: Union[Config, CKANConfig]):
             PylonsApp.find_controller)
 
         # This is from pylons 1.0 source, will monkey-patch into 0.9.7
-        def find_controller(self, controller):
+        def find_controller(self: Any, controller: str) -> Optional[Any]:
             if controller in self.controller_classes:
                 return self.controller_classes[controller]
             # Check to see if its a dotted name
@@ -74,7 +74,7 @@ def load_environment(conf: Union[Config, CKANConfig]):
                 self.controller_classes[controller] = mycontroller
                 return mycontroller
             return find_controller_generic(self, controller)
-        find_controller._old_find_controller = find_controller_generic
+        find_controller._old_find_controller = find_controller_generic  # type: ignore
         PylonsApp.find_controller = find_controller
 
     os.environ['CKAN_CONFIG'] = cast(str, conf['__file__'])

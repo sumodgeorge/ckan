@@ -162,9 +162,10 @@ def render(template_name: str,
     return flask_render_template(template_name, **extra_vars)
 
 
-def _pylons_prepare_renderer(template_name, extra_vars, cache_key=None,
-                             cache_type=None, cache_expire=None,
-                             cache_force=None, renderer=None):
+def _pylons_prepare_renderer(
+        template_name: str, extra_vars: Any, cache_key: Any = None,
+        cache_type: Any = None, cache_expire: Any = None,
+        cache_force: Any = None, renderer: Any = None):
     def render_template():
         globs = extra_vars or {}
         globs.update(pylons_globals())
@@ -196,7 +197,7 @@ def _pylons_prepare_renderer(template_name, extra_vars, cache_key=None,
         del globs['config']
         return render_jinja2(template_name, globs)
 
-    def set_pylons_response_headers(allow_cache):
+    def set_pylons_response_headers(allow_cache):  # type: ignore
         if 'Pragma' in response.headers:
             del response.headers["Pragma"]
         if allow_cache:
@@ -292,7 +293,7 @@ if six.PY2:
         repo = model.repo
         log = logging.getLogger(__name__)
 
-        def __before__(self, action, **params):
+        def __before__(self, action, **params):  # type: ignore
             c.__timer = time.time()
             app_globals.app_globals._check_uptodate()  # type: ignore
 
@@ -300,7 +301,7 @@ if six.PY2:
 
             i18n.handle_request(request, c)  # type: ignore
 
-        def __call__(self, environ, start_response):
+        def __call__(self, environ, start_response):  # type: ignore
             """Invoke the Controller"""
             # WSGIController.__call__ dispatches to the Controller method
             # the request is routed to. This routing information is
@@ -315,7 +316,7 @@ if six.PY2:
 
             return res
 
-        def __after__(self, action, **params):
+        def __after__(self, action, **params):  # type: ignore
 
             set_cors_headers_for_response(response)
 

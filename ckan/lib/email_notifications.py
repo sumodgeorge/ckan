@@ -149,7 +149,9 @@ _notifications_functions = [
     ]
 
 
-def get_notifications(user_dict: dict, since: datetime.datetime) -> List[Dict[str, Any]]:
+def get_notifications(
+        user_dict: Dict[str, Any],
+        since: datetime.datetime) -> List[Dict[str, Any]]:
     '''Return any email notifications for the given user since `since`.
 
     For example email notifications about activity streams will be returned for

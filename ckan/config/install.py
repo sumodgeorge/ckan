@@ -9,7 +9,7 @@ import ckan
 
 class CKANInstaller(PylonsInstaller):
 
-    def config_content(self, command, vars):
+    def config_content(self, command, vars):  # type: ignore
         ckan_version = ckan.__version__
         ckan_base_version = re.sub(r'[^0-9\.]', '', ckan_version)
         if ckan_base_version == ckan_version:

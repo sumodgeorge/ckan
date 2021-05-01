@@ -5,10 +5,11 @@ import inspect
 import time
 import logging
 import re
-from typing import Callable, List, Optional, TypeVar, Union
+from typing import Any, Callable, List, Optional, TypeVar, Union
 
 RT = TypeVar("RT")
 log = logging.getLogger(__name__)
+
 
 def deprecated(message: Optional[str]='') -> Callable[[Callable[..., RT]], Callable[..., RT]]:
     ''' This is a decorator used to mark functions as deprecated.
@@ -19,7 +20,7 @@ def deprecated(message: Optional[str]='') -> Callable[[Callable[..., RT]], Calla
 
     Additionally an exception is raised if the functions docstring does
     not contain the word `deprecated`.'''
-    def decorator(fn):
+    def decorator(fn: Callable[..., RT]) -> Callable[..., RT]:
         # When decorating a function check that the docstring is correct.
         if not fn.__doc__ or not re.search(r'\bdeprecated\b',
                                            fn.__doc__, re.IGNORECASE):
@@ -29,7 +30,7 @@ def deprecated(message: Optional[str]='') -> Callable[[Callable[..., RT]], Calla
                             'It must include the word `deprecated`.'
                             % (fn.__name__, fn.__module__))
 
-        def wrapped(*args, **kw):
+        def wrapped(*args: Any, **kw: Any):
             log.warning('Function %s() in module %s has been deprecated '
                         'and will be removed in a later release of ckan. %s'
                         % (fn.__name__, fn.__module__, message))
@@ -38,7 +39,7 @@ def deprecated(message: Optional[str]='') -> Callable[[Callable[..., RT]], Calla
     return decorator
 
 
-def timer(params: Union[Callable, List[str]]) -> Callable:
+def timer(params: Union[Callable[..., Any], List[str]]) -> Callable:
     ''' Decorator function for basic performance testing. It logs the time
     taken to call a function.  It can either be used as a basic decorator or an
     array of parameter names can be passed. If parameter names are passed then
@@ -49,14 +50,14 @@ def timer(params: Union[Callable, List[str]]) -> Callable:
         # this is being used as a simple decorator
         fn = params
         fn_name = '%s.%s' % (fn.__module__, fn.__name__)
-        def wrapped(*args, **kw):
+        def wrapped(*args: Any, **kw: Any):
             start = time.time()
             result = fn(*args, **kw)
             log.info('Timer: %s %.4f' % (fn_name, time.time() - start))
             return result
         return wrapped
 
-    def decorator(fn):
+    def decorator(fn: Callable[..., Any]):
         assert isinstance(params, list)
         # we have a list of parameter names so we want to find if the parameter
         # is a named one and if so store its position
@@ -69,7 +70,8 @@ def timer(params: Union[Callable, List[str]]) -> Callable:
                 # it could be passed in keywords
                 params_data.append((param))
         fn_name = '%s.%s' % (fn.__module__, fn.__name__)
-        def wrapped(*args, **kw):
+
+        def wrapped(*args: Any, **kw: Any):
             # store parameters being used in the call that we want to record
             params = []
             for param in  params_data:

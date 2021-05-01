@@ -20,6 +20,7 @@ prefixed names. Use the functions ``add_queue_name_prefix`` and
 from __future__ import print_function
 
 import logging
+from redis import Redis
 
 import rq
 from rq.connections import push_connection
@@ -32,7 +33,7 @@ from ckan.common import config
 from ckan.config.environment import load_environment
 from ckan.model import meta
 import ckan.plugins as plugins
-from typing import Any, Callable, Dict, Iterable, List, Optional
+from typing import Any, Callable, Dict, Iterable, List, Optional, cast
 
 
 log = logging.getLogger(__name__)
@@ -44,7 +45,7 @@ DEFAULT_JOB_TIMEOUT = 180
 _queues: Dict[str, rq.Queue] = {}
 
 
-def _connect():
+def _connect() -> Redis:
     u'''
     Connect to Redis and tell RQ about it.
 
@@ -206,6 +207,7 @@ def dictize_job(job: Job) -> Dict[str, Any]:
     :returns: The dictized job.
     :rtype: dict
     '''
+    assert job.created_at
     assert job.origin is not None
     return {
         u'id': job.id,
@@ -258,7 +260,7 @@ class Worker(rq.Worker):
         rq.worker.logger.setLevel(logging.INFO)
         super(Worker, self).__init__(qs, *args, **kwargs)  # type: ignore
 
-    def register_birth(self, *args, **kwargs) -> None:
+    def register_birth(self, *args: Any, **kwargs: Any) -> None:
         result = super(Worker, self).register_birth(*args, **kwargs)
         names_list = [remove_queue_name_prefix(n) for n in self.queue_names()]
         names = u', '.join(u'"{}"'.format(n) for n in names_list)
@@ -266,7 +268,7 @@ class Worker(rq.Worker):
                  self.key, self.pid, names))
         return result
 
-    def execute_job(self, job, *args, **kwargs) -> None:
+    def execute_job(self, job: Job, *args: Any, **kwargs: Any) -> None:
         # We shut down all database connections and the engine to make sure
         # that they are not shared with the child process and closed there
         # while still being in use in the main process, see
@@ -281,7 +283,7 @@ class Worker(rq.Worker):
         meta.engine.dispose()  # type: ignore
 
         # The original implementation performs the actual fork
-        queue = remove_queue_name_prefix(job.origin)
+        queue = remove_queue_name_prefix(cast(str, job.origin))
         log.info(u'Worker {} starts job {} from queue "{}"'.format(
                  self.key, job.id, queue))
         for plugin in plugins.PluginImplementations(plugins.IForkObserver):
@@ -292,23 +294,23 @@ class Worker(rq.Worker):
 
         return result
 
-    def register_death(self, *args, **kwargs) -> None:
+    def register_death(self, *args: Any, **kwargs: Any) -> None:
         result = super(Worker, self).register_death(*args, **kwargs)
         log.info(u'Worker {} (PID {}) has stopped'.format(self.key, self.pid))
         return result
 
-    def handle_exception(self, job, *exc_info) -> None:
+    def handle_exception(self, job: Job, *exc_info: Any) -> None:
         log.exception(u'Job {} on worker {} raised an exception: {}'.format(
                       job.id, self.key, exc_info[1]))
         return super(Worker, self).handle_exception(job, *exc_info)
 
-    def main_work_horse(self, job, queue):
+    def main_work_horse(self, job: Job, queue: rq.Queue):
         # This method is called in a worker's work horse process right
         # after forking.
         load_environment(config)
         return super(Worker, self).main_work_horse(job, queue)
 
-    def perform_job(self, *args, **kwargs) -> bool:
+    def perform_job(self, *args: Any, **kwargs: Any) -> bool:
         result = super(Worker, self).perform_job(*args, **kwargs)
         # rq.Worker.main_work_horse does a hard exit via os._exit directly
         # after its call to perform_job returns. Hence here is the correct

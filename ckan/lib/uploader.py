@@ -6,7 +6,7 @@ import datetime
 import logging
 import magic
 import mimetypes
-from typing import Any, Dict, IO, Optional, Union
+from typing import Any, AnyStr, Dict, IO, Optional, Union
 
 from six.moves.urllib.parse import urlparse  # type: ignore
 
@@ -29,7 +29,8 @@ _max_resource_size: Optional[int] = None
 _max_image_size: Optional[int] = None
 
 
-def _copy_file(input_file: IO, output_file: IO, max_size: int) -> None:
+def _copy_file(input_file: IO[bytes],
+               output_file: IO[bytes], max_size: int) -> None:
     input_file.seek(0)
     current_size = 0
     while True:
@@ -116,6 +117,7 @@ class Upload(object):
     object_type: Optional[str]
     old_filename: Optional[str]
     old_filepath: Optional[str]
+    upload_file: Optional[IO[bytes]]
 
     def __init__(self,
                  object_type: str,
@@ -246,6 +248,7 @@ class ResourceUpload(object):
             resource['url_type'] = 'upload'
             resource['last_modified'] = datetime.datetime.utcnow()
             self.upload_file = _get_underlying_file(upload_field_storage)
+            assert self.upload_file is not None
             self.upload_file.seek(0, os.SEEK_END)
             self.filesize = self.upload_file.tell()
             # go back to the beginning of the file buffer

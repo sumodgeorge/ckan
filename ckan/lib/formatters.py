@@ -70,7 +70,7 @@ def localised_number(number: float) -> str:
 def localised_filesize(number: int) -> str:
     ''' Returns a localised unicode representation of a number in bytes, MiB
     etc '''
-    def rnd(number, divisor):
+    def rnd(number: int, divisor: int):
         # round to 1 decimal place
         return localised_number(float(number * 10 // divisor) / 10)
 
@@ -90,7 +90,7 @@ def localised_SI_number(number: int) -> str:
     ''' Returns a localised unicode representation of a number in SI format
     eg 14700 becomes 14.7k '''
 
-    def rnd(number, divisor):
+    def rnd(number: int, divisor: int):
         # round to 1 decimal place
         return localised_number(float(number * 10 // divisor) / 10)
 

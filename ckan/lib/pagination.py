@@ -40,7 +40,7 @@ import dominate.tags as tags
 from markupsafe import Markup
 from six import text_type
 from six.moves import range  # type: ignore
-from typing import Any, Callable, Dict, Iterable, Optional, Sequence
+from typing import Any, Callable, Dict, Match, Optional, Sequence
 
 
 class BasePage(list):
@@ -104,13 +104,13 @@ class BasePage(list):
     last_item: Optional[int]
 
     def __init__(self,
-                 collection: Sequence,
+                 collection: Sequence[Any],
                  page: int = 1,
                  items_per_page: int = 20,
                  item_count: Optional[int] = None,
                  sqlalchemy_session: Any = None,
                  presliced_list: bool = False,
-                 url: Optional[Callable] = None,
+                 url: Optional[Callable[..., str]] = None,
                  **kwargs: Any) -> None:
         """Create a "Page" instance.
 
@@ -505,7 +505,7 @@ class BasePage(list):
         return Markup(result)
 
     # Private methods
-    def _range(self, regexp_match):
+    def _range(self, regexp_match: Match[str]):
         """
         Return range of linked pages (e.g. '1 2 [3] 4 5 6 7 8').
 
@@ -534,7 +534,7 @@ class BasePage(list):
         # Create a link to the first page (unless we are on the first page
         # or there would be no need to insert '..' spacers)
         if self.page != self.first_page and self.first_page < leftmost_page:
-            nav_items.append(self._pagerlink(self.first_page, self.first_page))
+            nav_items.append(self._pagerlink(self.first_page, str(self.first_page)))
 
         # Insert dots if there are pages between the first page
         # and the currently displayed page range
@@ -570,11 +570,11 @@ class BasePage(list):
         # Create a link to the very last page (unless we are on the last
         # page or there would be no need to insert '..' spacers)
         if self.page != self.last_page and rightmost_page < self.last_page:
-            nav_items.append(self._pagerlink(self.last_page, self.last_page))
+            nav_items.append(self._pagerlink(self.last_page, str(self.last_page)))
 
         return self.separator.join(nav_items)
 
-    def _pagerlink(self, page, text):
+    def _pagerlink(self, page: int, text: str):
         """
         Create a URL that links to another page using url_for().
 
@@ -638,7 +638,9 @@ class Page(BasePage):
 
     # Put each page link into a <li> (for Bootstrap to style it)
 
-    def _pagerlink(self, page, text, extra_attributes=None):
+    def _pagerlink(
+            self, page: int, text: str,
+            extra_attributes: Optional[Dict[str, Any]] = None):
         anchor = super(Page, self)._pagerlink(page, text)
         extra_attributes = extra_attributes or {}
         return text_type(tags.li(anchor, **extra_attributes))
@@ -647,7 +649,7 @@ class Page(BasePage):
     # and '..' into '<li><a>..'
     # (for Bootstrap to style them properly)
 
-    def _range(self, regexp_match):
+    def _range(self, regexp_match: Match[str]):
         html = super(Page, self)._range(regexp_match)
         # Convert ..
         dotdot = u'<span class="pager_dotdot">..</span>'

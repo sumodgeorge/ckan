@@ -1,4 +1,5 @@
 # encoding: utf-8
+# type: ignore
 
 from ckan.types import Context
 import logging

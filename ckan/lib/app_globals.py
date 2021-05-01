@@ -136,8 +136,8 @@ def get_globals_key(key: str) -> str:
 
 def reset() -> None:
     ''' set updatable values from config '''
-    def get_config_value(key, default=''):
-        if model.meta.engine.has_table('system_info'):
+    def get_config_value(key: str, default: str = ''):
+        if model.meta.engine.has_table('system_info'):  # type: ignore
             value = model.get_system_info(key)
         else:
             value = None

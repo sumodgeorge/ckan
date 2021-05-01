@@ -126,14 +126,14 @@ class Changes(dict):
             self[option.section][action] = []
         self[option.section][action].append(option)
 
-    def get(self, section, action=None) -> List[Option]:
+    def get(self, section: str, action: Optional[str] = None) -> List[Option]:
         try:
             return self[section][action]
         except KeyError:
             return []
 
 
-def calculate_changes(existing_options_dict: Dict,
+def calculate_changes(existing_options_dict: Dict[str, Any],
                       desired_options: Iterable[Option],
                       edit: bool) -> Changes:
     changes = Changes()
@@ -183,7 +183,7 @@ def make_changes(input_lines: Iterable[str], new_sections: Iterable[str],
     options_already_edited = set()
     have_inserted_new_sections = False
 
-    def write_option(option):
+    def write_option(option: Any):
         output.append(str(option))
 
     def insert_new_sections(new_sections: Iterable[str]):
