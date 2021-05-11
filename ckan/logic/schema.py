@@ -112,7 +112,7 @@ def default_create_package_schema(
         empty_if_not_sysadmin: Validator, ignore_missing: Validator,
         unicode_safe: Validator, package_id_does_not_exist: Validator,
         not_empty: Validator, name_validator: Validator,
-        package_name_validator: Validator,
+        package_name_validator: Validator, strip_value: Validator,
         if_empty_same_as: Callable[[str], Validator],
         email_validator: Validator, package_version_validator: Validator,
         ignore_not_package_admin: Validator, boolean_validator: Validator,
@@ -127,9 +127,11 @@ def default_create_package_schema(
             not_empty, unicode_safe, name_validator, package_name_validator],
         'title': [if_empty_same_as("name"), unicode_safe],
         'author': [ignore_missing, unicode_safe],
-        'author_email': [ignore_missing, unicode_safe, email_validator],
+        'author_email': [ignore_missing, unicode_safe, strip_value,
+                         email_validator],
         'maintainer': [ignore_missing, unicode_safe],
-        'maintainer_email': [ignore_missing, unicode_safe, email_validator],
+        'maintainer_email': [ignore_missing, unicode_safe, strip_value,
+                             email_validator],
         'license_id': [ignore_missing, unicode_safe],
         'notes': [ignore_missing, unicode_safe],
         'url': [ignore_missing, unicode_safe],
@@ -411,7 +413,7 @@ def default_user_schema(
         name_validator: Validator, user_name_validator: Validator,
         user_password_validator: Validator, user_password_not_empty: Validator,
         email_is_unique: Validator, ignore_not_sysadmin: Validator,
-        not_empty: Validator, email_validator: Validator,
+        not_empty: Validator, strip_value: Validator, email_validator: Validator,
         user_about_validator: Validator, ignore: Validator,
         boolean_validator: Validator, json_object: Validator):
     return cast(Schema, {
@@ -422,7 +424,8 @@ def default_user_schema(
         'password': [user_password_validator, user_password_not_empty,
                      ignore_missing, unicode_safe],
         'password_hash': [ignore_missing, ignore_not_sysadmin, unicode_safe],
-        'email': [not_empty, email_validator, email_is_unique, unicode_safe],
+        'email': [not_empty, strip_value, email_validator, email_is_unique,
+                  unicode_safe],
         'about': [ignore_missing, user_about_validator, unicode_safe],
         'created': [ignore],
         'sysadmin': [ignore_missing, ignore_not_sysadmin],
@@ -473,13 +476,13 @@ def default_update_user_schema(
         ignore_missing: Validator, name_validator: Validator,
         user_name_validator: Validator, unicode_safe: Validator,
         user_password_validator: Validator, email_is_unique: Validator,
-        not_empty: Validator, email_validator: Validator):
+        not_empty: Validator, strip_value: Validator, email_validator: Validator):
     schema = default_user_schema()
 
     schema['name'] = [
         ignore_missing, name_validator, user_name_validator, unicode_safe]
     schema['email'] = [
-        not_empty, email_validator, email_is_unique, unicode_safe]
+        not_empty, strip_value, email_validator, email_is_unique, unicode_safe]
     schema['password'] = [
         user_password_validator, ignore_missing, unicode_safe]
 
