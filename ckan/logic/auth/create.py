@@ -284,6 +284,7 @@ def api_token_create(context: Context, data_dict: DataDict) -> AuthResult:
     """Create new token for current user.
     """
     user = context['model'].User.get(data_dict['user'])
+    assert user
     return {'success': user.name == context['user']}
 
 
@@ -299,7 +300,7 @@ def package_collaborator_create(context: Context,
 
     pkg = model.Package.get(data_dict['id'])
     user_obj = model.User.get(user)
-
+    assert pkg and user_obj
     if not authz.can_manage_collaborators(pkg.id, user_obj.id):
         return {
             'success': False,

@@ -32,7 +32,7 @@ CKANApp = Any
 TuplizedKey = Tuple[Any, ...]
 
 DataDict = Dict[str, Any]
-ErrorDict = Dict[str, Union[List[Union[str, Dict[str, Any]]], str]]
+ErrorDict = Dict[str, Union[str, List[Union[str, Dict[str, Any]]]]]
 TuplizedErrorDict = Dict[Tuple[Any, ...], List[str]]
 
 class Context(TypedDict, total=False):
@@ -125,7 +125,7 @@ class DataValidator(Protocol):
 
 Validator = Union[ValueValidator, ContextValidator, DataValidator]
 
-# NestedSchema = Dict[str, Iterable[Validator]]
+NestedSchema = Dict[str, Iterable[Validator]]
 # Schema = Dict[str, Union[Iterable[Validator], "NestedSchema"]]
 Schema = Dict[str, Union[Iterable[Validator], "Schema"]]
 ComplexSchemaFunc = Callable[..., Schema]

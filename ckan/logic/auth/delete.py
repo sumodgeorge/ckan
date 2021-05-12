@@ -170,6 +170,7 @@ def package_collaborator_delete(context: Context,
     pkg = model.Package.get(data_dict['id'])
     user_obj = model.User.get(user)
 
+    assert pkg and user_obj
     if not authz.can_manage_collaborators(pkg.id, user_obj.id):
         return {
             'success': False,
@@ -197,7 +198,7 @@ def api_token_revoke(context: Context, data_dict: DataDict) -> AuthResult:
 
     model = context[u'model']
     token = model.ApiToken.get(data_dict[u'jti'])
-
+    assert token and token.owner
     # Do not make distinction between absent keys and keys not owned
     # by user in order to prevent accidential key discovery.
     if token is None or token.owner.name != context[u'user']:

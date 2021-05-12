@@ -722,7 +722,7 @@ def default_resource_search_schema(ignore_missing: Validator,
     return schema
 
 
-def create_schema_for_required_keys(keys: str) -> Schema:
+def create_schema_for_required_keys(keys: Iterable[str]) -> Schema:
     ''' helper function that creates a schema definition where
     each key from keys is validated against ``not_missing``.
     '''

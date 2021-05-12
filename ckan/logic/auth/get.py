@@ -159,6 +159,7 @@ def resource_view_show(context: Context, data_dict: DataDict) -> AuthResult:
         raise logic.NotFound(_('Resource view not found, cannot check auth.'))
     resource = model.Resource.get(resource_view.resource_id)
 
+    assert resource
     return authz.is_authorized('resource_show', context, {'id': resource.id})
 
 
@@ -466,6 +467,8 @@ def package_collaborator_list(context: Context,
     pkg = model.Package.get(data_dict['id'])
     user_obj = model.User.get(user)
 
+    assert pkg
+    assert user_obj
     if not authz.can_manage_collaborators(pkg.id, user_obj.id):
         return {
             'success': False,

@@ -350,7 +350,7 @@ Provides a class that holds runtime and parsing time options.
 :license: BSD, see LICENSE for more details.
 '''
 
-def jinja2_getattr(self, obj: Any, attribute: str) -> Any:
+def jinja2_getattr(self: Any, obj: Any, attribute: str) -> Any:
     """Get an item or attribute of an object but prefer the attribute.
     Unlike :meth:`getitem` the attribute *must* be a bytestring.
 
@@ -359,14 +359,14 @@ def jinja2_getattr(self, obj: Any, attribute: str) -> Any:
     try:
         value = getattr(obj, attribute)
         if isinstance(value, property):
-            value = value.fget()
+            value = value.fget()  # type: ignore
         return value
     except AttributeError:
         pass
     try:
         value = obj[attribute]
         if isinstance(value, property):
-            value = value.fget()
+            value = value.fget()  # type: ignore
         return value
     except (TypeError, LookupError, AttributeError):
         return self.undefined(obj=obj, name=attribute)

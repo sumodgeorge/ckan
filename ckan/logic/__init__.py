@@ -21,7 +21,7 @@ import ckan.plugins as p
 
 from ckan.common import _, c
 
-from ckan.types import (Action, AuthFunction, ErrorDict, Context, Schema,
+from ckan.types import (Action, AuthFunction, DataDict, ErrorDict, Context, Schema,
                         Validator)
 
 Decorated = TypeVar("Decorated")
@@ -81,14 +81,16 @@ class ValidationError(ActionError):
     error_dict: ErrorDict
 
     def __init__(self,
-                 error_dict: Union[str, ErrorDict],
+                 errors: Union[str, ErrorDict],
                  error_summary: Optional[Dict[str, str]] = None,
                  extra_msg: Optional[str] = None) -> None:
-        if not isinstance(error_dict, dict):
-            error_dict = {'message': error_dict}
+        if not isinstance(errors, dict):
+            error_dict: ErrorDict = {'message': errors}
+        else:
+            error_dict = errors
         # tags errors are a mess so let's clean them up
         if 'tags' in error_dict:
-            tag_errors: List[Any] = []
+            tag_errors: List[Union[str, Dict[str, Any]]] = []
             for error in error_dict['tags']:
                 assert isinstance(error, dict)
                 try:
@@ -105,10 +107,10 @@ class ValidationError(ActionError):
     @property
     def error_summary(self) -> Dict[str, str]:
         ''' autogenerate the summary if not supplied '''
-        def summarise(error_dict):
+        def summarise(error_dict: ErrorDict) -> Dict[str, str]:
             ''' Do some i18n stuff on the error_dict keys '''
 
-            def prettify(field_name):
+            def prettify(field_name: str):
                 field_name = re.sub(r'(?<!\w)[Uu]rl(?!\w)', 'URL',
                                     field_name.replace('_', ' ').capitalize())
                 return _(field_name.replace('_', ' '))
@@ -121,9 +123,10 @@ class ValidationError(ActionError):
                 elif key == 'extras':
                     errors_extras = []
                     for item in error:
+                        assert isinstance(item, dict)
                         if (item.get('key') and
                                 item['key'][0] not in errors_extras):
-                            errors_extras.append(item.get('key')[0])
+                            errors_extras.append(item['key'][0])
                     summary[_('Extras')] = ', '.join(errors_extras)
                 elif key == 'extras_validation':
                     summary[_('Extras')] = error[0]
@@ -228,7 +231,7 @@ def tuplize_dict(data_dict: Dict[str, Any]) -> Dict[Tuple[Any, ...], Any]:
     return tuplized_dict
 
 
-def untuplize_dict(tuplized_dict: Dict[Tuple, Any]) -> Dict[str, Any]:
+def untuplize_dict(tuplized_dict: Dict[Tuple[Any, ...], Any]) -> Dict[str, Any]:
 
     data_dict = {}
     for key, value in six.iteritems(tuplized_dict):
@@ -346,7 +349,7 @@ def clear_actions_cache() -> None:
     _actions.clear()
 
 
-def chained_action(func: Callable) -> Callable:
+def chained_action(func: Action) -> Action:
     func.chained_action = True  # type: ignore
     return func
 
@@ -474,8 +477,9 @@ def get_action(action: str) -> Action:
 
     # wrap the functions
     for action_name, _action in _actions.items():
-        def make_wrapped(_action, action_name):
-            def wrapped(context=None, data_dict=None, **kw):
+        def make_wrapped(_action: Action, action_name: str):
+            def wrapped(context: Optional[Context],
+                        data_dict: DataDict, **kw: Any):
                 if kw:
                     log.critical('%s was passed extra keywords %r'
                                  % (_action.__name__, kw))
@@ -522,7 +526,7 @@ def get_action(action: str) -> Action:
         fn.__doc__ = _action.__doc__
         # we need to retain the side effect free behaviour
         if getattr(_action, 'side_effect_free', False):
-            fn.side_effect_free = True
+            fn.side_effect_free = True  # type: ignore
         _actions[action_name] = fn
 
     return _actions[action]
@@ -583,9 +587,9 @@ def validate(schema_func: Callable[[], Schema],
              can_skip_validator: bool = False) -> Callable[[Action], Action]:
     ''' A decorator that validates an action function against a given schema
     '''
-    def action_decorator(action):
+    def action_decorator(action: Action) -> Action:
         @functools.wraps(action)
-        def wrapper(context, data_dict):
+        def wrapper(context: Context, data_dict: DataDict):
             if can_skip_validator:
                 if context.get('skip_validation'):
                     return action(context, data_dict)

@@ -5,7 +5,7 @@ extend CKAN.
 
 '''
 from inspect import isclass
-from typing import (Any, Callable, Dict, Iterable, List, Optional, OrderedDict, Sequence,
+from typing import (Any, Callable, Dict, Iterable, List, Optional, Sequence,
                     TYPE_CHECKING, Tuple, Type, Union)
 from typing_extensions import TypedDict, Literal
 
@@ -20,9 +20,11 @@ from ckan.types import (Action, AuthFunction, Context, DataDict, PFeed,
 
 if TYPE_CHECKING:
     import click
+    import ckan.model as model
+
+    from collections import OrderedDict
     from ckan.common import CKANConfig
     from ckan.config.middleware.flask_app import CKANFlask
-    import ckan.model as model
     from .core import SingletonPlugin
 
 

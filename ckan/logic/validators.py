@@ -939,7 +939,7 @@ email_pattern = re.compile(
                         )
 
 
-def strip_value(value):
+def strip_value(value: str):
     '''Trims the Whitespace'''
     return value.strip()
 
@@ -952,7 +952,7 @@ def email_validator(value: Any, context: Context) -> Any:
             raise Invalid(_('Email {email} is not a valid format').format(email=value))
     return value
 
-def collect_prefix_validate(prefix: str, *validator_names) -> Validator:
+def collect_prefix_validate(prefix: str, *validator_names: str) -> Validator:
     """
     Return a validator that will collect top-level keys starting with
     prefix then apply validator_names to each one. Results are moved
@@ -960,7 +960,8 @@ def collect_prefix_validate(prefix: str, *validator_names) -> Validator:
     """
     validator_fns = [logic.get_validator(v) for v in validator_names]
 
-    def prefix_validator(key, data, errors, context):
+    def prefix_validator(key: TuplizedKey, data: Dict[TuplizedKey, Any],
+                         errors: TuplizedErrorDict, context: Context):
         out = {}
         extras = data.get(('__extras',), {})
 
@@ -987,7 +988,7 @@ def collect_prefix_validate(prefix: str, *validator_names) -> Validator:
     return prefix_validator
 
 
-def dict_only(value: Any):
+def dict_only(value: Any) -> Dict[Any, Any]:
     if not isinstance(value, dict):
         raise Invalid(_('Must be a dict'))
     return value
@@ -1015,9 +1016,9 @@ def email_is_unique(key: TuplizedKey, data: Dict[TuplizedKey, Any],
         _('The email address \'{email}\' belongs to a registered user.').format(email=data[key]))
 
 
-def one_of(list_of_value: Container) -> Validator:
+def one_of(list_of_value: Container[Any]) -> Validator:
     ''' Checks if the provided value is present in a list '''
-    def func(value):
+    def func(value: Any):
         if value not in list_of_value:
             raise Invalid(_('Value must be one of {}'.format(list_of_value)))
         return value

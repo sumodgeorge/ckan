@@ -799,7 +799,9 @@ def tag_list(context: Context,
 
     if tags:
         if all_fields:
-            tag_list = model_dictize.tag_list_dictize(tags, context)
+            tag_list: Union[
+                List[Dict[str, Any]], List[str]
+            ] = model_dictize.tag_list_dictize(tags, context)
         else:
             tag_list = [tag.name for tag in tags]
     else:
