@@ -6,7 +6,8 @@ import ckan.plugins as plugins
 import ckan.plugins.toolkit as toolkit
 
 
-def group_create(context: Context, data_dict: Optional[DataDict] = None) -> AuthResult:
+def group_create(
+        context: Context, data_dict: Optional[DataDict] = None) -> AuthResult:
     # Get the user name of the logged-in user.
     user_name = context['user']
 

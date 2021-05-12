@@ -21,8 +21,9 @@ import ckan.plugins as p
 
 from ckan.common import _, c
 
-from ckan.types import (Action, AuthFunction, ChainedAction, ChainedAuthFunction, DataDict, ErrorDict, Context, Schema,
-                        Validator)
+from ckan.types import (Action, ChainedAction,
+                        ChainedAuthFunction, DataDict, ErrorDict, Context,
+                        Schema, Validator)
 
 Decorated = TypeVar("Decorated")
 
@@ -231,7 +232,8 @@ def tuplize_dict(data_dict: Dict[str, Any]) -> Dict[Tuple[Any, ...], Any]:
     return tuplized_dict
 
 
-def untuplize_dict(tuplized_dict: Dict[Tuple[Any, ...], Any]) -> Dict[str, Any]:
+def untuplize_dict(
+        tuplized_dict: Dict[Tuple[Any, ...], Any]) -> Dict[str, Any]:
 
     data_dict = {}
     for key, value in six.iteritems(tuplized_dict):

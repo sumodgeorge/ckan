@@ -86,7 +86,8 @@ meta.mapper(
     api_token_table,
     properties={
         u"owner": orm.relation(
-            user.User, backref=orm.backref(u"api_tokens", cascade=u"all, delete")
+            user.User, backref=orm.backref(u"api_tokens",
+                                           cascade=u"all, delete")
         )
     },
 )

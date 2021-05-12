@@ -5,7 +5,8 @@ from ckan.types import Context, ErrorDict
 import copy
 import logging
 import sys
-from typing import Any, Container, Dict, Iterable, List, Optional, Tuple, Union, cast
+from typing import (
+    Any, Container, Dict, Iterable, List, Optional, Tuple, Union, cast)
 import sqlalchemy
 import os
 import pprint
@@ -1614,7 +1615,8 @@ def search_sql(context: Context, data_dict: Dict[str, Any]):
 
         for f in function_names:
             for name_variant in [f.lower(), '"{}"'.format(f)]:
-                if name_variant in backend.allowed_sql_functions:  # type: ignore
+                if name_variant in \
+                   backend.allowed_sql_functions:  # type: ignore
                     break
             else:
                 raise toolkit.NotAuthorized(
@@ -2038,7 +2040,8 @@ class DatastorePostgresqlBackend(DatastoreBackend):
                 WHERE table_name = '{0}'
                 '''.format(id))
             tabletype_results = engine.execute(tabletype_sql)
-            info['meta']['table_type'] = tabletype_results.fetchone()[0]  # type: ignore
+            info['meta']['table_type'] = \
+                tabletype_results.fetchone()[0]  # type: ignore
             # MATERIALIZED VIEWS show as BASE TABLE, so
             # we check pg_matviews
             matview_sql = sqlalchemy.text(u'''
@@ -2059,13 +2062,15 @@ class DatastorePostgresqlBackend(DatastoreBackend):
             dbsize_sql = sqlalchemy.text(
                 u"SELECT pg_database_size(current_database())".format(id))
             dbsize_results = engine.execute(dbsize_sql)
-            info['meta']['db_size'] = dbsize_results.fetchone()[0]  # type: ignore
+            info['meta']['db_size'] = \
+                dbsize_results.fetchone()[0]  # type: ignore
 
             # IDXSIZE - size of all indices for table in bytes
             idxsize_sql = sqlalchemy.text(
                 u"SELECT pg_indexes_size('{0}')".format(id))
             idxsize_results = engine.execute(idxsize_sql)
-            info['meta']['idx_size'] = idxsize_results.fetchone()[0]  # type: ignore
+            info['meta']['idx_size'] = \
+                idxsize_results.fetchone()[0]  # type: ignore
 
             # all the aliases for this resource
             alias_sql = sqlalchemy.text(u'''

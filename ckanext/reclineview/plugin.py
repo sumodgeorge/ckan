@@ -1,6 +1,6 @@
 # encoding: utf-8
 
-from ckan.types import Context, DataValidator, TuplizedErrorDict, TuplizedKey, Validator
+from ckan.types import Context, Validator
 from logging import getLogger
 from typing import Any, Callable, Container, Dict
 
@@ -35,7 +35,7 @@ def get_dataproxy_url() -> str:
         'ckan.recline.dataproxy_url', '//jsonpdataproxy.appspot.com')
 
 
-def in_list(list_possible_values: Callable[ [], Container[Any]]) -> Validator:
+def in_list(list_possible_values: Callable[[], Container[Any]]) -> Validator:
     '''
     Validator that checks that the input value is one of the given
     possible values.

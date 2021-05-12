@@ -70,20 +70,24 @@ def datastore_search_sql(context: Context, data_dict: DataDict) -> AuthResult:
     return {'success': True}
 
 
-def datastore_change_permissions(context: Context, data_dict: DataDict) -> AuthResult:
+def datastore_change_permissions(
+        context: Context, data_dict: DataDict) -> AuthResult:
     return datastore_auth(context, data_dict)
 
 
-def datastore_function_create(context: Context, data_dict: DataDict) -> AuthResult:
+def datastore_function_create(
+        context: Context, data_dict: DataDict) -> AuthResult:
     '''sysadmin-only: functions can be used to skip access checks'''
     return {'success': False}
 
 
-def datastore_function_delete(context: Context, data_dict: DataDict) -> AuthResult:
+def datastore_function_delete(
+        context: Context, data_dict: DataDict) -> AuthResult:
     return {'success': False}
 
 
-def datastore_run_triggers(context: Context, data_dict: DataDict) -> AuthResult:
+def datastore_run_triggers(
+        context: Context, data_dict: DataDict) -> AuthResult:
     '''sysadmin-only: functions can be used to skip access checks'''
     return {'success': False}
 

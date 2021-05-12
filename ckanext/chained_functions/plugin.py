@@ -40,7 +40,8 @@ def user_show(next_auth: AuthFunction, context: Context,
 
 @side_effect_free
 @chained_action
-def package_search(original_action: Action, context: Context, data_dict: DataDict):
+def package_search(original_action: Action, context: Context,
+                   data_dict: DataDict):
     return original_action(context, data_dict)
 
 

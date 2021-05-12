@@ -1666,8 +1666,9 @@ class IFacets(Interface):
         '''
         return facets_dict
 
-    def group_facets(self, facets_dict: 'OrderedDict[str, Any]', group_type: str,
-                     package_type: Optional[str]) -> 'OrderedDict[str, Any]':
+    def group_facets(self, facets_dict: 'OrderedDict[str, Any]',
+                     group_type: str, package_type: Optional[str]
+                     ) -> 'OrderedDict[str, Any]':
         u'''Modify and return the ``facets_dict`` for a group's page.
 
         The ``package_type`` is the type of dataset that these facets apply to.

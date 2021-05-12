@@ -13,6 +13,7 @@ log = logging.getLogger(__name__)
 Data = Dict[str, Any]
 ChangeList = List[Dict[str, Any]]
 
+
 class Extra(TypedDict):
     key: str
     value: Any

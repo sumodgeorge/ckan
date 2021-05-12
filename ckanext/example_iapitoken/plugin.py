@@ -35,7 +35,8 @@ class ExampleIApiTokenPlugin(p.SingletonPlugin):
     def decode_api_token(self, token: str, **kwargs: Any):
         return json.loads(token)
 
-    def postprocess_api_token(self, data: Dict[str, Any], jti: str, data_dict: Dict[str, Any]):
+    def postprocess_api_token(self, data: Dict[str, Any], jti: str,
+                              data_dict: Dict[str, Any]):
         data[u"jti"] = u"!" + jti + u"!"
         return data
 

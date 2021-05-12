@@ -163,8 +163,9 @@ def default_create_package_schema(
 
 @validator_args
 def default_update_package_schema(
-        ignore_missing: Validator, package_id_not_changed: Validator, name_validator: Validator,
-        package_name_validator: Validator, unicode_safe: Validator, owner_org_validator: Validator):
+        ignore_missing: Validator, package_id_not_changed: Validator,
+        name_validator: Validator, package_name_validator: Validator,
+        unicode_safe: Validator, owner_org_validator: Validator):
     schema = default_create_package_schema()
 
     schema['resources'] = default_update_resource_schema()
@@ -413,9 +414,10 @@ def default_user_schema(
         name_validator: Validator, user_name_validator: Validator,
         user_password_validator: Validator, user_password_not_empty: Validator,
         email_is_unique: Validator, ignore_not_sysadmin: Validator,
-        not_empty: Validator, strip_value: Validator, email_validator: Validator,
-        user_about_validator: Validator, ignore: Validator,
-        boolean_validator: Validator, json_object: Validator):
+        not_empty: Validator, strip_value: Validator,
+        email_validator: Validator, user_about_validator: Validator,
+        ignore: Validator, boolean_validator: Validator,
+        json_object: Validator):
     return cast(Schema, {
         'id': [ignore_missing, unicode_safe],
         'name': [
@@ -476,7 +478,8 @@ def default_update_user_schema(
         ignore_missing: Validator, name_validator: Validator,
         user_name_validator: Validator, unicode_safe: Validator,
         user_password_validator: Validator, email_is_unique: Validator,
-        not_empty: Validator, strip_value: Validator, email_validator: Validator):
+        not_empty: Validator, strip_value: Validator,
+        email_validator: Validator):
     schema = default_user_schema()
 
     schema['name'] = [

@@ -1,6 +1,7 @@
 # encoding: utf-8
 
-from ckan.types import Context, Schema, TuplizedErrorDict, TuplizedKey, Validator
+from ckan.types import (
+    Context, Schema, TuplizedErrorDict, TuplizedKey, Validator)
 import json
 from typing import Any, Callable, Dict, cast
 

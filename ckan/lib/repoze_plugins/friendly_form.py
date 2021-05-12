@@ -87,7 +87,7 @@ class FriendlyFormPlugin(object):
                  post_login_url: str, logout_handler_path: str,
                  post_logout_url: str, rememberer_name: str,
                  login_counter_name: Optional[str] = None,
-                 charset: str=u'iso-8859-1'):
+                 charset: str = u'iso-8859-1'):
         u'''
 
         :param login_form_url: The URL/path where the login form is located.
@@ -319,7 +319,8 @@ class FriendlyFormPlugin(object):
         '''
         return self._insert_qs_variable(url, self.login_counter_name, logins)
 
-    def _insert_qs_variable(self, url: str, var_name: str, var_value: List[str]):
+    def _insert_qs_variable(self, url: str, var_name: str,
+                            var_value: List[str]):
         u'''
         Insert the variable ``var_name`` with value ``var_value`` in the query
         string of ``url`` and return the new URL.

@@ -35,6 +35,7 @@ DataDict = Dict[str, Any]
 ErrorDict = Dict[str, Union[int, str, List[Union[str, Dict[str, Any]]]]]
 TuplizedErrorDict = Dict[Tuple[Any, ...], List[str]]
 
+
 class Context(TypedDict, total=False):
     user: str
     model: "Model"
@@ -150,6 +151,7 @@ ChainedAuthFunction = Callable[
 Action = Callable[[Context, DataDict], Any]
 ChainedAction = Callable[[Action, Context, DataDict], Any]
 
+
 class PFeed(Protocol):
     def __init__(
         self,
@@ -261,6 +263,7 @@ class PModel(Protocol):
     MIN_RATING: int
     MAX_RATING: int
     repo: "model_.Repository"
+
 
 Model: TypeAlias = "model_"
 # Model: TypeAlias = PModel

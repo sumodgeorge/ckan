@@ -51,7 +51,7 @@ def load_environment(conf: Union[Config, CKANConfig]):
         # here. Required by the deliverance plugin and iATI
         from pylons.wsgiapp import PylonsApp  # type: ignore
         import pkg_resources
-        find_controller_generic = getattr(
+        fcg = getattr(
             PylonsApp.find_controller,
             '_old_find_controller',
             PylonsApp.find_controller)
@@ -73,8 +73,8 @@ def load_environment(conf: Union[Config, CKANConfig]):
 
                 self.controller_classes[controller] = mycontroller
                 return mycontroller
-            return find_controller_generic(self, controller)
-        find_controller._old_find_controller = find_controller_generic  # type: ignore
+            return fcg(self, controller)
+        find_controller._old_find_controller = fcg  # type: ignore
         PylonsApp.find_controller = find_controller
 
     os.environ['CKAN_CONFIG'] = cast(str, conf['__file__'])

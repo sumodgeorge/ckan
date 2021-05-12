@@ -53,7 +53,8 @@ class CkanCommand(object):
 
 
 def _get_commands_from_plugins(
-        plugins: "p.PluginImplementations[p.IClick]") -> Generator[Any, None, None]:
+        plugins: "p.PluginImplementations[p.IClick]"
+) -> Generator[Any, None, None]:
     for plugin in plugins:
         for cmd in plugin.get_commands():
             cmd._ckan_meta = {  # type: ignore

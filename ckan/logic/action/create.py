@@ -320,7 +320,8 @@ def resource_create(context: Context, data_dict: DataDict) -> Dict[str, Any]:
         context.pop('defer_commit')
     except ValidationError as e:
         try:
-            error_dict = cast(ErrorDict, e.error_dict['resources'][-1])  # type: ignore
+            error_dict = cast(ErrorDict,
+                              e.error_dict['resources'][-1])  # type: ignore
         except (KeyError, IndexError):
             error_dict = e.error_dict
         raise ValidationError(error_dict)
@@ -1163,7 +1164,8 @@ def user_invite(context: Context, data_dict: DataDict) -> Dict[str, Any]:
         # Occasionally it won't meet the constraints, so check
         validation_errors: TuplizedErrorDict = {}
         ckan.logic.validators.user_password_validator(
-            ('password', ), {('password', ): password}, validation_errors, context)
+            ('password', ), {('password', ): password},
+            validation_errors, context)
         if not validation_errors:
             break
 
@@ -1255,7 +1257,7 @@ def vocabulary_create(context: Context, data_dict: DataDict) -> Dict[str, Any]:
     return model_dictize.vocabulary_dictize(vocabulary, context)
 
 
-def activity_create(context: Context, activity_dict: DataDict):
+def activity_create(context: Context, data_dict: DataDict):
     '''Create a new activity stream activity.
 
     You must be a sysadmin to create new activities.
@@ -1277,7 +1279,7 @@ def activity_create(context: Context, activity_dict: DataDict):
 
     '''
 
-    _check_access('activity_create', context, activity_dict)
+    _check_access('activity_create', context, data_dict)
 
     if not ckan.common.asbool(
             config.get('ckan.activity_streams_enabled', 'true')):
@@ -1287,13 +1289,13 @@ def activity_create(context: Context, activity_dict: DataDict):
 
     # Any revision_id that the caller attempts to pass in the activity_dict is
     # ignored and removed here.
-    if 'revision_id' in activity_dict:
-        del activity_dict['revision_id']
+    if 'revision_id' in data_dict:
+        del data_dict['revision_id']
 
     schema = context.get('schema') or \
         ckan.logic.schema.default_create_activity_schema()
 
-    data, errors = _validate(activity_dict, schema, context)
+    data, errors = _validate(data_dict, schema, context)
     if errors:
         raise ValidationError(errors)
 
@@ -1370,8 +1372,7 @@ def follow_user(context: Context, data_dict: DataDict) -> Dict[str, Any]:
         raise NotAuthorized(_("You must be logged in to follow users"))
 
     schema = context.get(
-        'schema') or  ckan.logic.schema.default_follow_user_schema()
-
+        'schema') or ckan.logic.schema.default_follow_user_schema()
 
     validated_data_dict, errors = _validate(data_dict, schema, context)
 

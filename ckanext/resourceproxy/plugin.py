@@ -16,7 +16,7 @@ log = getLogger(__name__)
 
 
 def get_proxified_resource_url(data_dict: Dict[str, Any],
-                               proxy_schemes: List[str]=[u'http', u'https']):
+                               proxy_schemes: List[str] = [u'http', u'https']):
     u'''
     :param data_dict: contains a resource and package dict
     :type data_dict: dictionary
@@ -64,7 +64,7 @@ class ResourceProxy(p.SingletonPlugin):
     def get_blueprint(self):
         return blueprint.resource_proxy
 
-    def get_helpers(self) ->  Dict[str, Callable[..., Any]]:
+    def get_helpers(self) -> Dict[str, Callable[..., Any]]:
         return {u'view_resource_url': self.view_resource_url}
 
     def view_resource_url(

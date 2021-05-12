@@ -41,7 +41,8 @@ class IDatastore(interfaces.Interface):
         return data_dict
 
     def datastore_search(self, context: Context, data_dict: Dict[str, Any],
-                         fields_types: Dict[str, str], query_dict: Dict[str, Any]):
+                         fields_types: Dict[str, str],
+                         query_dict: Dict[str, Any]):
         '''Modify queries made on datastore_search
 
         The overall design is that every IDatastore extension will receive the
@@ -99,7 +100,8 @@ class IDatastore(interfaces.Interface):
         return query_dict
 
     def datastore_delete(self, context: Context, data_dict: Dict[str, Any],
-                         fields_types: Dict[str, str], query_dict: Dict[str, Any]):
+                         fields_types: Dict[str, str],
+                         query_dict: Dict[str, Any]):
         '''Modify queries made on datastore_delete
 
         The overall design is that every IDatastore extension will receive the

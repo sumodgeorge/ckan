@@ -17,8 +17,8 @@ from six import string_types
 import ckan.plugins.interfaces as interfaces
 
 from ckan.common import config
-from typing import (
-    Any, Dict, Generator, Generic, Iterator, List, Optional, Type, TypeVar, Union)
+from typing import (Any, Dict, Generator, Generic, Iterator, List, Optional,
+                    Type, TypeVar, Union)
 
 
 __all__ = [
@@ -141,6 +141,7 @@ def get_plugin(plugin: str) -> Optional[SingletonPlugin]:
     if plugin in _PLUGINS_SERVICE:
         return _PLUGINS_SERVICE[plugin]
     return None
+
 
 def plugins_update() -> None:
     ''' This is run when plugins have been loaded or unloaded and allows us

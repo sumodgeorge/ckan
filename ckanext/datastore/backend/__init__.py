@@ -26,7 +26,8 @@ def get_all_resources_ids_in_datastore() -> List[str]:
     return backend.get_all_ids()
 
 
-def _parse_sort_clause(clause: str, fields_types: Container[str]):  # type: ignore
+def _parse_sort_clause(  # type: ignore
+        clause: str, fields_types: Container[str]):
     clause_match = re.match(u'^(.+?)( +(asc|desc) *)?$', clause, re.I)
 
     if not clause_match:

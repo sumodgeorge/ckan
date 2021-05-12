@@ -224,14 +224,16 @@ class DatastorePlugin(p.SingletonPlugin):
         return data_dict
 
     def datastore_delete(self, context: Context, data_dict: Dict[str, Any],
-                         fields_types: Dict[str, str], query_dict: Dict[str, Any]):
+                         fields_types: Dict[str, str],
+                         query_dict: Dict[str, Any]):
         hook = getattr(self.backend, 'datastore_delete', None)
         if hook:
             query_dict = hook(context, data_dict, fields_types, query_dict)
         return query_dict
 
     def datastore_search(self, context: Context, data_dict: Dict[str, Any],
-                         fields_types: Dict[str, str], query_dict: Dict[str, Any]):
+                         fields_types: Dict[str, str],
+                         query_dict: Dict[str, Any]):
         hook = getattr(self.backend, 'datastore_search', None)
         if hook:
             query_dict = hook(context, data_dict, fields_types, query_dict)

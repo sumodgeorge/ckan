@@ -274,7 +274,8 @@ def _read(id: Optional[str], limit: int, group_type: str) -> Dict[str, Any]:
     extra_vars["drill_down_url"] = drill_down_url
 
     def remove_field(
-            key: str, value: Optional[str] = None, replace: Optional[str] = None):
+            key: str, value: Optional[str] = None,
+            replace: Optional[str] = None):
         controller = lookup_group_controller(group_type)
         return h.remove_url_param(
             key,

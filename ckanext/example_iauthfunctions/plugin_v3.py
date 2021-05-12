@@ -1,6 +1,7 @@
 # encoding: utf-8
 
-from ckan.types import AuthFunction, AuthResult, Context, ContextValidator, DataDict
+from ckan.types import (
+    AuthFunction, AuthResult, Context, ContextValidator, DataDict)
 from typing import Dict, Optional, cast
 import ckan.plugins as plugins
 import ckan.plugins.toolkit as toolkit

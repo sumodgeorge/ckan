@@ -534,7 +534,8 @@ class BasePage(list):
         # Create a link to the first page (unless we are on the first page
         # or there would be no need to insert '..' spacers)
         if self.page != self.first_page and self.first_page < leftmost_page:
-            nav_items.append(self._pagerlink(self.first_page, str(self.first_page)))
+            nav_items.append(self._pagerlink(
+                self.first_page, str(self.first_page)))
 
         # Insert dots if there are pages between the first page
         # and the currently displayed page range
@@ -570,7 +571,8 @@ class BasePage(list):
         # Create a link to the very last page (unless we are on the last
         # page or there would be no need to insert '..' spacers)
         if self.page != self.last_page and rightmost_page < self.last_page:
-            nav_items.append(self._pagerlink(self.last_page, str(self.last_page)))
+            nav_items.append(self._pagerlink(
+                self.last_page, str(self.last_page)))
 
         return self.separator.join(nav_items)
 

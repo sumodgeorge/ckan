@@ -265,7 +265,8 @@ def datapusher_hook(context: Context, data_dict: Dict[str, Any]):
             context, {'resource_id': res_id})
 
 
-def datapusher_status(context: Context, data_dict: Dict[str, Any]) -> Dict[str, Any]:
+def datapusher_status(
+        context: Context, data_dict: Dict[str, Any]) -> Dict[str, Any]:
     ''' Get the status of a datapusher job for a certain resource.
 
     :param resource_id: The resource id of the resource that you want the
