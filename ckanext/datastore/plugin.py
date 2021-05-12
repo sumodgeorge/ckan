@@ -1,7 +1,9 @@
 # encoding: utf-8
 
+from ckan.types import Action, AuthFunction, Context
+from ckan.common import CKANConfig
 import logging
-from typing import Any
+from typing import Any, Dict
 
 from six import string_types
 
@@ -22,7 +24,6 @@ from ckanext.datastore.backend.postgres import DatastorePostgresqlBackend
 import ckanext.datastore.blueprint as view
 
 log = logging.getLogger(__name__)
-_get_or_bust = logic.get_or_bust
 
 DEFAULT_FORMATS = []
 
@@ -44,7 +45,7 @@ class DatastorePlugin(p.SingletonPlugin):
 
     resource_show_action = None
 
-    def __new__(cls: Any, *args, **kwargs):
+    def __new__(cls: Any, *args: Any, **kwargs: Any) -> Any:
         idatastore_extensions = p.PluginImplementations(interfaces.IDatastore)
         idatastore_extensions = idatastore_extensions.extensions()
 
@@ -66,24 +67,24 @@ class DatastorePlugin(p.SingletonPlugin):
 
     # IConfigurer
 
-    def update_config(self, config):
+    def update_config(self, config: CKANConfig):
         DatastoreBackend.register_backends()
         DatastoreBackend.set_active_backend(config)
 
-        templates_base = config.get('ckan.base_templates_folder')
+        templates_base = config.get('ckan.base_templates_folder', '')
 
         p.toolkit.add_template_directory(config, templates_base)
         self.backend = DatastoreBackend.get_active_backend()
 
     # IConfigurable
 
-    def configure(self, config):
+    def configure(self, config: CKANConfig):
         self.config = config
         self.backend.configure(config)
 
     # IActions
 
-    def get_actions(self):
+    def get_actions(self) -> Dict[str, Action]:
         actions = {
             'datastore_create': action.datastore_create,
             'datastore_upsert': action.datastore_upsert,
@@ -103,7 +104,7 @@ class DatastorePlugin(p.SingletonPlugin):
 
     # IAuthFunctions
 
-    def get_auth_functions(self):
+    def get_auth_functions(self) -> Dict[str, AuthFunction]:
         return {
             'datastore_create': auth.datastore_create,
             'datastore_upsert': auth.datastore_upsert,
@@ -119,7 +120,7 @@ class DatastorePlugin(p.SingletonPlugin):
 
     # IResourceController
 
-    def before_show(self, resource_dict):
+    def before_show(self, resource_dict: Dict[str, Any]):
         # Modify the resource url of datastore resources so that
         # they link to the datastore dumps.
         if resource_dict.get('url_type') == 'datastore':
@@ -132,7 +133,7 @@ class DatastorePlugin(p.SingletonPlugin):
 
         return resource_dict
 
-    def after_delete(self, context, resources):
+    def after_delete(self, context: Context, resources: Any):
         model = context['model']
         pkg = context['package']
         res_query = model.Session.query(model.Resource)
@@ -155,7 +156,8 @@ class DatastorePlugin(p.SingletonPlugin):
 
     # IDatastore
 
-    def datastore_validate(self, context, data_dict, fields_types):
+    def datastore_validate(self, context: Context, data_dict: Dict[str, Any],
+                           fields_types: Dict[str, str]):
         column_names = list(fields_types.keys())
 
         filters = data_dict.get('filters', {})
@@ -221,13 +223,15 @@ class DatastorePlugin(p.SingletonPlugin):
 
         return data_dict
 
-    def datastore_delete(self, context, data_dict, fields_types, query_dict):
+    def datastore_delete(self, context: Context, data_dict: Dict[str, Any],
+                         fields_types: Dict[str, str], query_dict: Dict[str, Any]):
         hook = getattr(self.backend, 'datastore_delete', None)
         if hook:
             query_dict = hook(context, data_dict, fields_types, query_dict)
         return query_dict
 
-    def datastore_search(self, context, data_dict, fields_types, query_dict):
+    def datastore_search(self, context: Context, data_dict: Dict[str, Any],
+                         fields_types: Dict[str, str], query_dict: Dict[str, Any]):
         hook = getattr(self.backend, 'datastore_search', None)
         if hook:
             query_dict = hook(context, data_dict, fields_types, query_dict)
@@ -241,7 +245,7 @@ class DatastorePlugin(p.SingletonPlugin):
 
     def before_fork(self):
         try:
-            before_fork = self.backend.before_fork
+            before_fork = self.backend.before_fork  # type: ignore
         except AttributeError:
             pass
         else:

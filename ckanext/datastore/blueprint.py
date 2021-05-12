@@ -1,7 +1,7 @@
 # encoding: utf-8
 
-from ckan.types import Validator
-from typing import Any, Callable, cast
+from ckan.types import Schema, Validator
+from typing import Any, Callable, Dict, Optional, cast
 from six.moves import zip_longest  # type: ignore
 
 from flask import Blueprint, make_response
@@ -41,7 +41,7 @@ PAGINATE_BY = 32000
 datastore = Blueprint(u'datastore', __name__)
 
 
-def dump_schema():
+def dump_schema() -> Schema:
     return {
         u'offset': [default(0), int_validator],
         u'limit': [ignore_missing, int_validator],
@@ -57,7 +57,7 @@ def dump_schema():
     }
 
 
-def dump(resource_id):
+def dump(resource_id: str):
     data, errors = dict_fns.validate(request.args.to_dict(), dump_schema())
     if errors:
         abort(
@@ -94,7 +94,7 @@ def dump(resource_id):
 
 class DictionaryView(MethodView):
 
-    def _prepare(self, id, resource_id):
+    def _prepare(self, id: str, resource_id: str) -> Dict[str, Any]:
         try:
             # resource_edit_base template uses these
             pkg_dict = get_action(u'package_show')({}, {u'id': id})
@@ -116,7 +116,7 @@ class DictionaryView(MethodView):
         except (ObjectNotFound, NotAuthorized):
             abort(404, _(u'Resource not found'))
 
-    def get(self, id, resource_id):
+    def get(self, id: str, resource_id: str):
         u'''Data dictionary view: show field labels and descriptions'''
 
         data_dict = self._prepare(id, resource_id)
@@ -127,7 +127,7 @@ class DictionaryView(MethodView):
 
         return render(u'datastore/dictionary.html', data_dict)
 
-    def post(self, id, resource_id):
+    def post(self, id: str, resource_id: str):
         u'''Data dictionary view: edit field labels and descriptions'''
         data_dict = self._prepare(id, resource_id)
         fields = data_dict[u'fields']
@@ -162,7 +162,8 @@ class DictionaryView(MethodView):
 
 
 def dump_to(
-    resource_id, output, fmt, offset, limit, options, sort, search_params
+    resource_id: str, output: Any, fmt: str, offset: int, limit: Optional[int],
+        options: Dict[str, Any], sort: str, search_params: Dict[str, Any]
 ):
     if fmt == u'csv':
         writer_factory = csv_writer
@@ -179,17 +180,17 @@ def dump_to(
     else:
         assert False, u'Unsupported format'
 
-    def start_writer(fields):
+    def start_writer(fields: Any):
         bom = options.get(u'bom', False)
         return writer_factory(output, fields, resource_id, bom)
 
-    def result_page(offs, lim):
+    def result_page(offs: int, lim: Optional[int]):
         return get_action(u'datastore_search')(
             {},
             dict({
                 u'resource_id': resource_id,
                 u'limit': PAGINATE_BY
-                if limit is None else min(PAGINATE_BY, lim),
+                if lim is None else min(PAGINATE_BY, lim),
                 u'offset': offs,
                 u'sort': sort,
                 u'records_format': records_format,
@@ -226,7 +227,7 @@ def dump_to(
             offset += paginate_by
             if limit is not None:
                 limit -= paginate_by
-                if limit <= 0:
+                if limit <= 0:  # type: ignore
                     break
 
             result = result_page(offset, limit)

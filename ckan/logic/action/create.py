@@ -320,7 +320,7 @@ def resource_create(context: Context, data_dict: DataDict) -> Dict[str, Any]:
         context.pop('defer_commit')
     except ValidationError as e:
         try:
-            error_dict = cast(ErrorDict, e.error_dict['resources'][-1])
+            error_dict = cast(ErrorDict, e.error_dict['resources'][-1])  # type: ignore
         except (KeyError, IndexError):
             error_dict = e.error_dict
         raise ValidationError(error_dict)

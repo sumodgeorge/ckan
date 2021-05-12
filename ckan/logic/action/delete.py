@@ -208,7 +208,7 @@ def resource_delete(context: Context, data_dict: DataDict) -> None:
     try:
         pkg_dict = _get_action('package_update')(context, pkg_dict)
     except ValidationError as e:
-        errors = cast(ErrorDict, e.error_dict['resources'][-1])
+        errors = cast(ErrorDict, e.error_dict['resources'][-1])  # type: ignore
         raise ValidationError(errors)
 
     for plugin in plugins.PluginImplementations(plugins.IResourceController):

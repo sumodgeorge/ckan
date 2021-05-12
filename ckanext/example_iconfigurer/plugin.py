@@ -1,5 +1,7 @@
 # encoding: utf-8
 
+from ckan.types import Schema
+from ckan.common import CKANConfig
 from six import text_type
 
 import ckan.plugins as plugins
@@ -24,7 +26,7 @@ class ExampleIConfigurerPlugin(plugins.SingletonPlugin):
 
     # IConfigurer
 
-    def update_config(self, config):
+    def update_config(self, config: CKANConfig):
         # Add extension templates directory
 
         toolkit.add_template_directory(config, u'templates')
@@ -38,7 +40,7 @@ class ExampleIConfigurerPlugin(plugins.SingletonPlugin):
             u'My Second Custom Config Tab'
         )
 
-    def update_config_schema(self, schema):
+    def update_config_schema(self, schema: Schema):
 
         ignore_missing = toolkit.get_validator(u'ignore_missing')
         is_positive_integer = toolkit.get_validator(u'is_positive_integer')

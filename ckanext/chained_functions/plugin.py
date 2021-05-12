@@ -35,7 +35,7 @@ class ChainedFunctionsPlugin(p.SingletonPlugin):
 @chained_auth_function
 def user_show(next_auth: AuthFunction, context: Context,
               data_dict: Optional[DataDict] = None):
-    return next_auth(context, data_dict)
+    return next_auth(context, data_dict)  # type: ignore
 
 
 @side_effect_free
@@ -45,7 +45,7 @@ def package_search(original_action: Action, context: Context, data_dict: DataDic
 
 
 @chained_helper
-def ckan_version(next_func, **kw: Any):
+def ckan_version(next_func: Callable[..., Any], **kw: Any):
     return next_func(**kw)
 
 

@@ -1,5 +1,6 @@
 # encoding: utf-8
 
+from ckan.types import Schema
 from six import text_type
 
 import ckan.plugins as p
@@ -14,7 +15,7 @@ empty = get_validator('empty')
 boolean_validator = get_validator('boolean_validator')
 
 
-def datapusher_submit_schema():
+def datapusher_submit_schema() -> Schema:
     schema = {
         'resource_id': [not_missing, not_empty, text_type],
         'id': [ignore_missing],

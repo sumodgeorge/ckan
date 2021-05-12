@@ -110,7 +110,7 @@ def resource_update(context: Context, data_dict: DataDict) -> Dict[str, Any]:
         updated_pkg_dict = _get_action('package_update')(context, pkg_dict)
     except ValidationError as e:
         try:
-            error_dict = cast(Dict[str, Any], e.error_dict['resources'][n])
+            error_dict = cast(Dict[str, Any], e.error_dict['resources'][n])  # type: ignore
         except (KeyError, IndexError):
             error_dict = e.error_dict
         raise ValidationError(error_dict)

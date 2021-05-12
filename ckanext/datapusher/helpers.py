@@ -1,9 +1,10 @@
 # encoding: utf-8
 
+from typing import Any, Dict
 import ckan.plugins.toolkit as toolkit
 
 
-def datapusher_status(resource_id):
+def datapusher_status(resource_id: str):
     try:
         return toolkit.get_action('datapusher_status')(
             {}, {'resource_id': resource_id})
@@ -13,7 +14,7 @@ def datapusher_status(resource_id):
         }
 
 
-def datapusher_status_description(status):
+def datapusher_status_description(status: Dict[str, Any]):
     _ = toolkit._
 
     if status.get('status'):

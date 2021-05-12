@@ -1,9 +1,13 @@
 # encoding: utf-8
 
+from typing import Any, Dict, Optional
+from ckan.types import AuthResult, Context
 import ckan.plugins as plugins
 
 
-def group_create(context, data_dict=None):
+def group_create(
+        context: Context,
+        data_dict: Optional[Dict[str, Any]] = None) -> AuthResult:
     return {'success': False, 'msg': 'No one is allowed to create groups'}
 
 

@@ -41,7 +41,7 @@ def merge_filters(view_filters: Dict[str, Any],
     return filters
 
 
-def ajax(resource_view_id):
+def ajax(resource_view_id: str):
     resource_view = get_action(u'resource_view_show'
                                )({}, {
                                    u'id': resource_view_id
@@ -136,7 +136,7 @@ def ajax(resource_view_id):
     return json.dumps(dtdata)
 
 
-def filtered_download(resource_view_id):
+def filtered_download(resource_view_id: str):
     params = json.loads(request.form[u'params'])
     resource_view = get_action(u'resource_view_show'
                                )({}, {

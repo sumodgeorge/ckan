@@ -2,6 +2,7 @@
 
 from contextlib import contextmanager
 from email.utils import encode_rfc2231
+from typing import Any, Dict, List, Optional
 from simplejson import dumps
 import six
 from six import text_type
@@ -13,7 +14,8 @@ from codecs import BOM_UTF8
 
 
 @contextmanager
-def csv_writer(response, fields, name=None, bom=False):
+def csv_writer(response: Any, fields: List[Dict[str, Any]],
+               name: Optional[str] = None, bom: bool = False):
     u'''Context manager for writing UTF-8 CSV data to response
 
     :param response: file-like or response-like object for writing
@@ -38,7 +40,8 @@ def csv_writer(response, fields, name=None, bom=False):
 
 
 @contextmanager
-def tsv_writer(response, fields, name=None, bom=False):
+def tsv_writer(response: Any, fields: List[Dict[str, Any]],
+               name: Optional[str] = None, bom: bool = False):
     u'''Context manager for writing UTF-8 TSV data to response
 
     :param response: file-like or response-like object for writing
@@ -68,15 +71,16 @@ def tsv_writer(response, fields, name=None, bom=False):
 
 class TextWriter(object):
     u'text in, text out'
-    def __init__(self, response):
+    def __init__(self, response: Any):
         self.response = response
 
-    def write_records(self, records):
+    def write_records(self, records: List[Any]):
         self.response.write(records)
 
 
 @contextmanager
-def json_writer(response, fields, name=None, bom=False):
+def json_writer(response: Any, fields: List[Dict[str, Any]],
+                name: Optional[str] = None, bom: bool = False):
     u'''Context manager for writing UTF-8 JSON data to response
 
     :param response: file-like or response-like object for writing
@@ -103,11 +107,11 @@ def json_writer(response, fields, name=None, bom=False):
 
 
 class JSONWriter(object):
-    def __init__(self, response):
+    def __init__(self, response: Any):
         self.response = response
         self.first = True
 
-    def write_records(self, records):
+    def write_records(self, records: List[Any]):
         for r in records:
             if self.first:
                 self.first = False
@@ -120,7 +124,8 @@ class JSONWriter(object):
 
 
 @contextmanager
-def xml_writer(response, fields, name=None, bom=False):
+def xml_writer(response: Any, fields: List[Dict[str, Any]],
+               name: Optional[str] = None, bom: bool = False):
     u'''Context manager for writing UTF-8 XML data to response
 
     :param response: file-like or response-like object for writing
@@ -148,14 +153,15 @@ class XMLWriter(object):
     _key_attr = u'key'
     _value_tag = u'value'
 
-    def __init__(self, response, columns):
+    def __init__(self, response: Any, columns: List[str]):
         self.response = response
         self.id_col = columns[0] == u'_id'
         if self.id_col:
             columns = columns[1:]
         self.columns = columns
 
-    def _insert_node(self, root, k, v, key_attr=None):
+    def _insert_node(self, root: Any, k: str, v: Any,
+                     key_attr: Optional[Any] = None):
         element = SubElement(root, k)
         if v is None:
             element.attrib[u'xsi:nil'] = u'true'
@@ -172,7 +178,7 @@ class XMLWriter(object):
         if key_attr is not None:
             element.attrib[self._key_attr] = text_type(key_attr)
 
-    def write_records(self, records):
+    def write_records(self, records: List[Any]):
         for r in records:
             root = Element(u'row')
             if self.id_col:

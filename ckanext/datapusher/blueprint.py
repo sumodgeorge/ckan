@@ -15,7 +15,7 @@ datapusher = Blueprint(u'datapusher', __name__)
 
 class ResourceDataView(MethodView):
 
-    def post(self, id, resource_id):
+    def post(self, id: str, resource_id: str):
         try:
             toolkit.get_action(u'datapusher_submit')(
                 {}, {
@@ -29,7 +29,7 @@ class ResourceDataView(MethodView):
             u'datapusher.resource_data', id=id, resource_id=resource_id
         )
 
-    def get(self, id, resource_id):
+    def get(self, id: str, resource_id: str):
         try:
             pkg_dict = toolkit.get_action(u'package_show')({}, {u'id': id})
             resource = toolkit.get_action(u'resource_show'

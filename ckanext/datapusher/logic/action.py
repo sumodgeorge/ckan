@@ -1,10 +1,11 @@
 # encoding: utf-8
 
+from ckan.types import Context
 import logging
 import json
 import datetime
 import time
-from typing import Any, Dict
+from typing import Any, Dict, cast
 
 from six.moves.urllib.parse import urljoin  # type: ignore
 from dateutil.parser import parse as parse_date
@@ -24,7 +25,7 @@ _get_or_bust = logic.get_or_bust
 _validate = ckan.lib.navl.dictization_functions.validate
 
 
-def datapusher_submit(context, data_dict):
+def datapusher_submit(context: Context, data_dict: Dict[str, Any]):
     ''' Submit a job to the datapusher. The datapusher is a service that
     imports tabular data into the datastore.
 
@@ -182,7 +183,7 @@ def datapusher_submit(context, data_dict):
     return True
 
 
-def datapusher_hook(context, data_dict):
+def datapusher_hook(context: Context, data_dict: Dict[str, Any]):
     ''' Update datapusher task. This action is typically called by the
     datapusher whenever the status of a job changes.
 
@@ -222,7 +223,8 @@ def datapusher_hook(context, data_dict):
             context, {'id': resource_dict['package_id']})
 
         for plugin in p.PluginImplementations(interfaces.IDataPusher):
-            plugin.after_upload(context, resource_dict, dataset_dict)
+            plugin.after_upload(cast(Dict[str, Any], context),
+                                resource_dict, dataset_dict)
 
         logic.get_action('resource_create_default_resource_views')(
             context,
@@ -263,7 +265,7 @@ def datapusher_hook(context, data_dict):
             context, {'resource_id': res_id})
 
 
-def datapusher_status(context, data_dict):
+def datapusher_status(context: Context, data_dict: Dict[str, Any]) -> Dict[str, Any]:
     ''' Get the status of a datapusher job for a certain resource.
 
     :param resource_id: The resource id of the resource that you want the

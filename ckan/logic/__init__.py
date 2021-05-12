@@ -91,7 +91,7 @@ class ValidationError(ActionError):
         # tags errors are a mess so let's clean them up
         if 'tags' in error_dict:
             tag_errors: List[Union[str, Dict[str, Any]]] = []
-            for error in error_dict['tags']:
+            for error in error_dict['tags']:  # type: ignore
                 assert isinstance(error, dict)
                 try:
                     tag_errors.append(', '.join(error['name']))
@@ -122,18 +122,18 @@ class ValidationError(ActionError):
                     summary[_('Resources')] = _('Package resource(s) invalid')
                 elif key == 'extras':
                     errors_extras = []
-                    for item in error:
+                    for item in error:  # type: ignore
                         assert isinstance(item, dict)
                         if (item.get('key') and
                                 item['key'][0] not in errors_extras):
                             errors_extras.append(item['key'][0])
                     summary[_('Extras')] = ', '.join(errors_extras)
                 elif key == 'extras_validation':
-                    summary[_('Extras')] = error[0]
+                    summary[_('Extras')] = error[0]  # type: ignore
                 elif key == 'tags':
-                    summary[_('Tags')] = error[0]
+                    summary[_('Tags')] = error[0]  # type: ignore
                 else:
-                    summary[_(prettify(key))] = error[0]
+                    summary[_(prettify(key))] = error[0]  # type: ignore
             return summary
 
         if self._error_summary:
@@ -603,7 +603,7 @@ def validate(schema_func: Callable[[], Schema],
     return action_decorator
 
 
-def side_effect_free(action: Action) -> Action:
+def side_effect_free(action: Decorated) -> Decorated:
     '''A decorator that marks the given action function as side-effect-free.
 
     Action functions decorated with this decorator can be called with an HTTP
@@ -631,7 +631,7 @@ def side_effect_free(action: Action) -> Action:
     return action
 
 
-def auth_sysadmins_check(action: AuthFunction) -> AuthFunction:
+def auth_sysadmins_check(action: Decorated) -> Decorated:
     '''A decorator that prevents sysadmins from being automatically authorized
     to call an action function.
 
@@ -649,13 +649,13 @@ def auth_sysadmins_check(action: AuthFunction) -> AuthFunction:
     return action
 
 
-def auth_audit_exempt(action: Any) -> Any:
+def auth_audit_exempt(action: Decorated) -> Decorated:
     ''' Dirty hack to stop auth audit being done '''
-    action.auth_audit_exempt = True
+    action.auth_audit_exempt = True  # type: ignore
     return action
 
 
-def auth_allow_anonymous_access(action: AuthFunction) -> AuthFunction:
+def auth_allow_anonymous_access(action: Decorated) -> Decorated:
     ''' Flag an auth function as not requiring a logged in user
 
     This means that check_access won't automatically raise a NotAuthorized
@@ -667,7 +667,7 @@ def auth_allow_anonymous_access(action: AuthFunction) -> AuthFunction:
     return action
 
 
-def auth_disallow_anonymous_access(action: AuthFunction) -> AuthFunction:
+def auth_disallow_anonymous_access(action: Decorated) -> Decorated:
     ''' Flag an auth function as requiring a logged in user
 
     This means that check_access will automatically raise a NotAuthorized

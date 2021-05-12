@@ -4,7 +4,7 @@ from __future__ import print_function
 from ckan.types import Context
 
 import logging
-from typing import cast
+from typing import List, cast
 
 import click
 
@@ -25,7 +25,7 @@ requires_confirmation = click.option(
 )
 
 
-def confirm(yes):
+def confirm(yes: bool):
     if yes:
         return
     click.confirm(question, abort=True)
@@ -39,7 +39,7 @@ def datapusher():
 
 @datapusher.command()
 @requires_confirmation
-def resubmit(yes):
+def resubmit(yes: bool):
     u'''Resubmit updated datastore resources.
     '''
     confirm(yes)
@@ -51,7 +51,7 @@ def resubmit(yes):
 @datapusher.command()
 @click.argument(u'package', required=False)
 @requires_confirmation
-def submit(package, yes):
+def submit(package: str, yes: bool):
     u'''Submits resources from package.
 
     If no package ID/name specified, submits all resources from all
@@ -84,7 +84,7 @@ def submit(package, yes):
         _submit(resource_ids)
 
 
-def _submit(resources):
+def _submit(resources: List[str]):
     click.echo(u'Submitting {} datastore resources'.format(len(resources)))
     user = tk.get_action(u'get_site_user')(cast(Context, {
         u'model': model,

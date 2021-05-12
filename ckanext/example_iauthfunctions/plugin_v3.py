@@ -1,12 +1,13 @@
 # encoding: utf-8
 
-from ckan.types import Context, ContextValidator, DataDict
-from typing import Optional, cast
+from ckan.types import AuthFunction, AuthResult, Context, ContextValidator, DataDict
+from typing import Dict, Optional, cast
 import ckan.plugins as plugins
 import ckan.plugins.toolkit as toolkit
 
 
-def group_create(context: Context, data_dict: Optional[DataDict] = None):
+def group_create(
+        context: Context, data_dict: Optional[DataDict] = None) -> AuthResult:
     # Get the user name of the logged-in user.
     user_name: str = context['user']
 
@@ -36,5 +37,5 @@ def group_create(context: Context, data_dict: Optional[DataDict] = None):
 class ExampleIAuthFunctionsPlugin(plugins.SingletonPlugin):
     plugins.implements(plugins.IAuthFunctions)
 
-    def get_auth_functions(self):
+    def get_auth_functions(self) -> Dict[str, AuthFunction]:
         return {'group_create': group_create}

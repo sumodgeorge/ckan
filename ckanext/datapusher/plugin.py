@@ -1,8 +1,9 @@
 # encoding: utf-8
 
-from ckan.types import Context
+from ckan.common import CKANConfig
+from ckan.types import Action, AuthFunction, Context
 import logging
-from typing import cast
+from typing import Any, Callable, Dict, cast
 
 import ckan.logic as logic
 import ckan.model as model
@@ -14,7 +15,6 @@ import ckanext.datapusher.logic.action as action
 import ckanext.datapusher.logic.auth as auth
 
 log = logging.getLogger(__name__)
-_get_or_bust = logic.get_or_bust
 
 DEFAULT_FORMATS = [
     u'csv',
@@ -46,11 +46,11 @@ class DatapusherPlugin(p.SingletonPlugin):
     legacy_mode = False
     resource_show_action = None
 
-    def update_config(self, config):
-        templates_base = config.get(u'ckan.base_templates_folder')
+    def update_config(self, config: CKANConfig):
+        templates_base = config.get(u'ckan.base_templates_folder', '')
         toolkit.add_template_directory(config, templates_base)
 
-    def configure(self, config):
+    def configure(self, config: CKANConfig):
         self.config = config
 
         datapusher_formats = config.get(u'ckan.datapusher.formats',
@@ -69,7 +69,7 @@ class DatapusherPlugin(p.SingletonPlugin):
 
     # IResourceUrlChange
 
-    def notify(self, resource):
+    def notify(self, resource: model.Resource):
         context = cast(Context, {
             u'model': model,
             u'ignore_auth': True,
@@ -83,11 +83,11 @@ class DatapusherPlugin(p.SingletonPlugin):
 
     # IResourceController
 
-    def after_create(self, context, resource_dict):
+    def after_create(self, context: Context, resource_dict: Dict[str, Any]):
 
         self._submit_to_datapusher(resource_dict)
 
-    def _submit_to_datapusher(self, resource_dict):
+    def _submit_to_datapusher(self, resource_dict: Dict[str, Any]):
 
         context = cast(Context, {
             u'model': model,
@@ -142,20 +142,20 @@ class DatapusherPlugin(p.SingletonPlugin):
             log.critical(e)
             pass
 
-    def get_actions(self):
+    def get_actions(self) -> Dict[str, Action]:
         return {
             u'datapusher_submit': action.datapusher_submit,
             u'datapusher_hook': action.datapusher_hook,
             u'datapusher_status': action.datapusher_status
         }
 
-    def get_auth_functions(self):
+    def get_auth_functions(self) -> Dict[str, AuthFunction]:
         return {
             u'datapusher_submit': auth.datapusher_submit,
             u'datapusher_status': auth.datapusher_status
         }
 
-    def get_helpers(self):
+    def get_helpers(self) -> Dict[str, Callable[..., Any]]:
         return {
             u'datapusher_status': helpers.datapusher_status,
             u'datapusher_status_description': helpers.
