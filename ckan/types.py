@@ -32,7 +32,7 @@ CKANApp = Any
 TuplizedKey = Tuple[Any, ...]
 
 DataDict = Dict[str, Any]
-ErrorDict = Dict[str, Union[str, List[Union[str, Dict[str, Any]]]]]
+ErrorDict = Dict[str, Union[int, str, List[Union[str, Dict[str, Any]]]]]
 TuplizedErrorDict = Dict[Tuple[Any, ...], List[str]]
 
 class Context(TypedDict, total=False):
@@ -48,6 +48,9 @@ class Context(TypedDict, total=False):
     schema_keys: List[Any]
     revision_id: Optional[Any]
     revision_date: Optional[Any]
+
+    connection: Any
+    check_access: Callable[..., Any]
 
     id: str
     user_id: str
@@ -140,8 +143,12 @@ AuthFunction = Union[
     AuthFunctionWithMandatoryDataDict,
     # partial
 ]
-Action = Callable[[Context, DataDict], Any]
+ChainedAuthFunction = Callable[
+    [AuthFunction, Context, Optional[DataDict]], AuthResult
+]
 
+Action = Callable[[Context, DataDict], Any]
+ChainedAction = Callable[[Action, Context, DataDict], Any]
 
 class PFeed(Protocol):
     def __init__(

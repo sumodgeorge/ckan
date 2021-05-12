@@ -1,6 +1,8 @@
 # encoding: utf-8
 
 '''Example IDatasetFormPlugin'''
+from typing import List
+from ckan.types import Schema
 import ckan.plugins as p
 import ckan.plugins.toolkit as tk
 
@@ -8,7 +10,7 @@ import ckan.plugins.toolkit as tk
 class ExampleIDatasetFormPlugin(p.SingletonPlugin, tk.DefaultDatasetForm):
     p.implements(p.IDatasetForm)
 
-    def _modify_package_schema(self, schema):
+    def _modify_package_schema(self, schema: Schema) -> Schema:
         schema.update({
             'custom_text': [tk.get_validator('ignore_missing'),
                             tk.get_converter('convert_to_extras')]
@@ -25,7 +27,7 @@ class ExampleIDatasetFormPlugin(p.SingletonPlugin, tk.DefaultDatasetForm):
         schema = self._modify_package_schema(schema)
         return schema
 
-    def show_package_schema(self):
+    def show_package_schema(self) -> Schema:
         schema = super(ExampleIDatasetFormPlugin, self).show_package_schema()
         schema.update({
             'custom_text': [tk.get_converter('convert_from_extras'),
@@ -38,7 +40,7 @@ class ExampleIDatasetFormPlugin(p.SingletonPlugin, tk.DefaultDatasetForm):
         # package types not handled by any other IDatasetForm plugin.
         return True
 
-    def package_types(self):
+    def package_types(self) -> List[str]:
         # This plugin doesn't handle any special package types, it just
         # registers itself as the default (above).
         return []

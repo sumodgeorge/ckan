@@ -1,9 +1,10 @@
 # encoding: utf-8
 
 
+from typing import Any, Callable, Dict
 import ckan.plugins as plugins
 import ckan.plugins.toolkit as toolkit
-from ckan.common import config
+from ckan.common import CKANConfig, config
 
 
 def show_most_popular_groups():
@@ -47,13 +48,13 @@ class ExampleThemePlugin(plugins.SingletonPlugin):
     # Declare that this plugin will implement ITemplateHelpers.
     plugins.implements(plugins.ITemplateHelpers)
 
-    def update_config(self, config):
+    def update_config(self, config: CKANConfig):
 
         # Add this plugin's templates dir to CKAN's extra_template_paths, so
         # that CKAN will use this plugin's custom templates.
         toolkit.add_template_directory(config, 'templates')
 
-    def get_helpers(self):
+    def get_helpers(self) -> Dict[str, Callable[..., Any]]:
         '''Register the most_popular_groups() function above as a template
         helper function.
 

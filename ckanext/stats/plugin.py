@@ -1,5 +1,6 @@
 # encoding: utf-8
 
+from ckan.common import CKANConfig
 from logging import getLogger
 
 import ckan.plugins as p
@@ -17,7 +18,7 @@ class StatsPlugin(p.SingletonPlugin):
     def get_blueprint(self):
         return blueprint.stats
 
-    def update_config(self, config):
+    def update_config(self, config: CKANConfig):
         p.toolkit.add_template_directory(config, u'templates')
         p.toolkit.add_public_directory(config, u'public')
         p.toolkit.add_resource(u'public/ckanext/stats', u'ckanext_stats')

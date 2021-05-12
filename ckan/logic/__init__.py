@@ -21,7 +21,7 @@ import ckan.plugins as p
 
 from ckan.common import _, c
 
-from ckan.types import (Action, AuthFunction, DataDict, ErrorDict, Context, Schema,
+from ckan.types import (Action, AuthFunction, ChainedAction, ChainedAuthFunction, DataDict, ErrorDict, Context, Schema,
                         Validator)
 
 Decorated = TypeVar("Decorated")
@@ -349,7 +349,7 @@ def clear_actions_cache() -> None:
     _actions.clear()
 
 
-def chained_action(func: Action) -> Action:
+def chained_action(func: ChainedAction) -> ChainedAction:
     func.chained_action = True  # type: ignore
     return func
 
@@ -678,7 +678,7 @@ def auth_disallow_anonymous_access(action: AuthFunction) -> AuthFunction:
     return action
 
 
-def chained_auth_function(func: AuthFunction) -> AuthFunction:
+def chained_auth_function(func: ChainedAuthFunction) -> ChainedAuthFunction:
     '''
     Decorator function allowing authentication functions to be chained.
     '''

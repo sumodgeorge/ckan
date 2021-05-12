@@ -1,5 +1,7 @@
 # encoding: utf-8
 
+from typing import Any, Dict
+from ckan.types import Validator
 import six
 from six import text_type
 
@@ -10,7 +12,7 @@ from ckan import plugins
 class ExampleIValidatorsPlugin(plugins.SingletonPlugin):
     plugins.implements(plugins.IValidators)
 
-    def get_validators(self):
+    def get_validators(self) -> Dict[str, Validator]:
         return {
             u'equals_fortytwo': equals_fortytwo,
             u'negate': negate,
@@ -18,17 +20,17 @@ class ExampleIValidatorsPlugin(plugins.SingletonPlugin):
         }
 
 
-def equals_fortytwo(value):
+def equals_fortytwo(value: Any):
     if value != 42:
         raise Invalid(u'not 42')
     return value
 
 
-def negate(value):
+def negate(value: Any):
     return -value
 
 
-def unicode_please(value):
+def unicode_please(value: Any):
     if isinstance(value, six.binary_type):
         try:
             return six.ensure_text(value)

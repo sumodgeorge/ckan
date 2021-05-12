@@ -1,5 +1,8 @@
 # encoding: utf-8
 
+from ckan.types import Context
+from typing import Any, Dict
+from ckan.common import CKANConfig
 from six import text_type
 import ckan.plugins as p
 
@@ -14,13 +17,13 @@ class VideoView(p.SingletonPlugin):
     p.implements(p.IConfigurer, inherit=True)
     p.implements(p.IResourceView, inherit=True)
 
-    def update_config(self, config):
+    def update_config(self, config: CKANConfig):
         p.toolkit.add_template_directory(config, 'theme/templates')
         self.formats = config.get(
             'ckan.preview.video_formats',
             DEFAULT_VIDEO_FORMATS).split()
 
-    def info(self):
+    def info(self) -> Dict[str, Any]:
         return {'name': 'video_view',
                 'title': p.toolkit._('Video'),
                 'icon': 'file-video-o',
@@ -31,12 +34,12 @@ class VideoView(p.SingletonPlugin):
                 'default_title': p.toolkit._('Video'),
                 }
 
-    def can_view(self, data_dict):
+    def can_view(self, data_dict: Dict[str, Any]):
         return (data_dict['resource'].get('format', '').lower()
                 in self.formats)
 
-    def view_template(self, context, data_dict):
+    def view_template(self, context: Context, data_dict: Dict[str, Any]):
         return 'video_view.html'
 
-    def form_template(self, context, data_dict):
+    def form_template(self, context: Context, data_dict: Dict[str, Any]):
         return 'video_form.html'

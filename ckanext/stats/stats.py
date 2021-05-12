@@ -2,6 +2,7 @@
 
 import datetime
 import logging
+from typing import Any, List, Optional, Tuple
 from ckan.common import config
 from six import text_type
 from sqlalchemy import Table, select, join, func, and_
@@ -22,18 +23,19 @@ if cache_enabled:
 DATE_FORMAT = '%Y-%m-%d'
 
 
-def table(name):
+def table(name: str):
     return Table(name, model.meta.metadata, autoload=True)
 
 
-def datetime2date(datetime_):
+def datetime2date(datetime_: datetime.datetime):
     return datetime.date(datetime_.year, datetime_.month, datetime_.day)
 
 
 class Stats(object):
 
     @classmethod
-    def largest_groups(cls, limit=10):
+    def largest_groups(
+            cls, limit: int = 10) -> List[Tuple[Optional[model.Group], int]]:
         member = table('member')
         package = table('package')
 
@@ -57,7 +59,9 @@ class Stats(object):
         return res_groups
 
     @classmethod
-    def top_tags(cls, limit=10, returned_tag_info='object'):  # by package
+    def top_tags(cls, limit: int = 10,
+                 returned_tag_info: str = 'object'
+                 ) -> Optional[List[Any]]:  # by package
         assert returned_tag_info in ('name', 'id', 'object')
         tag = table('tag')
         package_tag = table('package_tag')
@@ -94,7 +98,7 @@ class Stats(object):
             return res_tags
 
     @classmethod
-    def top_package_creators(cls, limit=10):
+    def top_package_creators(cls, limit: int = 10):
         userid_count = model.Session.query(
             model.Package.creator_user_id,
             func.count(model.Package.creator_user_id)

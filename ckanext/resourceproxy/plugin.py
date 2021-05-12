@@ -1,6 +1,7 @@
 # encoding: utf-8
 
 from logging import getLogger
+from typing import Any, Callable, Dict, List
 
 from six.moves.urllib.parse import urlparse  # type: ignore
 
@@ -14,7 +15,8 @@ from ckanext.resourceproxy import blueprint
 log = getLogger(__name__)
 
 
-def get_proxified_resource_url(data_dict, proxy_schemes=[u'http', u'https']):
+def get_proxified_resource_url(data_dict: Dict[str, Any],
+                               proxy_schemes: List[str]=[u'http', u'https']):
     u'''
     :param data_dict: contains a resource and package dict
     :type data_dict: dictionary
@@ -62,15 +64,15 @@ class ResourceProxy(p.SingletonPlugin):
     def get_blueprint(self):
         return blueprint.resource_proxy
 
-    def get_helpers(self):
+    def get_helpers(self) ->  Dict[str, Callable[..., Any]]:
         return {u'view_resource_url': self.view_resource_url}
 
     def view_resource_url(
         self,
-        resource_view,
-        resource,
-        package,
-        proxy_schemes=[u'http', u'https']
+        resource_view: Any,
+        resource: Any,
+        package: Any,
+        proxy_schemes: List[str] = [u'http', u'https']
     ):
         u'''
         Returns the proxy url if its availiable

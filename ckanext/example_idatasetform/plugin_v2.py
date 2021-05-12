@@ -1,5 +1,8 @@
 # encoding: utf-8
 
+from ckan.common import CKANConfig
+from typing import List
+from ckan.types import Schema
 import ckan.plugins as p
 import ckan.plugins.toolkit as tk
 
@@ -8,7 +11,7 @@ class ExampleIDatasetFormPlugin(p.SingletonPlugin, tk.DefaultDatasetForm):
     p.implements(p.IDatasetForm)
     p.implements(p.IConfigurer)
 
-    def create_package_schema(self):
+    def create_package_schema(self) -> Schema:
         # let's grab the default schema in our plugin
         schema = super(ExampleIDatasetFormPlugin, self).create_package_schema()
         # our custom field
@@ -18,7 +21,7 @@ class ExampleIDatasetFormPlugin(p.SingletonPlugin, tk.DefaultDatasetForm):
         })
         return schema
 
-    def update_package_schema(self):
+    def update_package_schema(self) -> Schema:
         schema = super(ExampleIDatasetFormPlugin, self).update_package_schema()
         # our custom field
         schema.update({
@@ -27,7 +30,7 @@ class ExampleIDatasetFormPlugin(p.SingletonPlugin, tk.DefaultDatasetForm):
         })
         return schema
 
-    def show_package_schema(self):
+    def show_package_schema(self) -> Schema:
         schema = super(ExampleIDatasetFormPlugin, self).show_package_schema()
         schema.update({
             'custom_text': [tk.get_converter('convert_from_extras'),
@@ -41,12 +44,12 @@ class ExampleIDatasetFormPlugin(p.SingletonPlugin, tk.DefaultDatasetForm):
         # package types not handled by any other IDatasetForm plugin.
         return True
 
-    def package_types(self):
+    def package_types(self) -> List[str]:
         # This plugin doesn't handle any special package types, it just
         # registers itself as the default (above).
         return []
 
-    def update_config(self, config):
+    def update_config(self, config: CKANConfig):
         # Add this plugin's templates dir to CKAN's extra_template_paths, so
         # that CKAN will use this plugin's custom templates.
         tk.add_template_directory(config, 'templates')

@@ -1,11 +1,12 @@
 # encoding: utf-8
 
+from ckan.types import Context, DataValidator, TuplizedErrorDict, TuplizedKey, Validator
 from logging import getLogger
-from typing import Any, Dict
+from typing import Any, Callable, Container, Dict
 
 import six
 
-from ckan.common import json, config
+from ckan.common import CKANConfig, json, config
 import ckan.plugins as p
 import ckan.plugins.toolkit as toolkit
 from ckan.plugins.toolkit import _
@@ -16,7 +17,7 @@ natural_number_validator = p.toolkit.get_validator('natural_number_validator')
 Invalid = p.toolkit.Invalid
 
 
-def get_mapview_config():
+def get_mapview_config() -> Dict[str, Any]:
     '''
     Extracts and returns map view configuration of the reclineview extension.
     '''
@@ -26,7 +27,7 @@ def get_mapview_config():
             if k.startswith(namespace)}
 
 
-def get_dataproxy_url():
+def get_dataproxy_url() -> str:
     '''
     Returns the value of the ckan.recline.dataproxy_url config option
     '''
@@ -34,7 +35,7 @@ def get_dataproxy_url():
         'ckan.recline.dataproxy_url', '//jsonpdataproxy.appspot.com')
 
 
-def in_list(list_possible_values):
+def in_list(list_possible_values: Callable[ [], Container[Any]]) -> Validator:
     '''
     Validator that checks that the input value is one of the given
     possible values.
@@ -43,13 +44,14 @@ def in_list(list_possible_values):
         for validated field
     :type possible_values: function
     '''
-    def validate(key, data, errors, context):
-        if not data[key] in list_possible_values():
-            raise Invalid('"{0}" is not a valid parameter'.format(data[key]))
+    def validate(value: Any):
+        if value not in list_possible_values():
+            raise Invalid('"{0}" is not a valid parameter'.format(value))
     return validate
 
 
-def datastore_fields(resource, valid_field_types):
+def datastore_fields(resource: Dict[str, Any],
+                     valid_field_types: Container[str]):
     '''
     Return a list of all datastore fields for a given resource, as long as
     the datastore field type is in valid_field_types.
@@ -73,7 +75,7 @@ class ReclineViewBase(p.SingletonPlugin):
     p.implements(p.IResourceView, inherit=True)
     p.implements(p.ITemplateHelpers, inherit=True)
 
-    def update_config(self, config):
+    def update_config(self, config: CKANConfig):
         '''
         Set up the resource library, public directory and
         template directory for the view
@@ -82,19 +84,20 @@ class ReclineViewBase(p.SingletonPlugin):
         toolkit.add_template_directory(config, 'theme/templates')
         toolkit.add_resource('theme/public', 'ckanext-reclineview')
 
-    def can_view(self, data_dict):
+    def can_view(self, data_dict: Dict[str, Any]):
         resource = data_dict['resource']
         return (resource.get('datastore_active') or
                 '_datastore_only_resource' in resource.get('url', ''))
 
-    def setup_template_variables(self, context, data_dict):
+    def setup_template_variables(self, context: Context,
+                                 data_dict: Dict[str, Any]):
         return {'resource_json': json.dumps(data_dict['resource']),
                 'resource_view_json': json.dumps(data_dict['resource_view'])}
 
-    def view_template(self, context, data_dict):
+    def view_template(self, context: Context, data_dict: Dict[str, Any]):
         return 'recline_view.html'
 
-    def get_helpers(self):
+    def get_helpers(self) -> Dict[str, Callable[..., Any]]:
         return {
             'get_map_config': get_mapview_config,
             'get_dataproxy_url': get_dataproxy_url,
@@ -106,7 +109,7 @@ class ReclineView(ReclineViewBase):
     This extension views resources using a Recline MultiView.
     '''
 
-    def info(self):
+    def info(self) -> Dict[str, Any]:
         return {'name': 'recline_view',
                 'title': _('Data Explorer'),
                 'filterable': True,
@@ -115,7 +118,7 @@ class ReclineView(ReclineViewBase):
                 'default_title': p.toolkit._('Data Explorer'),
                 }
 
-    def can_view(self, data_dict):
+    def can_view(self, data_dict: Dict[str, Any]):
         resource = data_dict['resource']
 
         if (resource.get('datastore_active') or
@@ -135,7 +138,7 @@ class ReclineGridView(ReclineViewBase):
     This extension views resources using a Recline grid.
     '''
 
-    def info(self):
+    def info(self) -> Dict[str, Any]:
         return {'name': 'recline_grid_view',
                 'title': _('Grid'),
                 'filterable': True,
@@ -167,7 +170,7 @@ class ReclineGraphView(ReclineViewBase):
     def list_datastore_fields(self):
         return [t['value'] for t in self.datastore_fields]
 
-    def info(self):
+    def info(self) -> Dict[str, Any]:
         # in_list validator here is passed functions because this
         # method does not know what the possible values of the
         # datastore fields are (requires a datastore search)
@@ -187,7 +190,8 @@ class ReclineGraphView(ReclineViewBase):
                 'default_title': p.toolkit._('Graph'),
                 }
 
-    def setup_template_variables(self, context, data_dict):
+    def setup_template_variables(self, context: Context,
+                                 data_dict: Dict[str, Any]):
         self.datastore_fields = datastore_fields(data_dict['resource'],
                                                  self.datastore_field_types)
         vars: Dict[str, Any] = ReclineViewBase.setup_template_variables(
@@ -196,7 +200,7 @@ class ReclineGraphView(ReclineViewBase):
                      'graph_fields': self.datastore_fields})
         return vars
 
-    def form_template(self, context, data_dict):
+    def form_template(self, context: Context, data_dict: Dict[str, Any]):
         return 'recline_graph_form.html'
 
 
@@ -221,7 +225,7 @@ class ReclineMapView(ReclineViewBase):
     def list_datastore_fields(self):
         return [t['value'] for t in self.datastore_fields]
 
-    def info(self):
+    def info(self) -> Dict[str, Any]:
         # in_list validator here is passed functions because this
         # method does not know what the possible values of the
         # datastore fields are (requires a datastore search)
@@ -247,7 +251,8 @@ class ReclineMapView(ReclineViewBase):
                 'default_title': p.toolkit._('Map'),
                 }
 
-    def setup_template_variables(self, context, data_dict):
+    def setup_template_variables(self, context: Context,
+                                 data_dict: Dict[str, Any]):
         map_latlon_fields = datastore_fields(
             data_dict['resource'], self.datastore_field_latlon_types)
         map_geojson_fields = datastore_fields(
@@ -263,5 +268,5 @@ class ReclineMapView(ReclineViewBase):
                      })
         return vars
 
-    def form_template(self, context, data_dict):
+    def form_template(self, context: Context, data_dict: Dict[str, Any]):
         return 'recline_map_form.html'
