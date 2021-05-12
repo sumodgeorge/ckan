@@ -1,0 +1,15 @@
+name: Check types
+on: [push, pull_request]
+env:
+  NODE_VERSION: '16' # Shipped with VS Code.
+
+jobs:
+  typecheck:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-node@v2-beta
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+      - name: Check types
+        run: npx pyright

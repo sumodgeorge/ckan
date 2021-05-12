@@ -63,15 +63,6 @@ defaults:
             $(npm bin)/cypress run
           ;;
         esac
-  run_type_checks: &run_type_checks
-    run:
-      command: |
-        case $CIRCLE_NODE_INDEX in
-          $NODE_TESTS_CONTAINER)
-            export NODE\_OPTIONS=--experimental-worker;
-            $(npm bin)/pyright
-          ;;
-        esac
 
   ckan_env: &ckan_env
     environment:
@@ -125,7 +116,6 @@ jobs:
           path: ~/junit
       - <<: *start_test_server
       - <<: *run_front_tests
-      - <<: *run_type_checks
       - store_artifacts:
           path: ~/project/cypress/screenshots
       - run: coveralls

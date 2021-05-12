@@ -7,11 +7,15 @@ from six import text_type
 import ckan.lib.navl.dictization_functions as df
 
 from ckan.common import _, json, config
-from typing import Any, Callable, Dict, NoReturn, Tuple
+from typing import Any, Callable, Dict, NoReturn
 
 missing = df.missing
 StopOnError = df.StopOnError
 Invalid = df.Invalid
+
+
+def identity_converter(value: Any) -> Any:
+    return value
 
 
 def keep_extras(key: TuplizedKey, data: Dict[TuplizedKey, Any],
