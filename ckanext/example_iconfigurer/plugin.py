@@ -43,6 +43,7 @@ class ExampleIConfigurerPlugin(plugins.SingletonPlugin):
     def update_config_schema(self, schema: Schema):
 
         ignore_missing = toolkit.get_validator(u'ignore_missing')
+        unicode_safe = toolkit.get_validator(u'unicode_safe')
         is_positive_integer = toolkit.get_validator(u'is_positive_integer')
 
         schema.update({
@@ -52,7 +53,7 @@ class ExampleIConfigurerPlugin(plugins.SingletonPlugin):
 
             # This is a custom configuration option
             u'ckanext.example_iconfigurer.test_conf': [
-                ignore_missing, text_type
+                ignore_missing, unicode_safe
             ],
         })
 

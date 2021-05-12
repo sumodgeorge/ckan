@@ -4,7 +4,6 @@ from functools import wraps
 import inspect
 from typing import Any, Callable, Iterable, cast
 
-from six import text_type
 import ckan.model
 import ckan.plugins as plugins
 from ckan.logic import get_validator
@@ -446,13 +445,14 @@ def default_user_schema(
 def user_new_form_schema(user_both_passwords_entered: Validator,
                          user_password_validator: Validator,
                          user_passwords_match: Validator,
-                         email_is_unique: Validator):
+                         email_is_unique: Validator,
+                         unicode_safe: Validator):
     schema = default_user_schema()
 
     schema['email'] = [email_is_unique]
-    schema['password1'] = [text_type, user_both_passwords_entered,
+    schema['password1'] = [unicode_safe, user_both_passwords_entered,
                            user_password_validator, user_passwords_match]
-    schema['password2'] = [text_type]
+    schema['password2'] = [unicode_safe]
 
     return schema
 
@@ -505,7 +505,7 @@ def default_generate_apikey_user_schema(
 def default_user_invite_schema(
         not_empty: Validator, unicode_safe: Validator):
     return cast(Schema, {
-        'email': [not_empty, text_type],
+        'email': [not_empty, unicode_safe],
         'group_id': [not_empty],
         'role': [not_empty],
     })

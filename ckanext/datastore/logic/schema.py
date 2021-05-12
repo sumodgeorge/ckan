@@ -29,6 +29,7 @@ configured_default = cast(Callable[..., Validator], get_validator(
     'configured_default'))
 limit_to_configured_maximum = cast(Callable[..., Validator], get_validator(
     'limit_to_configured_maximum'))
+unicode_safe = get_validator('unicode_safe')
 
 
 def rename(old: str, new: str) -> Validator:
@@ -111,12 +112,12 @@ def unicode_or_json_validator(value: Any) -> Any:
 
 def datastore_create_schema() -> Schema:
     schema = {
-        'resource_id': [ignore_missing, text_type, resource_id_exists],
+        'resource_id': [ignore_missing, unicode_safe, resource_id_exists],
         'force': [ignore_missing, boolean_validator],
         'id': [ignore_missing],
         'aliases': [ignore_missing, list_of_strings_or_string],
         'fields': {
-            'id': [not_empty, text_type],
+            'id': [not_empty, unicode_safe],
             'type': [ignore_missing],
             'info': [ignore_missing],
         },
@@ -143,10 +144,10 @@ def datastore_create_schema() -> Schema:
 
 def datastore_upsert_schema() -> Schema:
     schema = {
-        'resource_id': [not_missing, not_empty, text_type],
+        'resource_id': [not_missing, not_empty, unicode_safe],
         'force': [ignore_missing, boolean_validator],
         'id': [ignore_missing],
-        'method': [ignore_missing, text_type, one_of(
+        'method': [ignore_missing, unicode_safe, one_of(
             ['upsert', 'insert', 'update'])],
         'calculate_record_count': [ignore_missing, default(False),
                                    boolean_validator],
@@ -159,7 +160,7 @@ def datastore_upsert_schema() -> Schema:
 
 def datastore_delete_schema() -> Schema:
     schema = {
-        'resource_id': [not_missing, not_empty, text_type],
+        'resource_id': [not_missing, not_empty, unicode_safe],
         'force': [ignore_missing, boolean_validator],
         'id': [ignore_missing],
         'calculate_record_count': [ignore_missing, default(False),
@@ -172,12 +173,12 @@ def datastore_delete_schema() -> Schema:
 
 def datastore_search_schema() -> Schema:
     schema = {
-        'resource_id': [not_missing, not_empty, text_type],
+        'resource_id': [not_missing, not_empty, unicode_safe],
         'id': [ignore_missing],
         'q': [ignore_missing, unicode_or_json_validator],
         'plain': [ignore_missing, boolean_validator],
         'filters': [ignore_missing, json_validator],
-        'language': [ignore_missing, text_type],
+        'language': [ignore_missing, unicode_safe],
         'limit': [
             configured_default('ckan.datastore.search.rows_default', 100),
             natural_number_validator,
@@ -221,5 +222,5 @@ def datastore_function_delete_schema() -> Schema:
 
 def datastore_analyze_schema() -> Schema:
     return {
-        'resource_id': [text_type, resource_id_exists],
+        'resource_id': [unicode_safe, resource_id_exists],
     }

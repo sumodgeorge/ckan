@@ -14,11 +14,6 @@ StopOnError = df.StopOnError
 Invalid = df.Invalid
 
 
-
-def identity_converter(value: Any) -> Any:
-    return value
-
-
 def keep_extras(key: TuplizedKey, data: Dict[TuplizedKey, Any],
                 errors: TuplizedErrorDict, context: Context) -> None:
 
