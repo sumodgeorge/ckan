@@ -1,15 +1,16 @@
 # encoding: utf-8
 
 import re
+from typing import Any
 
-from pylons.util import PylonsInstaller  # type: ignore
+from pylons.util import PylonsInstaller
 
 import ckan
 
 
 class CKANInstaller(PylonsInstaller):
 
-    def config_content(self, command, vars):  # type: ignore
+    def config_content(self, command: Any, vars: Any) -> Any:
         ckan_version = ckan.__version__
         ckan_base_version = re.sub(r'[^0-9\.]', '', ckan_version)
         if ckan_base_version == ckan_version:

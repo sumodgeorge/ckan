@@ -1,12 +1,15 @@
 # encoding: utf-8
 
-from typing import Any, Optional, Union
-import ckan.model as model
-import click
 import datetime
 import csv
-import ckan.logic as logic
+
 from collections import namedtuple
+from typing import Any, Optional
+
+import click
+
+import ckan.model as model
+import ckan.logic as logic
 from ckan.cli import error_shout
 
 ViewCount = namedtuple(u'ViewCount', u'id name count')

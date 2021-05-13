@@ -1,6 +1,7 @@
 # encoding: utf-8
 
 from typing import List
+
 import click
 
 import ckan.lib.jobs as bg_jobs

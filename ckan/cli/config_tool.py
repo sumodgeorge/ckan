@@ -5,8 +5,8 @@ from typing import Any, List
 
 import click
 
-from ckan.cli import error_shout
 import ckan.lib.config_tool as ct
+from ckan.cli import error_shout
 
 log = logging.getLogger(__name__)
 

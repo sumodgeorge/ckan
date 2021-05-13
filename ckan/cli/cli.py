@@ -1,9 +1,8 @@
 # encoding: utf-8
 
-from ckan.plugins.core import SingletonPlugin
 import logging
 from collections import defaultdict
-from typing import Any, Generator, List, Optional
+from typing import Any, Callable, Generator, Optional, cast
 from pkg_resources import iter_entry_points
 
 import six
@@ -29,10 +28,10 @@ from ckan.cli import (
     tracking,
     less,
     generate,
-    user
+    user,
+    seed,
 )
 
-from ckan.cli import seed
 
 log = logging.getLogger(__name__)
 
@@ -57,6 +56,7 @@ def _get_commands_from_plugins(
 ) -> Generator[Any, None, None]:
     for plugin in plugins:
         for cmd in plugin.get_commands():
+            # type_ignore_reason: using custom prop
             cmd._ckan_meta = {  # type: ignore
                 u'name': plugin.name,
                 u'type': u'plugin'
@@ -119,14 +119,14 @@ def _init_ckan_config(ctx: Any, param: str, value: str):
         ctx.command.add_command(cmd)
 
 
-click_config_option = click.option(  # type: ignore
+click_config_option = click.option(
     u'-c',
     u'--config',
     default=None,
     metavar=u'CONFIG',
     help=u'Config file to use (default: development.ini)',
     is_eager=True,
-    callback=_init_ckan_config
+    callback=cast(Callable[..., Any], _init_ckan_config)
 )
 
 

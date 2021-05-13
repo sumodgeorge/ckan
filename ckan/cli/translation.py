@@ -1,10 +1,11 @@
 # encoding: utf-8
 
-from typing import Any, Dict, List, Tuple
 import polib
 import re
 import logging
 import os
+
+from typing import Any, Dict, List, Tuple, cast
 
 import click
 import six
@@ -185,17 +186,18 @@ def check_po_file(path: str):
             for function in (
                 simple_conv_specs, mapping_keys, replacement_fields
             ):
-                for key in six.iterkeys(
-                        entry.msgstr_plural):  # type: ignore
+                # typechecker thinks it's a string
+                plurals = cast(Dict[str, str], entry.msgstr_plural)
+                for key in six.iterkeys(plurals):
                     if key == u'0':
                         error = check_translation(
                             function, entry.msgid,
-                            entry.msgstr_plural[key]  # type: ignore
+                            plurals[key]
                         )
                     else:
                         error = check_translation(
                             function, entry.msgid_plural,
-                            entry.msgstr_plural[key]  # type: ignore
+                            plurals[key]
                         )
                     if error:
                         errors.append(error)

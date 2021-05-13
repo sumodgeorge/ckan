@@ -1,6 +1,5 @@
 # encoding: utf-8
 
-from ckan.types import Context
 import logging
 import pprint
 
@@ -9,6 +8,7 @@ from six import text_type
 
 import ckan.logic as logic
 import ckan.model as model
+from ckan.types import Context
 
 log = logging.getLogger(__name__)
 

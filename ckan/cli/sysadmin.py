@@ -1,6 +1,7 @@
 # encoding: utf-8
 
 from typing import Any, List
+
 import click
 from six import text_type
 

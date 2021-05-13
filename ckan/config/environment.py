@@ -6,6 +6,8 @@ import logging
 import warnings
 import pytz
 
+from typing import Any, Dict, Optional, Union, cast
+
 import six
 import sqlalchemy
 
@@ -27,11 +29,10 @@ from ckan.lib.i18n import build_js_translations
 
 from ckan.common import CKANConfig, _, ungettext, config
 from ckan.exceptions import CkanConfigurationException
-from typing import Any, Dict, Optional, Union, cast
 from ckan.types import Config
 
 if six.PY2:
-    from pylons import config as pylons_config  # type: ignore
+    from pylons import config as pylons_config
 
 
 log = logging.getLogger(__name__)
@@ -49,7 +50,7 @@ def load_environment(conf: Union[Config, CKANConfig]):
     if six.PY2:
         # this must be run at a time when the env is semi-setup, thus inlined
         # here. Required by the deliverance plugin and iATI
-        from pylons.wsgiapp import PylonsApp  # type: ignore
+        from pylons.wsgiapp import PylonsApp
         import pkg_resources
         fcg = getattr(
             PylonsApp.find_controller,
@@ -74,6 +75,7 @@ def load_environment(conf: Union[Config, CKANConfig]):
                 self.controller_classes[controller] = mycontroller
                 return mycontroller
             return fcg(self, controller)
+        # type_ignore_reason: rely on implementation details
         find_controller._old_find_controller = fcg  # type: ignore
         PylonsApp.find_controller = find_controller
 
@@ -219,7 +221,7 @@ def update_config() -> None:
     ckan_host = config['ckan.host'] = urlparse(site_url).netloc
     if config.get('ckan.site_id') is None:
         if ':' in ckan_host:
-            ckan_host, port = ckan_host.split(':')
+            ckan_host = ckan_host.split(':')[0]
         assert ckan_host, 'You need to configure ckan.site_url or ' \
                           'ckan.site_id for SOLR search-index rebuild to work.'
         config['ckan.site_id'] = ckan_host
@@ -280,6 +282,7 @@ def update_config() -> None:
             **jinja_extensions.get_jinja_env_options())
         env.install_gettext_callables(_, ungettext, newstyle=True)
         # custom filters
+        # type_ignore_reason: attribute is missing from type declarations
         env.policies['ext.i18n.trimmed'] = True  # type: ignore
         env.filters['empty_and_escape'] = jinja_extensions.empty_and_escape
         config['pylons.app_globals'].jinja_env = env

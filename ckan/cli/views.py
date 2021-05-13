@@ -1,8 +1,7 @@
 # encoding: utf-8
 
-from typing import Any, Dict, List
-from ckan.types import Context
 import itertools
+from typing import Any, Dict, List
 
 import click
 import json
@@ -16,6 +15,7 @@ from ckan.lib.datapreview import (
     get_view_plugins,
     get_default_view_plugins,
 )
+from ckan.types import Context
 
 
 _page_size = 100

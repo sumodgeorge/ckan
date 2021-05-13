@@ -1,18 +1,18 @@
 # encoding: utf-8
 
-from ckan.types import Context
 import logging
 from typing import Any, Dict, List, cast
+
 import six
 import click
 from six import text_type
 
 import ckan.logic as logic
-import ckan.plugins as plugin
 import ckan.model as model
 import ckan.lib.helpers as h
 from ckan.cli import error_shout
 from ckan.common import json
+from ckan.types import Context
 
 
 log = logging.getLogger(__name__)

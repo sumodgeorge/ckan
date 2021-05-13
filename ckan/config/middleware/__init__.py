@@ -2,15 +2,17 @@
 
 """WSGI app initialization"""
 
-from ckan.common import CKANConfig
-from ckan.types import CKANApp, Config
 import logging
-
-from ckan.config.environment import load_environment
-from ckan.config.middleware.flask_app import make_flask_stack
 from typing import Optional, Union
 
 from flask.ctx import RequestContext
+
+from ckan.config.environment import load_environment
+from ckan.config.middleware.flask_app import make_flask_stack
+from ckan.common import CKANConfig
+from ckan.types import CKANApp, Config
+
+
 
 
 log = logging.getLogger(__name__)

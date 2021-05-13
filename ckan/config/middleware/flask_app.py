@@ -1,15 +1,17 @@
 # encoding: utf-8
 
-from ckan.types import CKANApp, Config
 import os
 import sys
-import re
 import time
 import inspect
 import itertools
 import pkgutil
+import logging
 
-from flask import Blueprint, send_from_directory
+from logging.handlers import SMTPHandler
+from typing import Any, Dict, Iterable, List, Optional, Tuple, Union, cast
+
+from flask import Blueprint, send_from_directory, Response
 from flask.ctx import _AppCtxGlobals
 from flask.sessions import SessionInterface
 from flask_multistatic import MultiStaticFlask
@@ -19,6 +21,7 @@ import webob
 
 from werkzeug.exceptions import default_exceptions, HTTPException
 from werkzeug.routing import Rule
+from werkzeug.local import LocalProxy
 
 from flask_babel import Babel
 
@@ -51,13 +54,8 @@ from ckan.views import (identify_user,
                         handle_i18n,
                         set_ckan_current_url,
                         )
+from ckan.types import CKANApp, Config
 
-import logging
-from logging.handlers import SMTPHandler
-from flask.blueprints import Blueprint
-from flask.wrappers import Response
-from werkzeug.local import LocalProxy
-from typing import Any, Dict, Iterable, List, Optional, Tuple, Union, cast
 log = logging.getLogger(__name__)
 
 
@@ -118,6 +116,14 @@ class CKANBabel(Babel):
         for path in super(CKANBabel, self).translation_directories:
             yield path
             self._i18n_path_idx += 1
+
+
+def _ungettext_alias():
+    u'''
+    Provide `ungettext` as an alias of `ngettext` for backwards
+    compatibility
+    '''
+    return dict(ungettext=ungettext)
 
 
 def make_flask_stack(conf: Union[Config, CKANConfig]) -> CKANApp:
@@ -228,13 +234,7 @@ def make_flask_stack(conf: Union[Config, CKANConfig]) -> CKANApp:
     app.context_processor(helper_functions)
     app.context_processor(c_object)
 
-    @app.context_processor
-    def ungettext_alias():  # type: ignore
-        u'''
-        Provide `ungettext` as an alias of `ngettext` for backwards
-        compatibility
-        '''
-        return dict(ungettext=ungettext)
+    app.context_processor(_ungettext_alias)
 
     # Babel
     _ckan_i18n_dir = i18n.get_ckan_i18n_dir()
@@ -338,6 +338,7 @@ def make_flask_stack(conf: Union[Config, CKANConfig]) -> CKANApp:
             app = TrackingMiddleware(app, config)
 
     # Add a reference to the actual Flask app so it's easier to access
+    # type_ignore_reason: custom attribute
     app._wsgi_app = flask_app  # type: ignore
 
     return app
@@ -518,6 +519,7 @@ def _register_core_blueprints(app: CKANApp):
     path = os.path.join(os.path.dirname(__file__), '..', '..', 'views')
 
     for loader, name, _ in pkgutil.iter_modules([path], 'ckan.views.'):
+        # type_ignore_reason: incorrect external type declarations
         module = loader.find_module(name).load_module(name)  # type: ignore
         for blueprint in inspect.getmembers(module, is_blueprint):
             app.register_blueprint(blueprint[1])
@@ -528,6 +530,7 @@ def _register_error_handler(app: CKANApp):
     u'''Register error handler'''
 
     def error_handler(e: Exception) -> Tuple[str, Optional[int]]:
+        # type_ignore_reason: inforrect type inference
         log.error(e, exc_info=sys.exc_info)  # type: ignore
         if isinstance(e, HTTPException):
             extra_vars = {
@@ -574,6 +577,7 @@ def _setup_error_mail_handler(app: CKANApp):
         toaddrs=[config.get('email_to', '')],
         subject='Application Error',
         credentials=credentials,
+        # type_ignore_reason: incomplete built-in type declarations
         secure=secure  # type: ignore
     )
 
@@ -598,6 +602,7 @@ def _setup_webassets(app: CKANApp):
 
     webassets_folder = get_webassets_path()
 
-    @app.route('/webassets/<path:path>', endpoint='webassets.index')
-    def webassets(path: str):  # type: ignore
+    def webassets(path: str):
         return send_from_directory(webassets_folder, path)
+
+    app.add_url_rule('/webassets/<path:path>', 'webassets.index', webassets)

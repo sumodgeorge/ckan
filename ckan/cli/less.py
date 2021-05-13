@@ -1,14 +1,14 @@
 # encoding: utf-8
 
-from typing import Tuple
-import click
 import subprocess
 import os
 
+from typing import Tuple
+
+import click
 import six
 
 from ckan.common import config
-from ckan.cli import error_shout
 
 
 @click.command(

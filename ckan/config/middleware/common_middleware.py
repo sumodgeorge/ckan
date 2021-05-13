@@ -1,9 +1,8 @@
 # encoding: utf-8
 
 """Additional middleware used by the Flask app stack."""
-from typing import Any
-from ckan.types import CKANApp, Config
 import hashlib
+from typing import Any
 
 import six
 from six.moves.urllib.parse import unquote, urlparse  # type: ignore
@@ -11,6 +10,7 @@ from six.moves.urllib.parse import unquote, urlparse  # type: ignore
 import sqlalchemy as sa
 
 from ckan.common import CKANConfig, config
+from ckan.types import CKANApp
 
 
 class TrackingMiddleware(object):

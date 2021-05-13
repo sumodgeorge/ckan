@@ -2,7 +2,7 @@
 
 from __future__ import print_function
 import os
-from typing import cast
+from typing import Any, cast
 
 import alembic.command
 import click
@@ -155,15 +155,17 @@ def migration(plugin: str, message: str):
     migration_dir = os.path.dirname(cast(str, config.config_file_name))
     config.set_main_option(
         u"sqlalchemy.url",
+        # type_ignore_reason: incomplete SQLAlchemy type signatures
         str(ckan.model.repo.metadata.bind.url))  # type: ignore
     config.set_main_option(u'script_location', migration_dir)
 
     if not os.path.exists(os.path.join(migration_dir, u'script.py.mako')):
         alembic.command.init(config, migration_dir)
 
-    rev = alembic.command.revision(config, message)
+    rev: Any = alembic.command.revision(config, message)
+
     click.secho(
         u"Revision file created. Now, you need to update it: \n\t{}".format(
-            rev.path  # type: ignore
+            rev.path
         ),
         fg=u"green")

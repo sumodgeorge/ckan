@@ -1,8 +1,8 @@
 # encoding: utf-8
 
-from ckan.types import Config
 import sys
 import os
+from typing import Any, Dict, Optional, cast
 
 import click
 import logging
@@ -10,7 +10,7 @@ from logging.config import fileConfig as loggingFileConfig
 from six.moves.configparser import ConfigParser  # type: ignore
 
 from ckan.exceptions import CkanConfigurationException
-from typing import Any, Dict, Optional, cast
+from ckan.types import Config
 
 log = logging.getLogger(__name__)
 
@@ -32,6 +32,7 @@ class CKANConfigLoader(object):
 
     def _update_defaults(self, new_defaults: Dict[str, Any]) -> None:
         for key, value in new_defaults.items():
+            # type_ignore_reason: using implementation details
             self.parser._defaults[key] = value  # type: ignore
 
     def _read_config_file(self, filename: str) -> None:
@@ -46,7 +47,9 @@ class CKANConfigLoader(object):
                 value = self.parser.get(self.section, option)
                 self.config[option] = value
                 if option in self.parser.defaults():
-                    self.config[u'global_conf'][option] = value  # type: ignore
+                    global_conf = self.config[u'global_conf']
+                    assert isinstance(global_conf, dict)
+                    global_conf[option] = value
 
     def _create_config_object(self) -> None:
         use_config_path = self.config_file

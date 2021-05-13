@@ -18,13 +18,13 @@
   "reportOptionalIterable": true,
   "reportOptionalContextManager": true,
   "reportOptionalOperand": true,
+  "reportTypedDictNotRequiredAccess": false,
   "reportUntypedFunctionDecorator": false,
   "reportUnknownParameterType": true,
   "reportUnknownArgumentType": false,
   "reportUnnecessaryIsInstance": true,
   "reportUnnecessaryCast": true,
   "reportUnnecessaryComparison": true,
-
   "include": [
     "ckan",
     "ckanext"
@@ -35,6 +35,5 @@
     "ckan/lib/create_test_data.py"
   ],
   "strict": [
-  ],
-  "reportTypedDictNotRequiredAccess": false
+  ]
 }

@@ -1,12 +1,9 @@
 # encoding: utf-8
 
 import re
-import traceback
 from typing import Any
 
 import click
-
-from ckan.cli import error_shout
 
 
 @click.group(
