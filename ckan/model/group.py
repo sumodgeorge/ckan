@@ -1,7 +1,7 @@
 # encoding: utf-8
 
 import datetime
-from typing import Any, Dict, List,  Optional, TYPE_CHECKING, Tuple, Union, overload
+from typing import Any, ClassVar, Dict, List,  Optional, TYPE_CHECKING, Tuple, Union, overload
 from typing_extensions import Literal
 
 from sqlalchemy import orm, types, Column, Table, ForeignKey, or_, and_, text
@@ -91,6 +91,7 @@ class Member(core.StatefulObjectMixin,
     def __init__(self, group: Optional['Group']=None, table_id: Optional[str]=None, group_id: Optional[str]=None,
                  table_name: Optional[str]=None, capacity: str='public', state: str='active') -> None:
         self.group = group
+
         self.group_id = group_id
         self.table_id = table_id
         self.table_name = table_name

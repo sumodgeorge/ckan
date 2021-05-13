@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 
+from functools import partial
 from typing import (
     Any,
     Callable,
@@ -142,7 +143,7 @@ AuthFunctionWithMandatoryDataDict = Callable[[Context, DataDict], AuthResult]
 AuthFunction = Union[
     AuthFunctionWithOptionalDataDict,
     AuthFunctionWithMandatoryDataDict,
-    # partial
+    partial[AuthResult],
 ]
 ChainedAuthFunction = Callable[
     [AuthFunction, Context, Optional[DataDict]], AuthResult

@@ -9,6 +9,10 @@
 # from ckan.common import x, y, z to be allowed
 
 from collections import MutableMapping
+from typing import (
+    Any, Dict, Iterable, List, Optional, Iterator,
+    Tuple, TypeVar, Union, cast, overload)
+from typing_extensions import Literal
 
 import flask
 import six
@@ -16,19 +20,15 @@ from werkzeug.datastructures import ImmutableMultiDict
 
 from werkzeug.local import Local, LocalProxy
 
-from flask_babel import (gettext as flask_ugettext,  # type: ignore
+from flask_babel import (gettext as flask_ugettext,
                          ngettext as flask_ungettext)
 
-import simplejson as json   # type: ignore
-from typing import (
-    Any, Dict, Iterable, List, Optional, Iterator,
-    Tuple, TypeVar, Union, cast, overload)
-from typing_extensions import Literal
+import simplejson as json
 if six.PY2:
-    import pylons  # type: ignore
-    from pylons.i18n import (ugettext as pylons_ugettext,  # type: ignore
+    import pylons
+    from pylons.i18n import (ugettext as pylons_ugettext,
                              ungettext as pylons_ungettext)
-    from pylons import response  # type: ignore
+    from pylons import response
 
 current_app = flask.current_app
 
@@ -41,14 +41,14 @@ def is_flask_request() -> Literal[True]:
     if six.PY3:
         return True
     try:
-        pylons.request.environ  # type: ignore
+        pylons.request.environ
         pylons_request_available = True
     except TypeError:
         pylons_request_available = False
 
-    return (flask.request and
+    return cast(Literal[True], (flask.request and
             (flask.request.environ.get(u'ckan.app') == u'flask_app' or
-             not pylons_request_available))  # type: ignore
+             not pylons_request_available)))
 
 
 def streaming_response(data: Iterable[Any],
@@ -65,8 +65,8 @@ def streaming_response(data: Iterable[Any],
             iter_data: Iterator[Any] = flask.stream_with_context(iter_data)
         resp = flask.Response(iter_data, mimetype=mimetype)
     else:
-        response.app_iter = iter_data  # type: ignore
-        resp = response.headers['Content-type'] = mimetype  # type: ignore
+        response.app_iter = iter_data
+        resp = response.headers['Content-type'] = mimetype
         assert False
     return resp
 
@@ -82,7 +82,7 @@ def ungettext(*args: Any, **kwargs: Any) -> str:
     if is_flask_request():
         return flask_ungettext(*args, **kwargs)
     else:
-        return pylons_ungettext(*args, **kwargs)  # type: ignore
+        return pylons_ungettext(*args, **kwargs)
 
 
 class CKANConfig(MutableMapping):
@@ -126,9 +126,9 @@ class CKANConfig(MutableMapping):
 
         if six.PY2:
             try:
-                pylons.config.clear()  # type: ignore
+                pylons.config.clear()
                 # Pylons set this default itself
-                pylons.config[u'lang'] = None  # type: ignore
+                pylons.config[u'lang'] = None
             except TypeError:
                 pass
 
@@ -141,7 +141,7 @@ class CKANConfig(MutableMapping):
 
         if six.PY2:
             try:
-                pylons.config[key] = value  # type: ignore
+                pylons.config[key] = value
             except TypeError:
                 pass
 
@@ -154,7 +154,7 @@ class CKANConfig(MutableMapping):
 
         if six.PY2:
             try:
-                del pylons.config[key]  # type: ignore
+                del pylons.config[key]
             except TypeError:
                 pass
 
@@ -163,7 +163,7 @@ def _get_request() -> flask.Request:
     if is_flask_request():
         return flask.request
     else:
-        return pylons.request  # type: ignore
+        return pylons.request
 
 
 class CKANRequest(LocalProxy):
@@ -188,7 +188,7 @@ class CKANRequest(LocalProxy):
         use request.args
         '''
         try:
-            return super(CKANRequest, self).params  # type: ignore
+            return super(CKANRequest, self).params
         except AttributeError:
             return self.args
 
@@ -197,14 +197,14 @@ def _get_c() -> Any:
     if is_flask_request():
         return flask.g
     else:
-        return pylons.c  # type: ignore
+        return pylons.c
 
 
 def _get_session() -> Any:
     if is_flask_request():
         return flask.session
     else:
-        return pylons.session  # type: ignore
+        return pylons.session
 
 
 local = Local()

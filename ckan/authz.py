@@ -1,11 +1,10 @@
 # encoding: utf-8
 
 import functools
-import inspect
-import sys
 
 from collections import defaultdict, OrderedDict
 from logging import getLogger
+from typing import Callable, Collection, Dict, KeysView, List, Optional, Union
 
 import six
 
@@ -18,7 +17,6 @@ from ckan.common import _, g
 
 import ckan.lib.maintain as maintain
 
-from typing import Any, Callable, Collection, Dict, KeysView, List, Optional, Union, cast
 from ckan.types import AuthResult, AuthFunction, DataDict, Context
 
 log = getLogger(__name__)
@@ -197,7 +195,8 @@ def is_authorized_boolean(action: str, context: Context, data_dict: Optional[Dat
     return outcome.get('success', False)
 
 
-def is_authorized(action: str, context: Context, data_dict: Optional[DataDict]=None) -> AuthResult:
+def is_authorized(action: str, context: Context,
+                  data_dict: Optional[DataDict]=None) -> AuthResult:
     if context.get('ignore_auth'):
         return {'success': True}
 
@@ -222,8 +221,8 @@ def is_authorized(action: str, context: Context, data_dict: Optional[DataDict]=N
         # access straight away
         if not getattr(auth_function, 'auth_allow_anonymous_access', False) \
            and not context.get('auth_user_obj'):
-            if isinstance(auth_function, functools.partial):  # type: ignore
-                name = auth_function.func.__name__  # type: ignore
+            if isinstance(auth_function, functools.partial):
+                name = auth_function.func.__name__
             else:
                 name = auth_function.__name__
             return {
@@ -239,7 +238,8 @@ def is_authorized(action: str, context: Context, data_dict: Optional[DataDict]=N
 # these are the permissions that roles have
 ROLE_PERMISSIONS = OrderedDict([
     ('admin', ['admin', 'membership']),
-    ('editor', ['read', 'delete_dataset', 'create_dataset', 'update_dataset', 'manage_group']),
+    ('editor', ['read', 'delete_dataset', 'create_dataset',
+                'update_dataset', 'manage_group']),
     ('member', ['read', 'manage_group']),
 ])
 
@@ -323,8 +323,9 @@ def has_user_permission_for_group_or_org(group_id: Optional[str],
     return False
 
 
-def _has_user_permission_for_groups(user_id: str, permission: str, group_ids: List[str],
-                                    capacity: Optional[str]=None):
+def _has_user_permission_for_groups(
+        user_id: str, permission: str, group_ids: List[str],
+        capacity: Optional[str]=None) -> bool:
     ''' Check if the user has the given permissions for the particular
     group (ignoring permissions cascading in a group hierarchy).
     Can also be filtered by a particular capacity.
@@ -333,6 +334,7 @@ def _has_user_permission_for_groups(user_id: str, permission: str, group_ids: Li
         return False
     # get any roles the user has for the group
     q = (model.Session.query(model.Member.capacity)
+         # type_ignore_reason: attribute has no method
          .filter(model.Member.group_id.in_(group_ids))  # type: ignore
          .filter(model.Member.table_name == 'user')
          .filter(model.Member.state == 'active')
@@ -349,7 +351,8 @@ def _has_user_permission_for_groups(user_id: str, permission: str, group_ids: Li
     return False
 
 
-def users_role_for_group_or_org(group_id: Optional[str], user_name: Optional[str]) -> Optional[str]:
+def users_role_for_group_or_org(
+        group_id: Optional[str], user_name: Optional[str]) -> Optional[str]:
     ''' Returns the user's role for the group. (Ignores privileges that cascade
     in a group hierarchy.)
 
@@ -375,7 +378,8 @@ def users_role_for_group_or_org(group_id: Optional[str], user_name: Optional[str
     return None
 
 
-def has_user_permission_for_some_org(user_name: Optional[str], permission: str) -> bool:
+def has_user_permission_for_some_org(
+        user_name: Optional[str], permission: str) -> bool:
     ''' Check if the user has the given permission for any organization. '''
     user_id = get_user_id_for_username(user_name, allow_none=True)
     if not user_id:
@@ -388,6 +392,7 @@ def has_user_permission_for_some_org(user_name: Optional[str], permission: str) 
     q = (model.Session.query(model.Member.group_id)
          .filter(model.Member.table_name == 'user')
          .filter(model.Member.state == 'active')
+         # type_ignore_reason: attribute has no method
          .filter(model.Member.capacity.in_(roles))  # type: ignore
          .filter(model.Member.table_id == user_id))
     group_ids = []
@@ -402,13 +407,15 @@ def has_user_permission_for_some_org(user_name: Optional[str], permission: str) 
         model.Session.query(model.Group)
         .filter(model.Group.is_organization == True)
         .filter(model.Group.state == 'active')
+        # type_ignore_reason: attribute has no method
         .filter(model.Group.id.in_(group_ids)).exists()  # type: ignore
     ).scalar()
 
     return permission_exists
 
 
-def get_user_id_for_username(user_name: Optional[str], allow_none: bool=False) -> Optional[str]:
+def get_user_id_for_username(
+        user_name: Optional[str], allow_none: bool = False) -> Optional[str]:
     ''' Helper function to get user id '''
     # first check if we have the user object already and get from there
     user = _get_user(user_name)
@@ -455,7 +462,9 @@ def can_manage_collaborators(package_id: str, user_id: str) -> bool:
     return user_is_collaborator_on_dataset(user_id, pkg.id, 'admin')
 
 
-def user_is_collaborator_on_dataset(user_id: str, dataset_id: str, capacity: Optional[Union[str, List[str]]]=None) -> bool:
+def user_is_collaborator_on_dataset(
+        user_id: str, dataset_id: str,
+        capacity: Optional[Union[str, List[str]]] = None) -> bool:
     '''
     Returns True if the provided user is a collaborator on the provided
     dataset.
@@ -473,6 +482,7 @@ def user_is_collaborator_on_dataset(user_id: str, dataset_id: str, capacity: Opt
     if capacity:
         if isinstance(capacity, six.string_types):
             capacity = [capacity]
+        # type_ignore_reason: attribute has no method
         q = q.filter(model.PackageMember.capacity.in_(capacity))  # type: ignore
 
     return model.Session.query(q.exists()).scalar()

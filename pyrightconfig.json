@@ -5,7 +5,7 @@
   "reportMissingTypeStubs": false,
   "strictParameterNoneValue": true,
   "reportFunctionMemberAccess": true,
-  "reportMissingImports": true,
+  "reportMissingImports": false,
   "reportImportCycles": false,
   "reportUnusedImport": false,
   "reportUnusedClass": true,
