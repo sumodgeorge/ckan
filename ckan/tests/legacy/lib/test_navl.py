@@ -31,7 +31,6 @@ def identity_converter(key, data, errors, context):
     return
 
 
-
 schema = {
     "__after": [identity_converter],
     "__extra": [identity_converter],

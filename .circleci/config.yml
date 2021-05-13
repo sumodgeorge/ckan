@@ -63,7 +63,6 @@ defaults:
             $(npm bin)/cypress run
           ;;
         esac
-
   ckan_env: &ckan_env
     environment:
       CKAN_DATASTORE_POSTGRES_DB: datastore_test
