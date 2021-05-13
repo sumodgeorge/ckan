@@ -34,9 +34,9 @@ def export(output_file: Any, start_date: Optional[str]):
     export_tracking(engine, output_file)
 
 
-def update_all(engine: Any, start_date_str: Optional[str] = None):
-    if start_date_str:
-        start_date = datetime.datetime.strptime(start_date_str, u'%Y-%m-%d')
+def update_all(engine: Any, start_date: Optional[str] = None):
+    if start_date:
+        date = datetime.datetime.strptime(start_date, u'%Y-%m-%d')
     else:
         # No date given. See when we last have data for and get data
         # from 2 days before then in case new data is available.
@@ -45,21 +45,21 @@ def update_all(engine: Any, start_date_str: Optional[str] = None):
                     ORDER BY tracking_date DESC LIMIT 1;'''
         result = engine.execute(sql).fetchall()
         if result:
-            start_date = result[0][u'tracking_date']
-            start_date += datetime.timedelta(-2)
+            date = result[0][u'tracking_date']
+            date += datetime.timedelta(-2)
             # convert date to datetime
             combine = datetime.datetime.combine
-            start_date = combine(start_date, datetime.time(0))
+            date = combine(date, datetime.time(0))
         else:
-            start_date = datetime.datetime(2011, 1, 1)
-    start_date_solrsync = start_date
+            date = datetime.datetime(2011, 1, 1)
+    start_date_solrsync = date
     end_date = datetime.datetime.now()
 
-    while start_date < end_date:
-        stop_date = start_date + datetime.timedelta(1)
-        update_tracking(engine, start_date)
-        click.echo(u'tracking updated for {}'.format(start_date))
-        start_date = stop_date
+    while date < end_date:
+        stop_date = date + datetime.timedelta(1)
+        update_tracking(engine, date)
+        click.echo(u'tracking updated for {}'.format(date))
+        date = stop_date
 
     update_tracking_solr(engine, start_date_solrsync)
 

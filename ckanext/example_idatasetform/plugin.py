@@ -8,6 +8,10 @@ import logging
 import ckan.plugins as plugins
 import ckan.plugins.toolkit as tk
 
+country_codes = cast(
+        Callable[..., Validator],
+        tk.get_converter('convert_to_tags'))('country_codes')
+
 
 def create_country_codes():
     '''Create country_codes vocab and tags, if they don't exist already.
@@ -34,7 +38,7 @@ def create_country_codes():
             tk.get_action('tag_create')(context, data)
 
 
-def country_codes():
+def country_codes_helper():
     '''Return the list of country codes from the country codes vocabulary.'''
     create_country_codes()
     try:
@@ -66,9 +70,6 @@ class ExampleIDatasetFormPlugin(plugins.SingletonPlugin,
     num_times_package_form_called = 0
     num_times_check_data_dict_called = 0
     num_times_setup_template_variables_called = 0
-    country_codes = cast(
-        Callable[..., Validator],
-        tk.get_converter('convert_to_tags'))('country_codes')
 
     def update_config(self, config: CKANConfig):
         # Add this plugin's templates dir to CKAN's extra_template_paths, so
@@ -76,7 +77,7 @@ class ExampleIDatasetFormPlugin(plugins.SingletonPlugin,
         tk.add_template_directory(config, 'templates')
 
     def get_helpers(self):
-        return {'country_codes': country_codes}
+        return {'country_codes': country_codes_helper}
 
     def is_fallback(self):
         # Return True to register this plugin as the default handler for

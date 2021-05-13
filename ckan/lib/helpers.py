@@ -99,11 +99,6 @@ LEGACY_ROUTE_NAMES = {
 
 
 class HelperAttributeDict(dict):
-    def __init__(self, *args: Callable[..., Any],
-                 **kwargs: Callable[..., Any]) -> None:
-        super(HelperAttributeDict, self).__init__(*args, **kwargs)
-        self.__dict__ = self
-
     def __missing__(self, key: str) -> NoReturn:
         raise ckan.exceptions.HelperError(
             'Helper \'{key}\' has not been defined.'.format(
@@ -112,7 +107,10 @@ class HelperAttributeDict(dict):
         )
 
     def __getattr__(self, key: str) -> Callable[..., Any]:
-        return self[key]
+        try:
+            return self[key]
+        except ckan.exceptions.HelperError as e:
+            raise AttributeError(e)
 
 
 # Builtin helper functions.
