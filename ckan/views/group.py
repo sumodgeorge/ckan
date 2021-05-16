@@ -247,7 +247,8 @@ def _read(id: Optional[str], limit: int, group_type: str) -> Dict[str, Any]:
     page = h.get_page_number(request.params)
 
     # most search operations should reset the page counter:
-    params_nopage = [(k, v) for k, v in request.params.items() if k != u'page']
+    params_nopage = [(k, v) for k, v in request.params.items(multi=True)
+                     if k != u'page']
     sort_by = request.params.get(u'sort', None)
 
     def search_url(params: Any) -> str:

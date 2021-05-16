@@ -384,10 +384,7 @@ For example: ``bar = toolkit.aslist(config.get('ckan.foo.bar', []))``
         assert config_var in ('extra_template_paths', 'extra_public_paths')
         # we want the filename that of the function caller but they will
         # have used one of the available helper functions
-        # TODO: starting from python 3.5, `inspect.stack` returns list
-        # of named tuples `FrameInfo`. Don't forget to remove
-        # `getframeinfo` wrapper after migration.
-        filename = inspect.getframeinfo(inspect.stack()[2][0]).filename
+        filename = inspect.stack()[2].filename
 
         this_dir = os.path.dirname(filename)
         absolute_path = os.path.join(this_dir, relative_path)
@@ -418,7 +415,7 @@ For example: ``bar = toolkit.aslist(config.get('ckan.foo.bar', []))``
         # TODO: starting from python 3.5, `inspect.stack` returns list
         # of named tuples `FrameInfo`. Don't forget to remove
         # `getframeinfo` wrapper after migration.
-        filename = inspect.getframeinfo(inspect.stack()[1][0]).filename
+        filename = inspect.stack()[1].filename
 
         this_dir = os.path.dirname(filename)
         absolute_path = os.path.join(this_dir, path)

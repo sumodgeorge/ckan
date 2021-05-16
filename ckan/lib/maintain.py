@@ -11,7 +11,10 @@ RT = TypeVar("RT")
 log = logging.getLogger(__name__)
 
 
-def deprecated(message: Optional[str]='') -> Callable[[Callable[..., RT]], Callable[..., RT]]:
+def deprecated(
+        message: Optional[str]='',
+        since: Optional[str] = None
+) -> Callable[[Callable[..., RT]], Callable[..., RT]]:
     ''' This is a decorator used to mark functions as deprecated.
 
     It logs a warning when the function is called. If a message is
@@ -31,9 +34,10 @@ def deprecated(message: Optional[str]='') -> Callable[[Callable[..., RT]], Calla
                             % (fn.__name__, fn.__module__))
 
         def wrapped(*args: Any, **kw: Any):
-            log.warning('Function %s() in module %s has been deprecated '
+            since_msg = f'since CKAN v{since}' if since else ''
+            log.warning('Function %s() in module %s has been deprecated %s'
                         'and will be removed in a later release of ckan. %s'
-                        % (fn.__name__, fn.__module__, message))
+                        % (fn.__name__, fn.__module__, since_msg, message))
             return fn(*args, **kw)
         return wrapped
     return decorator

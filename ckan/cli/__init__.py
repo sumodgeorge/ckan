@@ -1,7 +1,6 @@
 # encoding: utf-8
 
 from ckan.types import Config
-import sys
 import os
 
 import click

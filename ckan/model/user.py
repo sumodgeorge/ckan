@@ -4,7 +4,6 @@ from typing import Any, Dict, Iterable, List, Optional, TYPE_CHECKING
 
 import datetime
 import re
-import os
 from hashlib import sha1, md5
 import six
 

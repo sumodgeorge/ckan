@@ -440,7 +440,9 @@ class Package(core.StatefulObjectMixin,
     license = property(get_license, set_license)
 
     @maintain.deprecated('`is_private` attriute of model.Package is ' +
-                         'deprecated and should not be used.  Use `private`')
+                         'deprecated and should not be used.  Use `private`',
+                         since="2.1.0")
+
     def _is_private(self):
         """
         DEPRECATED in 2.1
@@ -578,7 +580,8 @@ class Package(core.StatefulObjectMixin,
                             rating=rating)
             meta.Session.add(rating_obj)
 
-    @maintain.deprecated()
+    @property
+    @maintain.deprecated(since="2.9.0")
     def _extras_list(self) -> List['PackageExtra']:
         '''DEPRECATED in 2.9
 
