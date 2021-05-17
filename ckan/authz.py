@@ -6,7 +6,7 @@ import importlib
 
 from collections import defaultdict, OrderedDict
 from logging import getLogger
-from typing import Callable, Collection, Dict, KeysView, List, Optional, Union,
+from typing import Callable, Collection, Dict, KeysView, List, Optional, Union
 from types import ModuleType
 
 import six

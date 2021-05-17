@@ -7,6 +7,7 @@ import re
 import mimetypes
 import string
 import json
+from typing import Any, Container, Dict, Optional, Union
 
 from six import string_types, iteritems
 from six.moves.urllib.parse import urlparse  # type: ignore
@@ -25,7 +26,6 @@ from ckan.model.core import State
 
 from ckan.common import _
 from ckan.types import TuplizedKey, Validator, Context, TuplizedErrorDict
-from typing import Any, Container, Dict, Optional, Union
 
 Invalid = df.Invalid
 StopOnError = df.StopOnError
@@ -201,7 +201,8 @@ def package_name_exists(value: str, context: Context) -> Any:
         raise Invalid(_('Not found') + ': %s' % value)
     return value
 
-def package_id_or_name_exists(package_id_or_name: str, context: Context) -> Any:
+def package_id_or_name_exists(
+        package_id_or_name: str, context: Context) -> Any:
     '''Return the given package_id_or_name if such a package exists.
 
     :raises: ckan.lib.navl.dictization_functions.Invalid if there is no
@@ -874,7 +875,7 @@ def filter_fields_and_values_should_have_same_length(key: TuplizedKey,
                                                                 Any],
                                                      errors: TuplizedErrorDict,
                                                      context: Context) -> Any:
-    convert_to_list_if_string = converters.convert_to_list_if_string  # type: ignore
+    convert_to_list_if_string = converters.convert_to_list_if_string
     fields = convert_to_list_if_string(data.get(('filter_fields',), []))
     values = convert_to_list_if_string(data.get(('filter_values',), []))
 

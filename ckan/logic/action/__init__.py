@@ -1,16 +1,15 @@
 # encoding: utf-8
 
-from copy import deepcopy
 import re
+from copy import deepcopy
+from typing import Any, Dict, List, Mapping, cast
 
 import six
 
 from ckan.logic import NotFound
 from ckan.common import _
-from ckan.types import ErrorDict, Model
-from ckan import model
 from ckan.model.domain_object import DomainObject
-from typing import Any, Dict, List, Mapping, cast
+from ckan.types import ErrorDict, Model
 
 
 def rename_keys(dict_: Dict[str, Any],

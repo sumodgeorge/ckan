@@ -6,9 +6,8 @@ import logging
 import datetime
 import time
 import json
+from typing import Any, Dict, List, Optional, TYPE_CHECKING, Union, cast
 
-from ckan.common import config
-import ckan.common as converters
 import six
 from six import text_type
 
@@ -28,10 +27,8 @@ import ckan.lib.uploader as uploader
 import ckan.lib.datapreview
 import ckan.lib.app_globals as app_globals
 
-
-from ckan.common import _, request
-from typing import Any, Dict, List, Optional, TYPE_CHECKING, Union, cast
-from ckan.types import Context, DataDict, Schema
+from ckan.common import _, request, config, asbool
+from ckan.types import Context, DataDict, ErrorDict
 
 if TYPE_CHECKING:
     import ckan.model as model_
@@ -114,7 +111,7 @@ def resource_update(context: Context, data_dict: DataDict) -> Dict[str, Any]:
         updated_pkg_dict = _get_action('package_update')(context, pkg_dict)
     except ValidationError as e:
         try:
-            error_dict = cast(Dict[str, Any], e.error_dict['resources'][n])  # type: ignore
+            error_dict = cast(List[ErrorDict], e.error_dict['resources'])[n]
         except (KeyError, IndexError):
             error_dict = e.error_dict
         raise ValidationError(error_dict)
@@ -134,7 +131,8 @@ def resource_update(context: Context, data_dict: DataDict) -> Dict[str, Any]:
     return resource
 
 
-def resource_view_update(context: Context, data_dict: DataDict) -> Dict[str, Any]:
+def resource_view_update(
+        context: Context, data_dict: DataDict) -> Dict[str, Any]:
     '''Update a resource view.
 
     To update a resource_view you must be authorized to update the resource
@@ -184,7 +182,8 @@ def resource_view_update(context: Context, data_dict: DataDict) -> Dict[str, Any
         model.repo.commit()
     return model_dictize.resource_view_dictize(resource_view, context)
 
-def resource_view_reorder(context: Context, data_dict: DataDict) -> Dict[str, Any]:
+def resource_view_reorder(
+        context: Context, data_dict: DataDict) -> Dict[str, Any]:
     '''Reorder resource views.
 
     :param id: the id of the resource
@@ -229,7 +228,8 @@ def resource_view_reorder(context: Context, data_dict: DataDict) -> Dict[str, An
     return {'id': id, 'order': new_order}
 
 
-def package_update(context: Context, data_dict: DataDict) -> Union[str, Dict[str, Any]]:
+def package_update(
+        context: Context, data_dict: DataDict) -> Union[str, Dict[str, Any]]:
     '''Update a dataset (package).
 
     You must be authorized to edit the dataset and the groups that it belongs
@@ -535,7 +535,8 @@ def package_revise(context: Context, data_dict: DataDict) -> Dict[str, Any]:
     return rval
 
 
-def package_resource_reorder(context: Context, data_dict: DataDict) -> Dict[str, Any]:
+def package_resource_reorder(
+        context: Context, data_dict: DataDict) -> Dict[str, Any]:
     '''Reorder resources against datasets.  If only partial resource ids are
     supplied then these are assumed to be first and the other resources will
     stay in their original order
@@ -579,7 +580,9 @@ def package_resource_reorder(context: Context, data_dict: DataDict) -> Dict[str,
     return {'id': id, 'order': [resource['id'] for resource in new_resources]}
 
 
-def _update_package_relationship(relationship: 'model_.PackageRelationship', comment: str, context: Context) -> Dict[str, Any]:
+def _update_package_relationship(
+        relationship: 'model_.PackageRelationship', comment: str,
+        context: Context) -> Dict[str, Any]:
     model = context['model']
     api = context.get('api_version')
     ref_package_by = 'id' if api == 2 else 'name'
@@ -593,7 +596,8 @@ def _update_package_relationship(relationship: 'model_.PackageRelationship', com
     return rel_dict
 
 
-def package_relationship_update(context: Context, data_dict: DataDict) -> Dict[str, Any]:
+def package_relationship_update(
+        context: Context, data_dict: DataDict) -> Dict[str, Any]:
     '''Update a relationship between two datasets (packages).
 
     The subject, object and type parameters are required to identify the
@@ -792,7 +796,8 @@ def group_update(context: Context, data_dict: DataDict) -> Dict[str, Any]:
     # values. This includes: packages, users, groups, tags, extras
     return _group_or_org_update(context, data_dict)
 
-def organization_update(context: Context, data_dict: DataDict) -> Dict[str, Any]:
+def organization_update(
+        context: Context, data_dict: DataDict) -> Dict[str, Any]:
     '''Update a organization.
 
     You must be authorized to edit the organization.
@@ -926,12 +931,14 @@ def user_generate_apikey(context: Context, data_dict: DataDict) -> Dict[str, Any
 
     # change key
     old_data = _get_action('user_show')(context, data_dict)
+    # type_ignore_reason: unresolved import
     old_data['apikey'] = model.types.make_uuid()  # type: ignore
     data_dict = old_data
     return _get_action('user_update')(context, data_dict)
 
 
-def task_status_update(context: Context, data_dict: DataDict) -> Dict[str, Any]:
+def task_status_update(
+        context: Context, data_dict: DataDict) -> Dict[str, Any]:
     '''Update a task status.
 
     :param id: the id of the task status to update
@@ -983,7 +990,8 @@ def task_status_update(context: Context, data_dict: DataDict) -> Dict[str, Any]:
     session.close()
     return model_dictize.task_status_dictize(task_status, context)
 
-def task_status_update_many(context: Context, data_dict: DataDict) -> Dict[str, Any]:
+def task_status_update_many(
+        context: Context, data_dict: DataDict) -> Dict[str, Any]:
     '''Update many task statuses at once.
 
     :param data: the task_status dictionaries to update, for the format of task
@@ -1007,7 +1015,8 @@ def task_status_update_many(context: Context, data_dict: DataDict) -> Dict[str, 
         model.Session.commit()
     return {'results': results}
 
-def term_translation_update(context: Context, data_dict: DataDict) -> Dict[str, Any]:
+def term_translation_update(
+        context: Context, data_dict: DataDict) -> Dict[str, Any]:
     '''Create or update a term translation.
 
     You must be a sysadmin to create or update term translations.
@@ -1058,7 +1067,8 @@ def term_translation_update(context: Context, data_dict: DataDict) -> Dict[str, 
 
     return data
 
-def term_translation_update_many(context: Context, data_dict: DataDict) -> Dict[str, Any]:
+def term_translation_update_many(
+        context: Context, data_dict: DataDict) -> Dict[str, Any]:
     '''Create or update many term translations at once.
 
     :param data: the term translation dictionaries to create or update,
@@ -1082,12 +1092,13 @@ def term_translation_update_many(context: Context, data_dict: DataDict) -> Dict[
     context['defer_commit'] = True
 
     action = _get_action('term_translation_update')
+    num = 0
     for num, row in enumerate(data_dict['data']):
         action(context, row)
 
     model.Session.commit()
 
-    return {'success': '%s rows updated' % (num + 1)}  # type: ignore
+    return {'success': '%s rows updated' % (num + 1)}
 
 
 def vocabulary_update(context: Context, data_dict: DataDict) -> Dict[str, Any]:
@@ -1136,7 +1147,8 @@ def vocabulary_update(context: Context, data_dict: DataDict) -> Dict[str, Any]:
     return model_dictize.vocabulary_dictize(updated_vocab, context)
 
 
-def dashboard_mark_activities_old(context: Context, data_dict: DataDict) -> None:
+def dashboard_mark_activities_old(
+        context: Context, data_dict: DataDict) -> None:
     '''Mark all the authorized user's new dashboard activities as old.
 
     This will reset
@@ -1170,7 +1182,7 @@ def send_email_notifications(context: Context, data_dict: DataDict) -> None:
     if not request.environ.get('paste.command_request'):
         _check_access('send_email_notifications', context, data_dict)
 
-    if not converters.asbool(
+    if not asbool(
             config.get('ckan.activity_streams_email_notifications')):
         raise ValidationError({'message': 'ckan.activity_streams_email_notifications'
                                ' is not enabled in config'})
@@ -1244,6 +1256,7 @@ def _bulk_update_dataset(
     model = context['model']
     model.Session.query(model.package_table) \
         .filter(
+            # type_ignore_reason: incomplete SQLAlchemy types
             model.Package.id.in_(datasets)  # type: ignore
         ) .filter(model.Package.owner_org == org_id) \
         .update(update_dict, synchronize_session=False)
@@ -1339,7 +1352,8 @@ def bulk_update_delete(context: Context, data_dict: DataDict) -> None:
     _bulk_update_dataset(context, data_dict, {'state': 'deleted'})
 
 
-def config_option_update(context: Context, data_dict: DataDict) -> Dict[str, Any]:
+def config_option_update(
+        context: Context, data_dict: DataDict) -> Dict[str, Any]:
     '''
 
     .. versionadded:: 2.4

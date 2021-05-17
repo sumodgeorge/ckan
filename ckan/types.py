@@ -143,7 +143,7 @@ AuthFunctionWithMandatoryDataDict = Callable[[Context, DataDict], AuthResult]
 AuthFunction = Union[
     AuthFunctionWithOptionalDataDict,
     AuthFunctionWithMandatoryDataDict,
-    partial[AuthResult],
+    'partial[AuthResult]',
 ]
 ChainedAuthFunction = Callable[
     [AuthFunction, Context, Optional[DataDict]], AuthResult

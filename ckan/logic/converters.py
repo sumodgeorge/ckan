@@ -1,6 +1,7 @@
 # encoding: utf-8
 
 import json
+from typing import Any, Dict
 
 import six
 from six import string_types, text_type
@@ -10,7 +11,6 @@ import ckan.lib.navl.dictization_functions as df
 import ckan.logic.validators as validators
 
 from ckan.common import _
-from typing import Any, Dict
 from ckan.types import Context, DataValidator, TuplizedErrorDict, TuplizedKey
 
 

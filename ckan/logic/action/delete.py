@@ -3,6 +3,7 @@
 '''API functions for deleting data from CKAN.'''
 
 import logging
+from typing import Any, List, Type, cast
 
 import sqlalchemy as sqla
 import six
@@ -19,7 +20,6 @@ from  ckan.lib.navl.dictization_functions import validate
 from ckan.model.follower import ModelFollowingModel
 
 from ckan.common import _
-from typing import Any, List, Type, cast
 from ckan.types import Context, DataDict, ErrorDict, Schema
 
 
@@ -207,7 +207,7 @@ def resource_delete(context: Context, data_dict: DataDict) -> None:
     try:
         pkg_dict = _get_action('package_update')(context, pkg_dict)
     except ValidationError as e:
-        errors = cast(ErrorDict, e.error_dict['resources'][-1])  # type: ignore
+        errors = cast(List[ErrorDict], e.error_dict['resources'])[-1]
         raise ValidationError(errors)
 
     for plugin in plugins.PluginImplementations(plugins.IResourceController):

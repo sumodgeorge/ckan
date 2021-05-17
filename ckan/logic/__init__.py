@@ -4,14 +4,12 @@ import functools
 import logging
 import re
 import importlib
-import inspect
 
 from collections import defaultdict
 from typing import (Any, Callable, Container, Dict, Iterable, List, Optional,
                     Tuple, TypeVar, Union, cast, overload)
 from typing_extensions import Literal
 
-from werkzeug.local import LocalProxy
 from werkzeug.datastructures import MultiDict
 
 import six
@@ -23,7 +21,6 @@ import ckan.lib.navl.dictization_functions as df
 import ckan.plugins as p
 
 from ckan.common import _, c
-
 from ckan.types import (Action, ChainedAction,
                         ChainedAuthFunction, DataDict, ErrorDict, Context,
                         Schema, Validator)
@@ -95,8 +92,7 @@ class ValidationError(ActionError):
         # tags errors are a mess so let's clean them up
         if 'tags' in error_dict:
             tag_errors: List[Union[str, Dict[str, Any]]] = []
-            for error in error_dict['tags']:  # type: ignore
-                assert isinstance(error, dict)
+            for error in cast(List[Dict[str, Any]], error_dict['tags']):
                 try:
                     tag_errors.append(', '.join(error['name']))
                 except KeyError:
@@ -126,18 +122,20 @@ class ValidationError(ActionError):
                     summary[_('Resources')] = _('Package resource(s) invalid')
                 elif key == 'extras':
                     errors_extras = []
-                    for item in error:  # type: ignore
-                        assert isinstance(item, dict)
+                    for item in cast(List[Dict[str, Any]], error):
                         if (item.get('key') and
                                 item['key'][0] not in errors_extras):
                             errors_extras.append(item['key'][0])
                     summary[_('Extras')] = ', '.join(errors_extras)
                 elif key == 'extras_validation':
-                    summary[_('Extras')] = error[0]  # type: ignore
+                    assert isinstance(error, list)
+                    summary[_('Extras')] = error[0]
                 elif key == 'tags':
-                    summary[_('Tags')] = error[0]  # type: ignore
+                    assert isinstance(error, list)
+                    summary[_('Tags')] = error[0]
                 else:
-                    summary[_(prettify(key))] = error[0]  # type: ignore
+                    assert isinstance(error, list)
+                    summary[_(prettify(key))] = error[0]
             return summary
 
         if self._error_summary:
@@ -164,6 +162,7 @@ def parse_params(
         # flask request has `getlist` instead of pylons' `getall`
 
         if hasattr(params, 'getall'):
+              # type_ignore_reason: pylons legacy
             value = params.getall(key)  # type: ignore
         else:
             value = params.getlist(key)
@@ -254,7 +253,7 @@ def flatten_to_string_key(dict: Dict[str, Any]) -> Dict[str, Any]:
 def _prepopulate_context(context: Optional[Context]) -> Context:
     if context is None:
         context = {}
-    context.setdefault('model', model)  # type: ignore
+    context.setdefault('model', model)
     context.setdefault('session', model.Session)
     try:
         context.setdefault('user', c.user)
@@ -355,6 +354,7 @@ def clear_actions_cache() -> None:
 
 
 def chained_action(func: ChainedAction) -> ChainedAction:
+    # type_ignore_reason: custom attribute
     func.chained_action = True  # type: ignore
     return func
 
@@ -452,6 +452,7 @@ def get_action(action: str) -> Action:
                 resolved_action_plugins[name] = plugin.name
                 # Extensions are exempted from the auth audit for now
                 # This needs to be resolved later
+                # type_ignore_reason: custom attribute
                 action_function.auth_audit_exempt = True  # type: ignore
                 fetched_actions[name] = action_function
     for name, func_list in six.iteritems(chained_actions):
@@ -516,6 +517,7 @@ def get_action(action: str) -> Action:
         fn.__doc__ = _action.__doc__
         # we need to retain the side effect free behaviour
         if getattr(_action, 'side_effect_free', False):
+            # type_ignore_reason: custom attribute
             fn.side_effect_free = True  # type: ignore
         _actions[action_name] = fn
 
@@ -617,6 +619,7 @@ def side_effect_free(action: Decorated) -> Decorated:
     your action function with CKAN.)
 
     '''
+    # type_ignore_reason: custom attribute
     action.side_effect_free = True  # type: ignore
     return action
 
@@ -635,12 +638,14 @@ def auth_sysadmins_check(action: Decorated) -> Decorated:
     sysadmin.
 
     '''
+    # type_ignore_reason: custom attribute
     action.auth_sysadmins_check = True  # type: ignore
     return action
 
 
 def auth_audit_exempt(action: Decorated) -> Decorated:
     ''' Dirty hack to stop auth audit being done '''
+    # type_ignore_reason: custom attribute
     action.auth_audit_exempt = True  # type: ignore
     return action
 
@@ -653,6 +658,7 @@ def auth_allow_anonymous_access(action: Decorated) -> Decorated:
     auth function can still return False if for some reason access is not
     granted).
     '''
+    # type_ignore_reason: custom attribute
     action.auth_allow_anonymous_access = True  # type: ignore
     return action
 
@@ -664,6 +670,7 @@ def auth_disallow_anonymous_access(action: Decorated) -> Decorated:
     exception if an authenticated user is not provided in the context, without
     calling the actual auth function.
     '''
+    # type_ignore_reason: custom attribute
     action.auth_allow_anonymous_access = False  # type: ignore
     return action
 
@@ -672,6 +679,7 @@ def chained_auth_function(func: ChainedAuthFunction) -> ChainedAuthFunction:
     '''
     Decorator function allowing authentication functions to be chained.
     '''
+    # type_ignore_reason: custom attribute
     func.chained_auth_function = True  # type: ignore
     return func
 

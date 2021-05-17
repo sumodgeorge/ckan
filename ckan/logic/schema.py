@@ -1,7 +1,7 @@
 # encoding: utf-8
 
-from functools import wraps
 import inspect
+from functools import wraps
 from typing import Any, Callable, Iterable, cast
 
 import ckan.model
@@ -202,7 +202,7 @@ def default_show_package_schema(keep_extras: Validator,
 
     # Add several keys to the 'resources' subschema so they don't get stripped
     # from the resource dicts by validation.
-    schema['resources'].update({  # type: ignore
+    cast(Schema, schema['resources']).update({
         'format': [ignore_missing, clean_format, unicode_safe],
         'created': [ignore_missing],
         'position': [not_empty],
@@ -226,7 +226,7 @@ def default_show_package_schema(keep_extras: Validator,
         'license_url': [ignore_missing],
     })
 
-    schema['groups'].update({  # type: ignore
+    cast(Schema, schema['groups']).update({
         'description': [ignore_missing],
         'display_name': [ignore_missing],
         'image_display_url': [ignore_missing],

@@ -396,10 +396,12 @@ def _group_or_org_list(
     query = query.filter(model.Group.state == 'active')
 
     if groups:
+        # type_ignore_reason: incomplete SQLAlchemy types
         query = query.filter(model.Group.name.in_(groups))  # type: ignore
     if q:
         q = u'%{0}%'.format(q)
         query = query.filter(_or_(
+            # type_ignore_reason: incomplete SQLAlchemy types
             model.Group.name.ilike(q),  # type: ignore
             model.Group.title.ilike(q),  # type: ignore
             model.Group.description.ilike(q),  # type: ignore
@@ -601,6 +603,7 @@ def group_list_authz(context: Context,
         q = model.Session.query(model.Member.group_id) \
             .filter(model.Member.table_name == 'user') \
             .filter(
+                # type_ignore_reason: incomplete SQLAlchemy types
                 model.Member.capacity.in_(roles)  # type: ignore
             ).filter(model.Member.table_id == user_id) \
             .filter(model.Member.state == 'active')
@@ -616,6 +619,7 @@ def group_list_authz(context: Context,
         .filter(model.Group.state == 'active')
 
     if not sysadmin or am_member:
+        # type_ignore_reason: incomplete SQLAlchemy types
         q = q.filter(model.Group.id.in_(group_ids))  # type: ignore
 
     groups = q.all()
@@ -707,6 +711,7 @@ def organization_list_for_user(context: Context,
         q = model.Session.query(model.Member, model.Group) \
             .filter(model.Member.table_name == 'user') \
             .filter(
+                # type_ignore_reason: incomplete SQLAlchemy types
                 model.Member.capacity.in_(roles)  # type: ignore
             ) \
             .filter(model.Member.table_id == user_id) \
@@ -735,6 +740,7 @@ def organization_list_for_user(context: Context,
         if not group_ids:
             return []
 
+        # type_ignore_reason: incomplete SQLAlchemy types
         orgs_q = orgs_q.filter(model.Group.id.in_(group_ids))  # type: ignore
         orgs_and_capacities = [
             (org, group_ids_to_capacities[org.id]) for org in orgs_q.all()]
@@ -847,6 +853,7 @@ def user_list(
     if all_fields:
         query: 'Query[Any]' = model.Session.query(
             model.User,
+            # type_ignore_reason: incomplete SQLAlchemy types
             model.User.name.label('name'),  # type: ignore
             model.User.fullname.label('fullname'),  # type: ignore
             model.User.about.label('about'),  # type: ignore
@@ -1506,7 +1513,8 @@ def user_show(context: Context, data_dict: DataDict) -> Dict[str, Any]:
 
 
 @logic.validate(ckan.logic.schema.default_autocomplete_schema)
-def package_autocomplete(context: Context, data_dict: DataDict) -> List[Dict[str, Any]]:
+def package_autocomplete(
+        context: Context, data_dict: DataDict) -> List[Dict[str, Any]]:
     '''Return a list of datasets (packages) that match a string.
 
     Datasets with names or titles that contain the query string will be
@@ -1597,6 +1605,7 @@ def format_autocomplete(context: Context, data_dict: DataDict) -> List[str]:
         .filter(_and_(
             model.Resource.state == 'active',
         ))
+        # type_ignore_reason: incomplete SQLAlchemy types
         .filter(model.Resource.format.ilike(like_q))  # type: ignore
         .group_by(model.Resource.format)
         .order_by(text('total DESC'))
@@ -1668,7 +1677,8 @@ def _group_or_org_autocomplete(
     return group_list
 
 
-def group_autocomplete(context: Context, data_dict: DataDict) -> List[Dict[str, Any]]:
+def group_autocomplete(
+        context: Context, data_dict: DataDict) -> List[Dict[str, Any]]:
     '''
     Return a list of group names that contain a string.
 
@@ -1956,6 +1966,7 @@ def package_search(context: Context, data_dict: DataDict) -> Dict[str, Any]:
         group_names.extend(facets.get(field_name, {}).keys())
 
     groups = (session.query(model.Group.name, model.Group.title)
+                    # type_ignore_reason: incomplete SQLAlchemy types
                     .filter(model.Group.name.in_(group_names))  # type: ignore
                     .all()
               if group_names else [])
@@ -2095,6 +2106,7 @@ def resource_search(context: Context, data_dict: DataDict) -> Dict[str, Any]:
         if isinstance(query, string_types):
             query = [query]
         try:
+            # type_ignore_reason: typechecker can't guess number of args
             fields = dict(pair.split(":", 1) for pair in query)  # type: ignore
         except ValueError:
             raise ValidationError(
@@ -2242,6 +2254,7 @@ def _tag_search(
         escaped_term = misc.escape_sql_like_special_characters(
             term, escape='\\')
         q = q.filter(
+            # type_ignore_reason: incomplete SQLAlchemy types
             model.Tag.name.ilike('%' + escaped_term + '%'))  # type: ignore
 
     count = q.count()
@@ -2361,7 +2374,8 @@ def task_status_show(context: Context, data_dict: DataDict) -> Dict[str, Any]:
     return task_status_dict
 
 
-def term_translation_show(context: Context, data_dict: DataDict) -> List[Dict[str, Any]]:
+def term_translation_show(
+        context: Context, data_dict: DataDict) -> List[Dict[str, Any]]:
     '''Return the translations for the given term(s) and language(s).
 
     :param terms: the terms to search for translations of, e.g. ``'Russian'``,
@@ -2465,7 +2479,8 @@ def status_show(context: Context, data_dict: DataDict) -> Dict[str, Any]:
     }
 
 
-def vocabulary_list(context: Context, data_dict: DataDict) -> List[Dict[str, Any]]:
+def vocabulary_list(
+        context: Context, data_dict: DataDict) -> List[Dict[str, Any]]:
     '''Return a list of all the site's tag vocabularies.
 
     :rtype: list of dictionaries
@@ -2501,7 +2516,8 @@ def vocabulary_show(context: Context, data_dict: DataDict) -> Dict[str, Any]:
 
 
 @logic.validate(ckan.logic.schema.default_activity_list_schema)
-def user_activity_list(context: Context, data_dict: DataDict) -> List[Dict[str, Any]]:
+def user_activity_list(
+        context: Context, data_dict: DataDict) -> List[Dict[str, Any]]:
     '''Return a user's public activity stream.
 
     You must be authorized to view the user's profile.
@@ -2545,7 +2561,8 @@ def user_activity_list(context: Context, data_dict: DataDict) -> List[Dict[str, 
 
 
 @logic.validate(ckan.logic.schema.default_activity_list_schema)
-def package_activity_list(context: Context, data_dict: DataDict) -> List[Dict[str, Any]]:
+def package_activity_list(
+        context: Context, data_dict: DataDict) -> List[Dict[str, Any]]:
     '''Return a package's activity stream (not including detail)
 
     You must be authorized to view the package.
@@ -2598,7 +2615,8 @@ def package_activity_list(context: Context, data_dict: DataDict) -> List[Dict[st
 
 
 @logic.validate(ckan.logic.schema.default_activity_list_schema)
-def group_activity_list(context: Context, data_dict: DataDict) -> List[Dict[str, Any]]:
+def group_activity_list(
+        context: Context, data_dict: DataDict) -> List[Dict[str, Any]]:
     '''Return a group's activity stream.
 
     You must be authorized to view the group.
@@ -2703,8 +2721,8 @@ def organization_activity_list(context: Context,
 
 
 @logic.validate(ckan.logic.schema.default_dashboard_activity_list_schema)
-def recently_changed_packages_activity_list(context: Context,
-                                            data_dict: DataDict) -> List[Dict[str, Any]]:
+def recently_changed_packages_activity_list(
+        context: Context, data_dict: DataDict) -> List[Dict[str, Any]]:
     '''Return the activity stream of all recently added or changed packages.
 
     :param offset: where to start getting activity items from
@@ -2823,7 +2841,8 @@ def _follower_list(
     return model_dictize.user_list_dictize(users, context)
 
 
-def user_follower_list(context: Context, data_dict: DataDict) -> List[Dict[str, Any]]:
+def user_follower_list(
+        context: Context, data_dict: DataDict) -> List[Dict[str, Any]]:
     '''Return the list of users that are following the given user.
 
     :param id: the id or name of the user
@@ -2839,7 +2858,8 @@ def user_follower_list(context: Context, data_dict: DataDict) -> List[Dict[str, 
         context['model'].UserFollowingUser)
 
 
-def dataset_follower_list(context: Context, data_dict: DataDict) -> List[Dict[str, Any]]:
+def dataset_follower_list(
+        context: Context, data_dict: DataDict) -> List[Dict[str, Any]]:
     '''Return the list of users that are following the given dataset.
 
     :param id: the id or name of the dataset
@@ -2855,7 +2875,8 @@ def dataset_follower_list(context: Context, data_dict: DataDict) -> List[Dict[st
         context['model'].UserFollowingDataset)
 
 
-def group_follower_list(context: Context, data_dict: DataDict) -> List[Dict[str, Any]]:
+def group_follower_list(
+        context: Context, data_dict: DataDict) -> List[Dict[str, Any]]:
     '''Return the list of users that are following the given group.
 
     :param id: the id or name of the group
@@ -3037,7 +3058,8 @@ def group_followee_count(context: Context, data_dict: DataDict) -> int:
 
 
 @logic.validate(ckan.logic.schema.default_follow_user_schema)
-def followee_list(context: Context, data_dict: DataDict) -> List[Dict[str, Any]]:
+def followee_list(
+        context: Context, data_dict: DataDict) -> List[Dict[str, Any]]:
     '''Return the list of objects that are followed by the given user.
 
     Returns all objects, of any type, that the given user is following
@@ -3101,7 +3123,8 @@ def followee_list(context: Context, data_dict: DataDict) -> List[Dict[str, Any]]
     return followee_dicts
 
 
-def user_followee_list(context: Context, data_dict: DataDict) -> List[Dict[str, Any]]:
+def user_followee_list(
+        context: Context, data_dict: DataDict) -> List[Dict[str, Any]]:
     '''Return the list of users that are followed by the given user.
 
     :param id: the id of the user
@@ -3132,7 +3155,8 @@ def user_followee_list(context: Context, data_dict: DataDict) -> List[Dict[str, 
     return model_dictize.user_list_dictize(users, context)
 
 
-def dataset_followee_list(context: Context, data_dict: DataDict) -> List[Dict[str, Any]]:
+def dataset_followee_list(
+        context: Context, data_dict: DataDict) -> List[Dict[str, Any]]:
     '''Return the list of datasets that are followed by the given user.
 
     :param id: the id or name of the user
@@ -3165,7 +3189,8 @@ def dataset_followee_list(context: Context, data_dict: DataDict) -> List[Dict[st
             for dataset in datasets]
 
 
-def group_followee_list(context: Context, data_dict: DataDict) -> List[Dict[str, Any]]:
+def group_followee_list(
+        context: Context, data_dict: DataDict) -> List[Dict[str, Any]]:
     '''Return the list of groups that are followed by the given user.
 
     :param id: the id or name of the user
@@ -3323,7 +3348,8 @@ def activity_show(context: Context, data_dict: DataDict) -> Dict[str, Any]:
     return activity
 
 
-def activity_data_show(context: Context, data_dict: DataDict) -> Dict[str, Any]:
+def activity_data_show(
+        context: Context, data_dict: DataDict) -> Dict[str, Any]:
     '''Show the data from an item of 'activity' (part of the activity
     stream).
 
@@ -3389,6 +3415,7 @@ def activity_diff(context: Context, data_dict: DataDict) -> Dict[str, Any]:
         .filter_by(object_id=activity.object_id) \
         .filter(model.Activity.timestamp < activity.timestamp) \
         .order_by(
+            # type_ignore_reason: incomplete SQLAlchemy types
             model.Activity.timestamp.desc()  # type: ignore
         ).first()
     if prev_activity is None:
@@ -3406,9 +3433,11 @@ def activity_diff(context: Context, data_dict: DataDict) -> Dict[str, Any]:
 
     # do the diff
     if diff_type == 'unified':
+        # type_ignore_reason: typechecker can't predict number of items
         diff_generator = difflib.unified_diff(*obj_lines)  # type: ignore
         diff = '\n'.join(line for line in diff_generator)
     elif diff_type == 'context':
+        # type_ignore_reason: typechecker can't predict number of items
         diff_generator = difflib.context_diff(*obj_lines)  # type: ignore
         diff = '\n'.join(line for line in diff_generator)
     elif diff_type == 'html':
@@ -3419,6 +3448,7 @@ def activity_diff(context: Context, data_dict: DataDict) -> Dict[str, Any]:
             for line in obj_lines[obj_index]:
                 wrapped_obj_lines.extend(re.findall(r'.{1,70}(?:\s+|$)', line))
             obj_lines[obj_index] = wrapped_obj_lines
+        # type_ignore_reason: typechecker can't predict number of items
         diff = difflib.HtmlDiff().make_table(*obj_lines)  # type: ignore
     else:
         raise ValidationError({'message': 'diff_type not recognized'})
@@ -3465,7 +3495,8 @@ def _unpick_search(
     return sorts
 
 
-def member_roles_list(context: Context, data_dict: DataDict) -> List[Dict[str, Any]]:
+def member_roles_list(
+        context: Context, data_dict: DataDict) -> List[Dict[str, Any]]:
     '''Return the possible roles for members of groups and organizations.
 
     :param group_type: the group type, either ``"group"`` or ``"organization"``
@@ -3602,7 +3633,8 @@ def job_show(context: Context, data_dict: DataDict) -> Dict[str, Any]:
         raise NotFound
 
 
-def api_token_list(context: Context, data_dict: DataDict) -> List[Dict[str, Any]]:
+def api_token_list(
+        context: Context, data_dict: DataDict) -> List[Dict[str, Any]]:
     '''Return list of all available API Tokens for current user.
 
     :returns: collection of all API Tokens

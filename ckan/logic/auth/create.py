@@ -1,11 +1,12 @@
 # encoding: utf-8
 
+from typing import Optional
+
 import ckan.logic as logic
 import ckan.authz as authz
 import ckan.logic.auth as logic_auth
 
 from ckan.common import _
-from typing import Optional
 from ckan.types import Context, DataDict, AuthResult
 
 @logic.auth_allow_anonymous_access

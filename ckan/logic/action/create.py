@@ -5,8 +5,9 @@
 import logging
 import random
 import re
-from socket import error as socket_error
 import datetime
+from socket import error as socket_error
+from typing import Any, Dict, List, Optional, Union, cast
 
 import six
 
@@ -31,11 +32,10 @@ import ckan.authz as authz
 import ckan.model
 
 from ckan.common import _, config
+from ckan.types import Context, DataDict, ErrorDict, Schema, TuplizedErrorDict
 
 # FIXME this looks nasty and should be shared better
 from ckan.logic.action.update import _update_package_relationship
-from typing import Any, Dict, List, Optional, Union, cast
-from ckan.types import Context, DataDict, ErrorDict, Schema, TuplizedErrorDict
 
 log = logging.getLogger(__name__)
 
@@ -320,8 +320,7 @@ def resource_create(context: Context, data_dict: DataDict) -> Dict[str, Any]:
         context.pop('defer_commit')
     except ValidationError as e:
         try:
-            error_dict = cast(ErrorDict,
-                              e.error_dict['resources'][-1])  # type: ignore
+            error_dict = cast(List[ErrorDict], e.error_dict['resources'])[-1]
         except (KeyError, IndexError):
             error_dict = e.error_dict
         raise ValidationError(error_dict)
