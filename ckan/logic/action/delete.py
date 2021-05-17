@@ -13,7 +13,6 @@ import ckan.logic.action
 import ckan.logic.schema
 import ckan.plugins as plugins
 import ckan.lib.dictization as dictization
-import ckan.lib.dictization.model_dictize as model_dictize
 import ckan.lib.api_token as api_token
 from ckan import authz
 from  ckan.lib.navl.dictization_functions import validate

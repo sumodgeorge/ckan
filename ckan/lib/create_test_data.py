@@ -3,7 +3,6 @@
 
 from ckan.types import Context
 import logging
-from collections import defaultdict
 import datetime
 from typing import List, Set, cast
 

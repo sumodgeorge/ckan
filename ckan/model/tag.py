@@ -3,7 +3,7 @@
 from typing import List, Optional, Any
 
 from sqlalchemy.orm import relation
-from sqlalchemy import types, Column, Table, ForeignKey, and_, UniqueConstraint
+from sqlalchemy import types, Column, Table, ForeignKey, UniqueConstraint
 
 import ckan  # this import is needed
 
@@ -154,7 +154,7 @@ class Tag(domain_object.DomainObject):
         # Todo: Make sure tag names can't be changed to look like tag IDs?
 
     @classmethod
-    @maintain.deprecated()
+    @maintain.deprecated(since="2.9.0")
     def search_by_name(
             cls, search_term: str,
             vocab_id_or_name: Optional[str] = None) -> Optional['Query[Tag]']:
@@ -264,7 +264,7 @@ class PackageTag(core.StatefulObjectMixin,
         return s.encode('utf8')
 
     @classmethod
-    @maintain.deprecated()
+    @maintain.deprecated(since="2.9.0")
     def by_name(
             cls, package_name: str, tag_name: str,
             vocab_id_or_name: Optional[str] = None,

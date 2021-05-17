@@ -2,7 +2,7 @@
 
 import datetime
 import re
-
+import logging
 import requests
 
 from ckan.common import config
@@ -16,7 +16,7 @@ from typing import Any, Dict, Generic, Iterable, Iterator, List, Optional, Tuple
 
 TLicense = TypeVar('TLicense', bound='DefaultLicense')
 
-log = __import__('logging').getLogger(__name__)
+log = logging.getLogger(__name__)
 
 
 class License(Generic[TLicense]):
@@ -66,7 +66,7 @@ class License(Generic[TLicense]):
 
     @maintain.deprecated("License.__getitem__() is deprecated and will be "
                          "removed in a future version of CKAN. Instead, "
-                         "please use attribute access.")
+                         "please use attribute access.", since="2.4.0")
     def __getitem__(self, key: str) -> Any:
         '''NB This method is deprecated and will be removed in a future version
         of CKAN. Instead, please use attribute access.
@@ -81,7 +81,7 @@ class License(Generic[TLicense]):
 
     @maintain.deprecated("License.as_dict() is deprecated and will be "
                          "removed in a future version of CKAN. Instead, "
-                         "please use attribute access.")
+                         "please use attribute access.", since="2.4.0")
     def as_dict(self) -> Dict[str, Any]:
         '''NB This method is deprecated and will be removed in a future version
         of CKAN. Instead, please use attribute access.

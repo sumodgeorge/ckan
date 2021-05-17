@@ -1,6 +1,7 @@
 # encoding: utf-8
 from ckan.types import Context
 import logging
+import inspect
 from collections import OrderedDict
 from functools import partial
 from six.moves.urllib.parse import urlencode  # type: ignore
@@ -64,11 +65,10 @@ def _get_pkg_template(template_type: str,
                       package_type: Optional[str] = None) -> str:
     pkg_plugin = lookup_package_plugin(package_type)
     method = getattr(pkg_plugin, template_type)
-    try:
+    signature = inspect.signature(method)
+    if len(signature.parameters):
         return method(package_type)
-    except TypeError as err:
-        if u'takes 1' not in str(err) and u'takes exactly 1' not in str(err):
-            raise
+    else:
         return method()
 
 
@@ -242,7 +242,8 @@ def search(package_type: str) -> str:
     limit = int(config.get(u'ckan.datasets_per_page', 20))
 
     # most search operations should reset the page counter:
-    params_nopage = [(k, v) for k, v in request.args.items() if k != u'page']
+    params_nopage = [(k, v) for k, v in request.args.items(multi=True)
+                     if k != u'page']
 
     extra_vars[u'drill_down_url'] = drill_down_url
     extra_vars[u'remove_field'] = partial(remove_field, package_type)

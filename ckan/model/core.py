@@ -1,9 +1,9 @@
 # encoding: utf-8
 
+import logging
 from typing import Optional
 
-
-log = __import__('logging').getLogger(__name__)
+log = logging.getLogger(__name__)
 
 
 class State(object):

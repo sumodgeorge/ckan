@@ -58,6 +58,8 @@ def get_uploader(upload_to: str,
     upload = None
     for plugin in plugins.PluginImplementations(plugins.IUploader):
         upload = plugin.get_uploader(upload_to, old_filename)
+        if upload:
+            break
 
     # default uploader
     if upload is None:
@@ -71,6 +73,8 @@ def get_resource_uploader(data_dict: Dict[str, Any]) -> PResourceUploader:
     upload = None
     for plugin in plugins.PluginImplementations(plugins.IUploader):
         upload = plugin.get_resource_uploader(data_dict)
+        if upload:
+            break
 
     # default uploader
     if upload is None:

@@ -3,9 +3,8 @@
 from ckan.types import Context, Schema, TuplizedKey
 import copy
 import json
-
 import six
-from six import text_type
+
 from ckan.common import config, _
 from typing import (Any, Callable, Dict, Iterable, List, Optional,
                     Sequence, Set, Tuple, Union, cast)

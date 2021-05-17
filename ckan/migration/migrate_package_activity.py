@@ -30,7 +30,6 @@ package_revision table.)
 from __future__ import print_function
 from __future__ import absolute_import
 import argparse
-import sys
 from collections import defaultdict
 from typing import Any
 from six.moves import input

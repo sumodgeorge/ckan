@@ -5,7 +5,6 @@ from simplejson import (  # type: ignore
     loads,
     RawJSON,  # type: ignore
     dumps)
-import six
 from six import text_type
 
 
