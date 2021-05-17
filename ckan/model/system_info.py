@@ -7,13 +7,14 @@ configuration options.
 For more details, check :doc:`maintaining/configuration`.
 '''
 
+from typing import Any, Optional
+
 from sqlalchemy import types, Column, Table
 from six import text_type
 
 import ckan.model.meta as meta
 import ckan.model.core as core
 import ckan.model.domain_object as domain_object
-from typing import Any, Optional
 
 __all__ = ['system_info_table', 'SystemInfo',
            'get_system_info', 'set_system_info']

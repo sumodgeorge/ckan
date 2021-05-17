@@ -1,6 +1,7 @@
 # encoding: utf-8
 
 import datetime
+from typing import Any, Callable, ClassVar, Dict, List, Optional
 
 from six import text_type
 from collections import OrderedDict
@@ -17,7 +18,6 @@ import ckan.model.domain_object as domain_object
 import ckan.lib.dictization
 from .package import Package
 import ckan.model
-from typing import Any, Callable, ClassVar, Dict, List, Optional
 
 __all__ = ['Resource', 'resource_table']
 
@@ -85,8 +85,9 @@ class Resource(core.StatefulObjectMixin,
 
     url_changed: Optional[bool]
 
-    def __init__(self, url: str=u'', format: str=u'', description: str=u'', hash: str=u'',
-                 extras: Optional[Dict[str, Any]]=None, package_id: Optional[str]=None, **kwargs: Any) -> None:
+    def __init__(self, url: str=u'', format: str=u'', description: str=u'',
+                 hash: str=u'', extras: Optional[Dict[str, Any]]=None,
+                 package_id: Optional[str]=None, **kwargs: Any) -> None:
         self.id = _types.make_uuid()
         self.url = url
         self.format = format
@@ -151,7 +152,8 @@ class Resource(core.StatefulObjectMixin,
         if cls.extra_columns is None:
             cls.extra_columns = config.get(
                 'ckan.extra_resource_fields', '').split()
-            for field in cls.extra_columns:  # type: ignore
+            assert cls.extra_columns is not None
+            for field in cls.extra_columns:
                 setattr(cls, field, DictProxy(field, 'extras'))
         assert cls.extra_columns is not None
         return cls.extra_columns

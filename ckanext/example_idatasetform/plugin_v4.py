@@ -35,9 +35,6 @@ class ExampleIDatasetFormPlugin(p.SingletonPlugin, tk.DefaultDatasetForm):
     p.implements(p.IDatasetForm)
     p.implements(p.IConfigurer)
     p.implements(p.ITemplateHelpers)
-    country_codes = cast(
-        Callable[..., Validator],
-        tk.get_converter('convert_to_tags'))('country_codes')
 
     def get_helpers(self):
         return {'country_codes': country_codes}
@@ -49,7 +46,9 @@ class ExampleIDatasetFormPlugin(p.SingletonPlugin, tk.DefaultDatasetForm):
         })
         schema.update({
             'country_code': [
-                tk.get_validator('ignore_missing')
+                tk.get_validator('ignore_missing'),
+                cast(Callable[..., Validator],
+                     tk.get_converter('convert_to_tags'))('country_codes'),
             ]
         })
         return schema
@@ -64,7 +63,8 @@ class ExampleIDatasetFormPlugin(p.SingletonPlugin, tk.DefaultDatasetForm):
         schema['tags']['__extras'].append(tk.get_converter('free_tags_only'))
         schema.update({
             'country_code': [
-                country_codes,
+                cast(Callable[..., Validator],
+                     tk.get_converter('convert_from_tags'))('country_codes'),
                 tk.get_validator('ignore_missing')]
         })
         return schema

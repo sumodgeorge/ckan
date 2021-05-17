@@ -113,7 +113,8 @@ class Tag(domain_object.DomainObject):
         return tag
 
     @classmethod
-    def get(cls, tag_id_or_name: str, vocab_id_or_name: Optional[str]=None) -> Optional["Tag"]:
+    def get(cls, tag_id_or_name: str,
+            vocab_id_or_name: Optional[str]=None) -> Optional["Tag"]:
         '''Return the tag with the given id or name, or None.
 
         By default only free tags (tags which do not belong to any vocabulary)
@@ -185,6 +186,7 @@ class Tag(domain_object.DomainObject):
         else:
             query = meta.Session.query(Tag)
         search_term = search_term.strip().lower()
+        # type_ignore_reason: incomplete SQLAlchemy types
         query = query.filter(Tag.name.contains(search_term))  # type: ignore
         query = query.distinct().join(Tag.package_tags)
         return query
@@ -314,6 +316,7 @@ class PackageTag(core.StatefulObjectMixin,
             return [self.package]
         return []
 
+# type_ignore_reason: incomplete SQLAlchemy types
 meta.mapper(Tag, tag_table, properties={
     'package_tags': relation(PackageTag, backref='tag',
         cascade='all, delete, delete-orphan',

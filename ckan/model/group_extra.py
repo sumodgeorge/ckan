@@ -33,9 +33,11 @@ class GroupExtra(core.StatefulObjectMixin,
 
     group: group.Group
 
+# type_ignore_reason: incomplete SQLAlchemy types
 meta.mapper(GroupExtra, group_extra_table, properties={
     'group': orm.relation(group.Group,
-        backref=orm.backref('_extras',
+        backref=orm.backref(
+            '_extras',
             collection_class=orm.collections.attribute_mapped_collection(u'key'),  # type: ignore
             cascade='all, delete, delete-orphan',
             ),

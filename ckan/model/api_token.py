@@ -3,6 +3,7 @@
 import copy
 import datetime
 from secrets import token_urlsafe
+from typing import Any, Dict, Optional
 
 from sqlalchemy import types, Column, Table, ForeignKey, orm
 from sqlalchemy.dialects.postgresql import JSONB
@@ -12,9 +13,6 @@ import ckan.plugins.toolkit as tk
 import ckan.model.meta as meta
 import ckan.model.user as user
 import ckan.model.domain_object as domain_object
-
-from typing import Any, Dict, Optional
-
 
 __all__ = [u"ApiToken", u"api_token_table"]
 

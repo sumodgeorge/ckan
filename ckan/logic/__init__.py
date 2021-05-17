@@ -21,9 +21,10 @@ import ckan.lib.navl.dictization_functions as df
 import ckan.plugins as p
 
 from ckan.common import _, c
-from ckan.types import (Action, ChainedAction,
-                        ChainedAuthFunction, DataDict, ErrorDict, Context, FlattenDataDict,
-                        Schema, Validator)
+from ckan.types import (
+    Action, ChainedAction,
+    ChainedAuthFunction, DataDict, ErrorDict, Context, FlattenDataDict,
+    Schema, Validator)
 
 Decorated = TypeVar("Decorated")
 
@@ -162,7 +163,7 @@ def parse_params(
         # flask request has `getlist` instead of pylons' `getall`
 
         if hasattr(params, 'getall'):
-              # type_ignore_reason: pylons legacy
+            # type_ignore_reason: pylons legacy
             value = params.getall(key)  # type: ignore
         else:
             value = params.getlist(key)

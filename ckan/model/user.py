@@ -294,12 +294,14 @@ class User(core.StatefulObjectMixin,
             query = sqlalchemy_query
         qstr = '%' + querystr + '%'
         filters = [
+            # type_ignore_reason: incomplete SQLAlchemy types
             cls.name.ilike(qstr),  # type: ignore
             cls.fullname.ilike(qstr),  # type: ignore
         ]
         # sysadmins can search on user emails
         import ckan.authz as authz
         if user_name and authz.is_sysadmin(user_name):
+            # type_ignore_reason: incomplete SQLAlchemy types
             filters.append(cls.email.ilike(qstr))  # type: ignore
 
         query = query.filter(or_(*filters))
@@ -312,6 +314,7 @@ class User(core.StatefulObjectMixin,
         names or ids
         '''
         query = meta.Session.query(cls.id)
+        # type_ignore_reason: incomplete SQLAlchemy types
         query = query.filter(or_(cls.name.in_(user_list),  # type: ignore
                                  cls.id.in_(user_list)))  # type: ignore
         return [user.id for user in query.all()]
@@ -319,4 +322,5 @@ class User(core.StatefulObjectMixin,
 
 meta.mapper(User, user_table,
     properties={'password': synonym('_password', map_column=True)},
+    # type_ignore_reason: incomplete SQLAlchemy types
     order_by=user_table.c.name)  # type: ignore

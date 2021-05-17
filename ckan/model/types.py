@@ -5,11 +5,11 @@ import uuid
 import simplejson as json
 
 from datetime import datetime
+from typing import Any, Union
 from sqlalchemy import types
 from six import string_types, text_type
 
 import ckan.model.meta as meta
-from typing import Any, Union
 
 __all__ = ['iso_date_to_datetime_for_sqlite', 'make_uuid', 'UuidType',
            'JsonType', 'JsonDictType']

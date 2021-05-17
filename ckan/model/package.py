@@ -136,6 +136,7 @@ class Package(core.StatefulObjectMixin,
     def search_by_name(cls, text_query: str) -> 'Query[Package]':
         text_query = text_query
         return meta.Session.query(cls).filter(
+            # type_ignore_reason: incomplete SQLAlchemy types
             cls.name.contains(text_query.lower())  # type: ignore
         )
 
@@ -263,7 +264,8 @@ class Package(core.StatefulObjectMixin,
             total += rating.rating
         return total / len(self.ratings)
 
-    def as_dict(self, ref_package_by: str='name', ref_group_by: str='name') -> Dict[str, Any]:
+    def as_dict(self, ref_package_by: str='name',
+                ref_group_by: str='name') -> Dict[str, Any]:
         _dict = domain_object.DomainObject.as_dict(self)
         # Set 'license' in _dict to cater for old clients.
         # Todo: Remove from Version 2?
@@ -293,7 +295,8 @@ class Package(core.StatefulObjectMixin,
         _dict['type'] = self.type or u'dataset'
         return _dict
 
-    def add_relationship(self, type_: str, related_package: "Package", comment: str=u''):
+    def add_relationship(self, type_: str, related_package: "Package",
+                         comment: str=u''):
         '''Creates a new relationship between this package and a
         related_package. It leaves the caller to commit the change.
 
@@ -331,8 +334,10 @@ class Package(core.StatefulObjectMixin,
         meta.Session.add(rel)
         return rel
 
-    def get_relationships(self, with_package: Optional["Package"]=None, type: Optional[str]=None, active: bool=True,
-                          direction: str='both') -> List["PackageRelationship"]:
+    def get_relationships(
+            self, with_package: Optional["Package"]=None, type:
+            Optional[str]=None, active: bool=True,
+            direction: str='both') -> List["PackageRelationship"]:
         '''Returns relationships this package has.
         Keeps stored type/ordering (not from pov of self).'''
         assert direction in ('both', 'forward', 'reverse')
@@ -363,7 +368,9 @@ class Package(core.StatefulObjectMixin,
             q = q.filter(and_(*reverse_filters))
         return q.all()
 
-    def get_relationships_with(self, other_package: "Package", type: Optional[str]=None, active: bool=True) -> List["PackageRelationship"]:
+    def get_relationships_with(
+            self, other_package: "Package", type: Optional[str]=None,
+            active: bool=True) -> List["PackageRelationship"]:
         return self.get_relationships(with_package=other_package,
                                       type=type,
                                       active=active)
@@ -456,7 +463,8 @@ class Package(core.StatefulObjectMixin,
     def is_in_group(self, group: "Group") -> bool:
         return group in self.get_groups()
 
-    def get_groups(self, group_type: Optional[str]=None, capacity: Optional[str]=None) -> List["Group"]:
+    def get_groups(self, group_type: Optional[str]=None,
+                   capacity: Optional[str]=None) -> List["Group"]:
         import ckan.model as model
 
         # Gets [ (group, capacity,) ...]
@@ -478,7 +486,8 @@ class Package(core.StatefulObjectMixin,
         return groups
 
     def activity_stream_item(
-            self, activity_type: str, user_id: str) -> Optional["activity.Activity"]:
+            self, activity_type: str,
+            user_id: str) -> Optional["activity.Activity"]:
         import ckan.model
         import ckan.logic
 
@@ -534,7 +543,8 @@ class Package(core.StatefulObjectMixin,
             }
         )
 
-    def set_rating(self, user_or_ip: Union["User", str], rating: float) -> None:
+    def set_rating(self,
+                   user_or_ip: Union["User", str], rating: float) -> None:
         '''Record a user's rating of this package.
 
         The caller function is responsible for doing the commit.
@@ -607,6 +617,7 @@ class RatingValueException(Exception):
 # import here to prevent circular import
 from ckan.model import tag
 
+# type_ignore_reason: incomplete SQLAlchemy types
 meta.mapper(Package, package_table, properties={
     # delete-orphan on cascade does NOT work!
     # Why? Answer: because of way SQLAlchemy/our code works there are points

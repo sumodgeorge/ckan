@@ -13,9 +13,9 @@ import ckan.lib.helpers as h
 import ckan.lib.navl.dictization_functions as dict_fns
 import ckan.logic as logic
 import ckan.model as model
+import ckan.logic.schema
 from ckan.common import g, _, config, request
 from ckan.views.home import CACHE_PARAMETERS
-
 
 from ckan.types import Context, Query
 
@@ -27,6 +27,7 @@ admin = Blueprint(u'admin', __name__, url_prefix=u'/ckan-admin')
 
 def _get_sysadmins() -> Query:
     q = model.Session.query(model.User).filter(
+        # type_ignore_reason: incomplete SQLAlchemy types
         model.User.sysadmin.is_(True),  # type: ignore
         model.User.state == u'active')
     return q
@@ -92,7 +93,7 @@ class ResetConfigView(MethodView):
 class ConfigView(MethodView):
     def get(self) -> str:
         items = _get_config_options()
-        schema = logic.schema.update_configuration_schema()  # type: ignore
+        schema = ckan.logic.schema.update_configuration_schema()
         data = {}
         for key in schema:
             data[key] = config.get(key)

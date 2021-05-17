@@ -1,14 +1,15 @@
 # encoding: utf-8
 
+from typing import Any, Optional
+
 """SQLAlchemy Metadata and Session object"""
 from sqlalchemy import MetaData
 import sqlalchemy.orm as orm
 from sqlalchemy.orm.session import SessionExtension  # type: ignore
+from sqlalchemy.engine import Engine
 
 import ckan.model.extension as extension
 from ckan.types import AlchemySession
-from typing import Any, Optional
-from sqlalchemy.engine import Engine
 
 __all__ = ['Session', 'engine_is_sqlite', 'engine_is_pg']
 

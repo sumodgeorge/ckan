@@ -18,8 +18,7 @@ into plugins-toolkit.rst manually before running Sphinx).
 
 '''
 import inspect
-import types
-from typing import Any, Callable, Optional, Type
+from typing import Any, Callable, Optional
 
 import ckan.plugins.toolkit as toolkit
 

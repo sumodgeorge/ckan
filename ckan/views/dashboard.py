@@ -1,10 +1,8 @@
 # encoding: utf-8
-from ckan.types import Context
 import logging
 from typing import Any, Dict, Optional, cast
 
-from flask import Blueprint
-from flask.wrappers import Response
+from flask import Blueprint, Response
 
 import ckan.lib.base as base
 import ckan.lib.helpers as h
@@ -12,6 +10,7 @@ import ckan.logic as logic
 import ckan.model as model
 from ckan.common import _, g, request
 from ckan.views.user import _extra_template_variables
+from ckan.types import Context
 
 log = logging.getLogger(__name__)
 

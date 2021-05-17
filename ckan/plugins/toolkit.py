@@ -1,9 +1,9 @@
 # encoding: utf-8
 
-from ckan.common import CKANConfig
 import sys
 from typing import Any, Dict, List, Optional, TYPE_CHECKING, Tuple, Union, cast
 from types import ModuleType
+from ckan.common import CKANConfig
 
 
 class _Toolkit(object):

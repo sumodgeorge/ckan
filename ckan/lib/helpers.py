@@ -2573,11 +2573,11 @@ def resource_preview(
 @core_helper
 def get_allowed_view_types(
         resource: Dict[str, Any],
-        package: Dict[str, Any]) -> List[Tuple[Any, ...]]:
+        package: Dict[str, Any]) -> List[Tuple[str, str, str]]:
     data_dict = {'resource': resource, 'package': package}
     plugins = datapreview.get_allowed_view_plugins(data_dict)
 
-    allowed_view_types: List[Tuple[Any, ...]] = []
+    allowed_view_types: List[Tuple[str, str, str]] = []
     for plugin in plugins:
         info = plugin.info()
         allowed_view_types.append((info['name'],

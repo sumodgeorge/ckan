@@ -1,12 +1,12 @@
 # encoding: utf-8
 
 import datetime
+from typing import Dict
 
 from sqlalchemy import types, Column, Table, text
 
 import ckan.model.meta as meta
 import ckan.model.domain_object as domain_object
-from typing import Dict
 
 __all__ = ['tracking_summary_table', 'TrackingSummary', 'tracking_raw_table']
 
@@ -33,7 +33,7 @@ class TrackingSummary(domain_object.DomainObject):
     package_id: str
     tracking_type: str
     # count attribute shadows DomainObject.count()
-    count: int  # type: ignore
+    count: int
     running_total: int
     recent_views: int
     tracking_date: datetime.datetime

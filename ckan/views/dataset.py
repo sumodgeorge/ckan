@@ -1,13 +1,13 @@
 # encoding: utf-8
-from ckan.types import Context
 import logging
 import inspect
 from collections import OrderedDict
 from functools import partial
 from six.moves.urllib.parse import urlencode  # type: ignore
 from datetime import datetime
+from typing import Any, Dict, Iterable, List, Optional, Tuple, Union, cast
 
-from flask import Blueprint
+from flask import Blueprint, Response
 from flask.views import MethodView
 from werkzeug.datastructures import MultiDict
 from ckan.common import asbool
@@ -28,9 +28,7 @@ from ckan.lib.plugins import lookup_package_plugin
 from ckan.lib.render import TemplateNotFound
 from ckan.lib.search import SearchError, SearchQueryError, SearchIndexError
 from ckan.views import LazyView
-from typing import Any, Dict, Iterable, List, Optional, Tuple, Union, cast
-from flask.blueprints import Blueprint
-from flask.wrappers import Response
+from ckan.types import Context
 
 
 NotFound = logic.NotFound

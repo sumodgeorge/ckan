@@ -1,8 +1,8 @@
 # encoding: utf-8
 
+import datetime as _datetime
 from typing import Generic, List, Optional, Tuple, Type, TypeVar
 
-import datetime as _datetime
 import sqlalchemy
 
 import ckan.model
@@ -14,11 +14,13 @@ from ckan.types import Query
 
 
 Follower = TypeVar("Follower", bound='ckan.model.User')
-Followed = TypeVar("Followed", 'ckan.model.User', 'ckan.model.Package', 'ckan.model.Group')
+Followed = TypeVar(
+    "Followed", 'ckan.model.User', 'ckan.model.Package', 'ckan.model.Group')
 
 T = TypeVar('T', bound='ModelFollowingModel')
 
-class ModelFollowingModel(domain_object.DomainObject, Generic[Follower, Followed]):
+class ModelFollowingModel(domain_object.DomainObject,
+                          Generic[Follower, Followed]):
     follower_id: str
     object_id: str
     datetime: _datetime.datetime
@@ -84,28 +86,36 @@ class ModelFollowingModel(domain_object.DomainObject, Generic[Follower, Followed
         return followers
 
     @classmethod
-    def _filter_following_objects(cls: Type[T], query: 'Query[Tuple[T, Follower, Followed]]') -> List[T]:
+    def _filter_following_objects(
+            cls: Type[T],
+            query: 'Query[Tuple[T, Follower, Followed]]') -> List[T]:
         return [q[0] for q in query]
 
     @classmethod
-    def _get_followees(cls: Type[T], follower_id: Optional[str]) -> 'Query[Tuple[T, Follower, Followed]]':
+    def _get_followees(
+            cls: Type[T], follower_id: Optional[str]
+    ) -> 'Query[Tuple[T, Follower, Followed]]':
         return cls._get(follower_id)
 
     @classmethod
-    def _get_followers(cls: Type[T], object_id: Optional[str]) -> 'Query[Tuple[T, Follower, Followed]]':
+    def _get_followers(
+            cls: Type[T],
+            object_id: Optional[str]) -> 'Query[Tuple[T, Follower, Followed]]':
         return cls._get(None, object_id)
 
     @classmethod
     def _get(
             cls: Type[T], follower_id: Optional[str] = None,
-            object_id: Optional[str] = None) -> 'Query[Tuple[T, Follower, Followed]]':
+            object_id: Optional[str] = None
+    ) -> 'Query[Tuple[T, Follower, Followed]]':
         follower_alias = sqlalchemy.orm.aliased(cls._follower_class())
         object_alias = sqlalchemy.orm.aliased(cls._object_class())
 
         follower_id = follower_id or cls.follower_id
         object_id = object_id or cls.object_id
 
-        query: 'Query[Tuple[T, Follower, Followed]]' = meta.Session.query(cls, follower_alias, object_alias)\
+        query: 'Query[Tuple[T, Follower, Followed]]' = meta.Session.query(
+            cls, follower_alias, object_alias)\
             .filter(sqlalchemy.and_(
                 follower_alias.id == follower_id,
                 cls.follower_id == follower_alias.id,
@@ -117,7 +127,8 @@ class ModelFollowingModel(domain_object.DomainObject, Generic[Follower, Followed
         return query
 
 
-class UserFollowingUser(ModelFollowingModel['ckan.model.User', 'ckan.model.User']):
+class UserFollowingUser(
+        ModelFollowingModel['ckan.model.User', 'ckan.model.User']):
     '''A many-many relationship between users.
 
     A relationship between one user (the follower) and another (the object),
@@ -148,7 +159,8 @@ user_following_user_table = sqlalchemy.Table('user_following_user',
 
 meta.mapper(UserFollowingUser, user_following_user_table)
 
-class UserFollowingDataset(ModelFollowingModel['ckan.model.User', 'ckan.model.Package']):
+class UserFollowingDataset(
+        ModelFollowingModel['ckan.model.User', 'ckan.model.Package']):
     '''A many-many relationship between users and datasets (packages).
 
     A relationship between a user (the follower) and a dataset (the object),
@@ -180,7 +192,8 @@ user_following_dataset_table = sqlalchemy.Table('user_following_dataset',
 meta.mapper(UserFollowingDataset, user_following_dataset_table)
 
 
-class UserFollowingGroup(ModelFollowingModel['ckan.model.User', 'ckan.model.Group']):
+class UserFollowingGroup(
+        ModelFollowingModel['ckan.model.User', 'ckan.model.Group']):
     '''A many-many relationship between users and groups.
 
     A relationship between a user (the follower) and a group (the object),

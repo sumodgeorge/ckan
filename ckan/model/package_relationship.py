@@ -1,5 +1,7 @@
 # encoding: utf-8
 
+from typing import Any, Dict, List, Optional, Tuple
+
 from sqlalchemy import orm, types, Column, Table, ForeignKey
 
 import ckan.model.meta as meta
@@ -7,7 +9,6 @@ import ckan.model.core as core
 import ckan.model.package as _package
 import ckan.model.types as _types
 import ckan.model.domain_object as domain_object
-from typing import Any, Dict, List, Optional, Tuple
 from ckan.model import package as _package
 from ckan.types import Query
 

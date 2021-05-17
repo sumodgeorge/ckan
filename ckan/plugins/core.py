@@ -4,8 +4,10 @@
 Provides plugin services to the CKAN
 '''
 
-from contextlib import contextmanager
 import logging
+from contextlib import contextmanager
+from typing import (Any, Dict, Generator, Generic, Iterator, List, Optional,
+                    Type, TypeVar, Union)
 from pkg_resources import iter_entry_points
 from pyutilib.component.core import PluginGlobals, implements
 from pyutilib.component.core import ExtensionPoint
@@ -17,8 +19,6 @@ from six import string_types
 import ckan.plugins.interfaces as interfaces
 
 from ckan.common import config
-from typing import (Any, Dict, Generator, Generic, Iterator, List, Optional,
-                    Type, TypeVar, Union)
 
 
 __all__ = [
@@ -79,7 +79,7 @@ def use_plugin(
 
 class PluginImplementations(ExtensionPoint, Generic[TInterface]):
     def __init__(self, interface: Type[TInterface], *args: Any):
-        super().__init__(interface, *args)  # type: ignore
+        super().__init__(interface, *args)
 
     def __iter__(self) -> Iterator[TInterface]:
         '''

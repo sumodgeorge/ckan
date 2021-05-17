@@ -52,9 +52,10 @@ class ResourceView(domain_object.DomainObject):
     def get_count_not_in_view_types(
             cls, view_types: Collection[str]) -> List[Tuple[str, int]]:
         '''Returns the count of ResourceView not in the view types list'''
-        view_type = cls.view_type  # type: ignore
+        view_type = cls.view_type
         query: 'Query[Tuple[str, int]]' = meta.Session.query(
             view_type, sa.func.count(cls.id)).group_by(view_type).filter(
+                # type_ignore_reason: incomplete SQLAlchemy types
                 sa.not_(view_type.in_(view_types)))  # type: ignore
 
         return query.all()
@@ -64,6 +65,7 @@ class ResourceView(domain_object.DomainObject):
         '''Delete the Resource Views not in the received view types list'''
         query = meta.Session.query(cls) \
                     .filter(sa.not_(
+                        # type_ignore_reason: incomplete SQLAlchemy types
                         cls.view_type.in_(view_types)))  # type: ignore
 
         return query.delete(synchronize_session='fetch')
@@ -75,6 +77,7 @@ class ResourceView(domain_object.DomainObject):
 
         if view_types:
             query = query.filter(
+                # type_ignore_reason: incomplete SQLAlchemy types
                 cls.view_type.in_(view_types))  # type: ignore
 
         return query.delete(synchronize_session='fetch')

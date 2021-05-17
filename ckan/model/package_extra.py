@@ -38,6 +38,7 @@ class PackageExtra(core.StatefulObjectMixin, domain_object.DomainObject):
         return [self.package]
 
 
+# type_ignore_reason: incomplete SQLAlchemy types
 meta.mapper(PackageExtra, package_extra_table, properties={
     'package': orm.relation(_package.Package,
         backref=orm.backref('_extras',

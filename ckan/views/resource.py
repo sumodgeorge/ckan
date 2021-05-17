@@ -1,12 +1,12 @@
 # encoding: utf-8
 import cgi
-from ckan.types import Context
 import json
 import logging
-from typing import Any, Dict, Tuple, cast
+from typing import Any, Dict, Tuple, cast, Optional, Union
 
 import flask
 from flask.views import MethodView
+from flask import Response
 
 import six
 import ckan.lib.base as base
@@ -22,8 +22,8 @@ from ckan.views.home import CACHE_PARAMETERS
 from ckan.views.dataset import (
     _get_pkg_template, _get_package_type, _setup_template_variables
 )
-from typing import Optional, Union
-from flask.wrappers import Response
+
+from ckan.types import Context
 
 Blueprint = flask.Blueprint
 NotFound = logic.NotFound
@@ -71,9 +71,11 @@ def read(package_type: str, id: str, resource_id: str) -> str:
         # activity stream
         current_pkg = package
         try:
-            package = context['session'].query(model.Activity).get(
+            activity = context['session'].query(model.Activity).get(
                 activity_id
-            ).data['package']  # type: ignore
+            )
+            assert activity
+            package = activity.data['package']
         except AttributeError:
             base.abort(404, _(u'Dataset not found'))
 

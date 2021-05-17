@@ -1,7 +1,9 @@
 # encoding: utf-8
 
 import datetime
-from typing import Any, ClassVar, Dict, List,  Optional, TYPE_CHECKING, Tuple, Union, overload
+from typing import (
+    Any, Dict, List,  Optional, TYPE_CHECKING, Tuple, Union, overload
+)
 from typing_extensions import Literal
 
 from sqlalchemy import orm, types, Column, Table, ForeignKey, or_, and_, text
@@ -16,10 +18,6 @@ import ckan.model.user as _user
 import ckan.model.package as _package
 
 from ckan.types import Context, Query
-
-if TYPE_CHECKING:
-    from .group_extra import GroupExtra
-
 
 __all__ = ['group_table', 'Group',
            'Member',
@@ -88,8 +86,10 @@ class Member(core.StatefulObjectMixin,
 
     group: Optional['Group']
 
-    def __init__(self, group: Optional['Group']=None, table_id: Optional[str]=None, group_id: Optional[str]=None,
-                 table_name: Optional[str]=None, capacity: str='public', state: str='active') -> None:
+    def __init__(self, group: Optional['Group']=None,
+                 table_id: Optional[str]=None, group_id: Optional[str]=None,
+                 table_name: Optional[str]=None, capacity: str='public',
+                 state: str='active') -> None:
         self.group = group
 
         self.group_id = group_id
@@ -148,9 +148,10 @@ class Group(core.StatefulObjectMixin,
     extras: AssociationProxy
     member_all: List[Member]
 
-    def __init__(self, name: str=u'', title: str=u'', description: str=u'', image_url: str=u'',
-                 type: str=u'group', approval_status: str=u'approved',
-                 is_organization: bool=False) -> None:
+    def __init__(self, name: str = u'', title: str = u'',
+                 description: str = u'', image_url: str = u'',
+                 type: str = u'group', approval_status: str = u'approved',
+                 is_organization: bool = False) -> None:
         self.name = name
         self.title = title
         self.description = description
@@ -177,12 +178,14 @@ class Group(core.StatefulObjectMixin,
     # Todo: Make sure group names can't be changed to look like group IDs?
 
     @classmethod
-    def all(cls, group_type: Optional[str]=None, state: Tuple[str]=('active',)) -> 'Query[Group]':
+    def all(cls, group_type: Optional[str]=None,
+            state: Tuple[str]=('active',)) -> 'Query[Group]':
         """
         Returns all groups.
         """
         q = meta.Session.query(cls)
         if state:
+            # type_ignore_reason: incomplete SQLAlchemy types
             q = q.filter(cls.state.in_(state))  # type: ignore
 
         if group_type:
@@ -216,7 +219,8 @@ class Group(core.StatefulObjectMixin,
                      filter_by(state='active').\
                      all()
 
-    def get_children_group_hierarchy(self, type: str='group') -> List[Tuple[str, str, str, str]]:
+    def get_children_group_hierarchy(
+            self, type: str='group') -> List[Tuple[str, str, str, str]]:
         '''Returns the groups in all levels underneath this group in the
         hierarchy. The ordering is such that children always come after their
         parent.
@@ -272,7 +276,8 @@ class Group(core.StatefulObjectMixin,
             filter(Group.state == 'active').\
             order_by(Group.title).all()
 
-    def groups_allowed_to_be_its_parent(self, type: str='group') -> List["Group"]:
+    def groups_allowed_to_be_its_parent(
+            self, type: str='group') -> List["Group"]:
         '''Returns a list of the groups (of the specified type) which are
         allowed to be this group's parent. It excludes ones which would
         create a loop in the hierarchy, causing the recursive CTE to
@@ -370,9 +375,11 @@ class Group(core.StatefulObjectMixin,
             return query.all()
 
     @classmethod
-    def search_by_name_or_title(cls, text_query: str, group_type: Optional[str]=None,
-                                is_org: bool=False, limit: int=20) -> 'Query[Group]':
+    def search_by_name_or_title(
+            cls, text_query: str, group_type: Optional[str]=None,
+            is_org: bool=False, limit: int=20) -> 'Query[Group]':
         text_query = text_query.strip().lower()
+        # type_ignore_reason: incomplete SQLAlchemy types
         q = meta.Session.query(cls) \
             .filter(or_(cls.name.contains(text_query),  # type: ignore
                         cls.title.ilike('%' + text_query + '%')))  # type: ignore

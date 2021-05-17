@@ -48,7 +48,8 @@ class DomainObject(object):
         return cls.Session.query(cls).count()
 
     @classmethod
-    def by_name(cls: Type[T], name: Optional[str], autoflush: bool=True, for_update: bool=False) -> Optional[T]:
+    def by_name(cls: Type[T], name: Optional[str], autoflush: bool=True,
+                for_update: bool=False) -> Optional[T]:
         q = meta.Session.query(cls).autoflush(autoflush
             ).filter_by(name=name)
         if for_update:
@@ -111,7 +112,8 @@ class DomainObject(object):
             _dict[col.name] = val
         return _dict
 
-    def from_dict(self, _dict: Dict[str, Any]) -> Tuple[Set[Any], Dict[str, Any]]:
+    def from_dict(self,
+                  _dict: Dict[str, Any]) -> Tuple[Set[Any], Dict[str, Any]]:
         """
         Loads data from dict into table.
 

@@ -8,10 +8,6 @@ import logging
 import ckan.plugins as plugins
 import ckan.plugins.toolkit as tk
 
-country_codes = cast(
-        Callable[..., Validator],
-        tk.get_converter('convert_to_tags'))('country_codes')
-
 
 def create_country_codes():
     '''Create country_codes vocab and tags, if they don't exist already.
@@ -93,7 +89,11 @@ class ExampleIDatasetFormPlugin(plugins.SingletonPlugin,
         # Add our custom country_code metadata field to the schema.
 
         schema.update({
-                'country_code': [tk.get_validator('ignore_missing')]
+                'country_code': [
+                    tk.get_validator('ignore_missing'),
+                    cast(
+                        Callable[..., Validator],
+                        tk.get_converter('convert_to_tags'))('country_codes')]
                 })
         # Add our custom_test metadata field to the schema, this one will use
         # convert_to_extras instead of convert_to_tags.
@@ -127,7 +127,9 @@ class ExampleIDatasetFormPlugin(plugins.SingletonPlugin,
         # Add our custom country_code metadata field to the schema.
         schema.update({
             'country_code': [
-                country_codes,
+                cast(
+                    Callable[..., Validator],
+                    tk.get_converter('convert_from_tags'))('country_codes'),
                 tk.get_validator('ignore_missing')]
             })
 

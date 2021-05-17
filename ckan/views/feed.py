@@ -1,11 +1,11 @@
 # encoding: utf-8
 
-from ckan.types import Context, DataDict, PFeed
 import logging
-from typing import Dict, Optional, Tuple, Type, cast
+import json
+from typing import Dict, Optional, Tuple, Type, cast, Any, List
 
 from six.moves.urllib.parse import urlparse  # type: ignore
-from flask import Blueprint, make_response
+from flask import Blueprint, make_response, Response
 import six
 from six import text_type
 from dateutil.tz import tzutc
@@ -16,9 +16,7 @@ import ckan.lib.base as base
 import ckan.model as model
 import ckan.logic as logic
 import ckan.plugins as plugins
-import json
-from typing import Any, List
-from flask.wrappers import Response
+from ckan.types import Context, DataDict, PFeed
 
 log = logging.getLogger(__name__)
 

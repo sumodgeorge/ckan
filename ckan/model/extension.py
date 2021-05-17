@@ -5,12 +5,12 @@ Provides bridges between the model and plugin PluginImplementationss
 """
 import logging
 from operator import methodcaller
+from typing import Any, Callable
 
 from sqlalchemy.orm.interfaces import MapperExtension
 from sqlalchemy.orm.session import SessionExtension  # type: ignore
 
 import ckan.plugins as plugins
-from typing import Any, Callable
 
 
 log = logging.getLogger(__name__)

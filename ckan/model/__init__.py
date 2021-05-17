@@ -6,6 +6,7 @@ import os
 import re
 from time import sleep
 from os.path import splitext
+from typing import Any, Dict, List, Optional, Tuple
 
 from sqlalchemy import MetaData, Table
 from sqlalchemy.exc import ProgrammingError
@@ -136,7 +137,6 @@ from . import (
     tag,
     vocabulary,
 )
-from typing import Any, Callable, Collection, Dict, List, Optional, Tuple
 from sqlalchemy.engine import Engine
 from ckan.types import AlchemySession
 
@@ -268,7 +268,8 @@ class Repository():
     def add_alembic_output(self, *args: str) -> None:
         self._alembic_output.append(args)
 
-    def take_alembic_output(self, with_reset: bool=True) -> List[Tuple[str, ...]]:
+    def take_alembic_output(self,
+                            with_reset: bool=True) -> List[Tuple[str, ...]]:
         output = self._alembic_output
         if with_reset:
             self.reset_alembic_output()
@@ -355,7 +356,8 @@ def is_id(id_string: str) -> bool:
     return bool(re.match(reg_ex, id_string))
 
 
-def parse_db_config(config_key: str=u'sqlalchemy.url') -> Optional[Dict[str, str]]:
+def parse_db_config(
+        config_key: str=u'sqlalchemy.url') -> Optional[Dict[str, str]]:
     u''' Takes a config key for a database connection url and parses it into
     a dictionary. Expects a url like:
 

@@ -1,8 +1,8 @@
 # encoding: utf-8
-from ckan.types import Context, ErrorDict, Schema
 import logging
+from typing import Any, Dict, List, Optional, Tuple, Union, cast
 
-from flask import Blueprint
+from flask import Blueprint, Response
 from flask.views import MethodView
 from ckan.common import asbool
 from six import text_type, ensure_str
@@ -20,8 +20,7 @@ import ckan.model as model
 import ckan.plugins as plugins
 from ckan import authz
 from ckan.common import _, config, g, request
-from typing import Any, Dict, List, Optional, Tuple, Union, cast
-from flask.wrappers import Response
+from ckan.types import Context, ErrorDict, Schema
 
 log = logging.getLogger(__name__)
 

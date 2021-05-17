@@ -1,7 +1,7 @@
 # encoding: utf-8
 
-import ckan.model.domain_object as domain_object
 from typing import Optional
+import ckan.model.domain_object as domain_object
 
 
 class System(domain_object.DomainObject):

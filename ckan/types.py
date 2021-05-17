@@ -14,10 +14,10 @@ from typing import (
     Union,
     TYPE_CHECKING,
 )
+
+from typing_extensions import Protocol, TypedDict, TypeAlias
 from sqlalchemy.orm.scoping import ScopedSession
 from sqlalchemy import Table
-from typing_extensions import Protocol, TypedDict, TypeAlias
-
 from sqlalchemy.orm import Query
 
 if TYPE_CHECKING:

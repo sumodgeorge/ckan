@@ -45,9 +45,10 @@ def is_flask_request() -> Literal[True]:
     except TypeError:
         pylons_request_available = False
 
-    return cast(Literal[True], (flask.request and
-            (flask.request.environ.get(u'ckan.app') == u'flask_app' or
-             not pylons_request_available)))
+    return cast(Literal[True], (
+        flask.request and
+        (flask.request.environ.get(u'ckan.app') == u'flask_app' or
+         not pylons_request_available)))
 
 
 def streaming_response(data: Iterable[Any],

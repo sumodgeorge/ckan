@@ -1,16 +1,16 @@
 # encoding: utf-8
 
-from werkzeug.datastructures import ImmutableMultiDict
-from ckan.types import Context
 import os
 import logging
 import html
-from typing import Any, Callable, Dict, List, Optional, Tuple, cast
+from typing import Any, Callable, Dict, List, Optional, Tuple, cast, Union
 
-from flask import Blueprint, make_response
+from flask import Blueprint, make_response, Response
+
 import six
 from six import text_type
 from werkzeug.exceptions import BadRequest
+from werkzeug.datastructures import ImmutableMultiDict
 
 import ckan.model as model
 from ckan.common import json, _, g, request
@@ -20,8 +20,7 @@ from ckan.lib.base import render
 from ckan.lib.navl.dictization_functions import DataError
 from ckan.logic import get_action, ValidationError, NotFound, NotAuthorized
 from ckan.lib.search import SearchError, SearchIndexError, SearchQueryError
-from typing import Union
-from flask.wrappers import Response
+from ckan.types import Context
 
 
 log = logging.getLogger(__name__)

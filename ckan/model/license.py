@@ -3,6 +3,11 @@
 import datetime
 import re
 import logging
+from typing import (
+    Any, Dict, Generic, Iterable, Iterator, List, Optional, Tuple,
+    TypeVar, Union
+)
+
 import requests
 
 from ckan.common import config
@@ -12,7 +17,6 @@ from six import text_type, string_types
 
 from ckan.common import _, json
 import ckan.lib.maintain as maintain
-from typing import Any, Dict, Generic, Iterable, Iterator, List, Optional, Tuple, TypeVar, Union
 
 TLicense = TypeVar('TLicense', bound='DefaultLicense')
 
@@ -36,6 +40,7 @@ class License(Generic[TLicense]):
         for (key, value) in self._data.items():
             if key == 'date_created':
                 # Parse ISO formatted datetime.
+                # type_ignore_reason: typechecker can't guess number of args
                 value = datetime.datetime(*list(
                     int(item) for item
                     in re.split(r'[^\d]', value)  # type: ignore
@@ -161,7 +166,8 @@ class LicenseRegister(object):
             msg = "Licenses at %s must be dictionary or list" % license_url
             raise ValueError(msg)
 
-    def __getitem__(self, key: str, default: Any=Exception) -> Union[License, Any]:
+    def __getitem__(self, key: str,
+                    default: Any=Exception) -> Union[License, Any]:
         for license in self.licenses:
             if key == license.id:
                 return license
