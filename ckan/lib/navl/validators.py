@@ -1,13 +1,13 @@
 # encoding: utf-8
 
-from ckan.types import Context, TuplizedErrorDict, TuplizedKey
+from typing import Any, Callable, Dict, NoReturn
 import six
 from six import text_type
 
 import ckan.lib.navl.dictization_functions as df
 
 from ckan.common import _, json, config
-from typing import Any, Callable, Dict, NoReturn
+from ckan.types import Context, TuplizedErrorDict, TuplizedKey
 
 missing = df.missing
 StopOnError = df.StopOnError

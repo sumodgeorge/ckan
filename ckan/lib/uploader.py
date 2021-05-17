@@ -6,7 +6,7 @@ import datetime
 import logging
 import magic
 import mimetypes
-from typing import Any, AnyStr, Dict, IO, Optional, Union
+from typing import Any, Dict, IO, Optional, Union
 
 from six.moves.urllib.parse import urlparse  # type: ignore
 
@@ -16,7 +16,6 @@ import ckan.lib.munge as munge
 import ckan.logic as logic
 import ckan.plugins as plugins
 from ckan.common import config
-
 from ckan.types import PUploader, PResourceUploader
 
 ALLOWED_UPLOAD_TYPES = (cgi.FieldStorage, FlaskFileStorage)

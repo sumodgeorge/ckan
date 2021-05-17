@@ -1,12 +1,12 @@
 # encoding: utf-8
 
 import logging
+from typing import Any, Mapping, Optional
 
 from zope.interface import implementer
 from repoze.who.interfaces import IAuthenticator
 
 from ckan.model import User
-from typing import Any, Mapping, Optional
 
 log = logging.getLogger(__name__)
 

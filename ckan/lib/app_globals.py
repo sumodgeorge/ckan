@@ -3,16 +3,15 @@
 ''' The application's Globals object '''
 
 import logging
-from threading import Lock
 import re
 import six
-from ckan.common import asbool
-from ckan.common import config
+from threading import Lock
+from typing import Any, Dict, List, Tuple, Union
 
 import ckan
 import ckan.model as model
 from ckan.logic.schema import update_configuration_schema
-from typing import Any, Dict, List, Tuple, Union
+from ckan.common import asbool, config
 
 
 log = logging.getLogger(__name__)
@@ -137,6 +136,7 @@ def get_globals_key(key: str) -> str:
 def reset() -> None:
     ''' set updatable values from config '''
     def get_config_value(key: str, default: str = ''):
+        # type_ignore_reason: engine theoretically uninitialized
         if model.meta.engine.has_table('system_info'):  # type: ignore
             value = model.get_system_info(key)
         else:
@@ -147,6 +147,7 @@ def reset() -> None:
             try:
                 config_value = six.ensure_text(config_value)
             except UnicodeDecodeError:
+                # type_ignore_reason: py2 str/unicode uncertanty
                 config_value = config_value.decode('latin-1')  # type: ignore
         # we want to store the config the first time we get here so we can
         # reset them if needed

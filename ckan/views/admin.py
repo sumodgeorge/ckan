@@ -206,7 +206,7 @@ class TrashView(MethodView):
             model.Session.remove()
         h.flash_success(_(u'Massive purge complete'))
 
-    def purge_entity(self, ent_type):
+    def purge_entity(self, ent_type: str):
         entities = self.deleted_entities[ent_type]
         number = entities.count()
 
@@ -222,14 +222,14 @@ class TrashView(MethodView):
         ))
 
     @staticmethod
-    def _get_purge_action(ent_type):
+    def _get_purge_action(ent_type: str) -> str:
         actions = {
             "package": "dataset_purge",
             "organization": "organization_purge",
             "group": "group_purge",
         }
 
-        return actions.get(ent_type)
+        return actions[ent_type]
 
 
 admin.add_url_rule(

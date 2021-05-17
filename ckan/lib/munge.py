@@ -7,6 +7,7 @@
 
 import os.path
 import re
+from typing import Union
 
 from six import text_type
 
@@ -26,6 +27,7 @@ MIN_FILENAME_TOTAL_LENGTH = 3
 def munge_name(name: str) -> str:
     '''Munges the package name field in case it is not to spec.'''
     # substitute non-ascii characters
+    # type_ignore_reason: py2 unicode
     if isinstance(name, text_type):  # type: ignore
         name = substitute_ascii_equivalents(name)
     # separators become dashes
@@ -41,6 +43,7 @@ def munge_name(name: str) -> str:
 def munge_title_to_name(name: str) -> str:
     '''Munge a package title into a package name.'''
     # substitute non-ascii characters
+    # type_ignore_reason: py2 unicode
     if isinstance(name, text_type):  # type: ignore
         name = substitute_ascii_equivalents(name)
     # convert spaces and separators
@@ -141,7 +144,7 @@ def munge_filename_legacy(filename: str) -> str:
     return filename
 
 
-def munge_filename(filename: str) -> str:
+def munge_filename(filename: Union[str, bytes]) -> str:
     ''' Tidies a filename
 
     Keeps the filename extension (e.g. .csv).
@@ -149,7 +152,7 @@ def munge_filename(filename: str) -> str:
 
     Returns a Unicode string.
     '''
-    if not isinstance(filename, text_type):  # type: ignore
+    if not isinstance(filename, text_type):
         filename = decode_path(filename)
 
     # Ignore path

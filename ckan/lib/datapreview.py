@@ -5,17 +5,15 @@
 Functions and data structures that are needed for the ckan data preview.
 """
 
-from ckan.types import Context
 import logging
+from typing import Any, Dict, Iterable, List, Optional
 
 from six.moves.urllib.parse import urlparse  # type: ignore
 
-from ckan.common import config
-
 import ckan.plugins as p
 from ckan import logic
-from ckan.common import _
-from typing import Any, Dict, Iterable, List, Optional
+from ckan.common import _, config
+from ckan.types import Context
 
 
 log = logging.getLogger(__name__)

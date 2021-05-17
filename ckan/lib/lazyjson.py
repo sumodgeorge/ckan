@@ -1,7 +1,7 @@
 # encoding: utf-8
 
 from typing import Any, Dict, Optional
-from simplejson import (  # type: ignore
+from simplejson import (
     loads,
     RawJSON,  # type: ignore
     dumps)

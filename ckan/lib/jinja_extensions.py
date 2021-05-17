@@ -1,8 +1,9 @@
 # encoding: utf-8
 
 import re
-from os import path
 import logging
+from os import path
+from typing import Any, Dict, Iterable, List, Optional, Sequence, Union
 
 from jinja2 import nodes
 from jinja2 import loaders
@@ -16,7 +17,6 @@ from six import text_type
 import ckan.lib.base as base
 import ckan.lib.helpers as h
 from ckan.common import config
-from typing import Any, Dict, Iterable, List, Optional, Sequence, Union
 from markupsafe import Markup
 
 
@@ -83,8 +83,10 @@ class CkanInternationalizationExtension(ext.InternationalizationExtension):
         if args:
             for arg in args:
                 if isinstance(arg, nodes.Const):
+                    # type_ignore_reason: custom property
                     value = arg.value   # type: ignore
                     if isinstance(value, text_type):
+                        # type_ignore_reason: custom property
                         arg.value = regularise_html(value)   # type: ignore
         return node
 
@@ -136,6 +138,7 @@ class CkanExtend(ext.Extension):
         # format is *<search path parent directory>*<template name>
         magic_filename = '*' + current_path + '*' + filename
         # set template
+        # type_ignore_reason: custom property
         node.template = nodes.Const(magic_filename)   # type: ignore
         return node
 
@@ -248,6 +251,7 @@ class BaseExtension(ext.Extension):
                 value = parser.parse_expression()
                 kwargs.append(nodes.Pair(
                     key, value,
+                    # type_ignore_reason: custom property
                     lineno=key.lineno  # type: ignore
                 ))
             else:

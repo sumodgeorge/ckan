@@ -1,18 +1,18 @@
 # -*- coding: utf-8 -*-
 
-from ckan.types import Schema
 import jwt
 import logging
-
+from typing import Any, Dict, Iterable, Optional
 from calendar import timegm
+from datetime import datetime
 
 import ckan.plugins as plugins
 import ckan.model as model
 from ckan.common import config
 from ckan.logic.schema import default_create_api_token_schema
 from ckan.exceptions import CkanConfigurationException
-from datetime import datetime
-from typing import Any, Dict, Iterable, Optional
+from ckan.types import Schema
+
 
 log = logging.getLogger(__name__)
 

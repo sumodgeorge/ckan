@@ -3,12 +3,13 @@
 import datetime
 import logging
 import re
+from typing import Any, Dict, Optional, Tuple
+
 import pysolr
 import simplejson
 
 from six import string_types
 from six.moves.urllib.parse import quote_plus  # type: ignore
-from typing import Any, Dict, Optional, Tuple
 from pysolr import Solr
 
 from ckan.common import config, asint

@@ -8,6 +8,7 @@ import logging
 import time
 import inspect
 import sys
+from typing import Any, Dict, NoReturn, Optional
 
 from jinja2.exceptions import TemplateNotFound
 
@@ -29,13 +30,11 @@ from ckan.views import (identify_user,
                         )
 from ckan.common import (c, request, config,
                          session, is_flask_request, asbool)
-from typing import Any, Dict, NoReturn, Optional
-
 
 if six.PY2:
-    from pylons.controllers import WSGIController  # type: ignore
-    from pylons.controllers.util import abort as _abort  # type: ignore
-    from pylons.templating import (  # type: ignore
+    from pylons.controllers import WSGIController
+    from pylons.controllers.util import abort as _abort
+    from pylons.templating import (
         cached_template, pylons_globals
     )
     from ckan.common import response  # type: ignore
@@ -77,7 +76,7 @@ def abort(status_code: int,
     # with Lucid) causes an exception when unicode is received.
     detail = detail.encode('utf8')
 
-    return _abort(status_code=status_code,  # type: ignore
+    return _abort(status_code=status_code,
                   detail=detail,
                   headers=headers,
                   comment=comment)
@@ -156,7 +155,7 @@ def render(template_name: str,
     if not is_flask_request():
         renderer = _pylons_prepare_renderer(template_name, extra_vars,
                                             *pargs, **kwargs)
-        return cached_template(template_name, renderer)  # type: ignore
+        return cached_template(template_name, renderer)
 
     _allow_caching()
     return flask_render_template(template_name, **extra_vars)
@@ -197,7 +196,7 @@ def _pylons_prepare_renderer(
         del globs['config']
         return render_jinja2(template_name, globs)
 
-    def set_pylons_response_headers(allow_cache):  # type: ignore
+    def set_pylons_response_headers(allow_cache: bool):
         if 'Pragma' in response.headers:
             del response.headers["Pragma"]
         if allow_cache:
@@ -293,15 +292,15 @@ if six.PY2:
         repo = model.repo
         log = logging.getLogger(__name__)
 
-        def __before__(self, action, **params):  # type: ignore
+        def __before__(self, action: str, **params: Any):
             c.__timer = time.time()
-            app_globals.app_globals._check_uptodate()  # type: ignore
+            app_globals.app_globals._check_uptodate()
 
             identify_user()
 
             i18n.handle_request(request, c)  # type: ignore
 
-        def __call__(self, environ, start_response):  # type: ignore
+        def __call__(self, environ: Any, start_response: Any) -> Any:
             """Invoke the Controller"""
             # WSGIController.__call__ dispatches to the Controller method
             # the request is routed to. This routing information is
@@ -316,7 +315,7 @@ if six.PY2:
 
             return res
 
-        def __after__(self, action, **params):  # type: ignore
+        def __after__(self, action: str, **params: Any):
 
             set_cors_headers_for_response(response)
 

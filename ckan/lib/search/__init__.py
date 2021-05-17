@@ -1,21 +1,22 @@
 # encoding: utf-8
 
 from __future__ import print_function
-from ckan.types import Context
 import logging
 import sys
 import cgitb
 import warnings
 import base64
 import xml.dom.minidom
+from typing import Collection, Dict, Any, Optional, Type, cast, overload
 
 import requests
 
-from ckan.common import asbool, config
 import ckan.model as model
 import ckan.model.domain_object as domain_object
 import ckan.plugins as p
 import ckan.logic as logic
+from ckan.common import asbool, config
+from ckan.types import Context
 
 from ckan.lib.search.common import (
     SearchIndexError, SearchError, SearchQueryError,
@@ -30,7 +31,6 @@ from ckan.lib.search.query import (
     QueryOptions, convert_legacy_parameters_to_solr
 )
 from ckan.lib.search.index import SearchIndex
-from typing import Collection, Container, Dict, List, Any, Optional, Type, cast, overload
 
 
 log = logging.getLogger(__name__)

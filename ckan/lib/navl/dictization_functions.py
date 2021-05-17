@@ -1,13 +1,14 @@
 # encoding: utf-8
 
-from ckan.types import Context, Schema, TuplizedKey
 import copy
 import json
+from typing import (Any, Callable, Dict, Iterable, List, Optional,
+                    Sequence, Set, Tuple, Union, cast)
+
 import six
 
 from ckan.common import config, _
-from typing import (Any, Callable, Dict, Iterable, List, Optional,
-                    Sequence, Set, Tuple, Union, cast)
+from ckan.types import Context, Schema, TuplizedKey
 
 
 class Missing(object):

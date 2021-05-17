@@ -2,10 +2,11 @@
 
 import hmac
 import hashlib
+from typing import Optional
+
 import six
 
 from ckan.common import config, request
-from typing import Optional
 
 secret: Optional[bytes] = None
 

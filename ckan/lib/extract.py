@@ -1,8 +1,8 @@
 # encoding: utf-8
 
+from typing import Any
 from jinja2.ext import babel_extract
 from ckan.lib.jinja_extensions import _get_extensions   # type: ignore
-from typing import Any
 
 
 def extract_ckan(fileobj: Any, *args: Any, **kw: Any) -> Any:

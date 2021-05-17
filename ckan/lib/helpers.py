@@ -5,13 +5,11 @@
 Consists of functions to typically be used within templates, but also
 available to Controllers. This module is available to templates as 'h'.
 '''
-from ckan.types import Context
 import email.utils
 import datetime
 import logging
 import re
 import os
-from typing import Any, Callable, List, Match, NoReturn, cast
 import pytz
 import tzlocal
 import pprint
@@ -20,6 +18,9 @@ import uuid
 import functools
 
 from collections import defaultdict
+from typing import (
+    Any, Callable, List, Match, NoReturn, cast,
+    Dict, Iterable, Optional, Tuple, TypeVar, Union)
 
 import dominate.tags as dom_tags
 from markdown import markdown
@@ -55,17 +56,17 @@ from ckan.lib.pagination import Page
 from ckan.common import _, ungettext, c, g, request, session, json
 from ckan.lib.webassets_tools import include_asset, render_assets
 from markupsafe import Markup, escape
-from typing import Dict, Iterable, Optional, Tuple, TypeVar, Union
+from ckan.types import Context
 from flask.wrappers import Response
+
+if six.PY2:
+    from pylons import url as _pylons_default_url
+    from routes import redirect_to as _routes_redirect_to
+    from routes import url_for as _routes_default_url_for
+
 
 T = TypeVar("T")
 Helper = TypeVar("Helper", bound=Callable[..., Any])
-
-if six.PY2:
-    from pylons import url as _pylons_default_url  # type: ignore
-    from routes import redirect_to as _routes_redirect_to  # type: ignore
-    from routes import url_for as _routes_default_url_for  # type: ignore
-
 
 log = logging.getLogger(__name__)
 
@@ -240,7 +241,7 @@ def redirect_to(*args: Any, **kw: Any) -> Response:
     if is_flask_request():
         return cast(Response, _flask_redirect(_url))
     else:
-        return _routes_redirect_to(_url)  # type: ignore
+        return _routes_redirect_to(_url)
 
 
 @maintain.deprecated('h.url is deprecated please use h.url_for', since='2.6.0')
@@ -1700,7 +1701,7 @@ def pager_url(page: int, partial: Optional[str] = None, **kwargs: Any) -> str:
         pargs.append(request.endpoint)
         # FIXME: add `id` param to kwargs if it really required somewhere
     else:
-        routes_dict = _pylons_default_url.environ[  # type: ignore
+        routes_dict = _pylons_default_url.environ[
             'pylons.routes_dict']
         kwargs['controller'] = routes_dict['controller']
         kwargs['action'] = routes_dict['action']
@@ -1830,6 +1831,7 @@ def date_str_to_datetime(date_str: str) -> datetime.datetime:
         time_tuple = time_tuple[:5] + [seconds, microseconds]
 
     return datetime.datetime(
+        # type_ignore_reason: typchecker can't guess number of arguments
         *list(int(item) for item in time_tuple)  # type: ignore
     )
 
@@ -1876,6 +1878,7 @@ def parse_rfc_2822_date(date_str: str,
             offset = 0
         tz_info = _RFC2282TzInfo(offset)
     return datetime.datetime(
+        # type_ignore_reason: typchecker can't guess number of arguments
         *time_tuple[:6], microsecond=0, tzinfo=tz_info)  # type: ignore
 
 

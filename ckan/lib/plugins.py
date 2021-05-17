@@ -1,10 +1,10 @@
 # encoding: utf-8
 
 
-from ckan.types import Context, DataDict, Schema
 import logging
 import os
 import sys
+from typing import Any, Dict, List, Optional, TYPE_CHECKING, TypeVar, cast
 
 from flask import Blueprint
 
@@ -16,7 +16,7 @@ import ckan.logic.schema
 import ckan.plugins.toolkit as toolkit
 from ckan.model.user import User
 from ckan.model.package import Package
-from typing import Any, Dict, List, Optional, TYPE_CHECKING, TypeVar
+from ckan.types import Context, DataDict, Schema
 
 if TYPE_CHECKING:
     from ckan.config.middleware.flask_app import CKANFlask
@@ -183,7 +183,8 @@ def register_package_blueprints(app: 'CKANFlask') -> None:
 def set_default_package_plugin() -> None:
     global _default_package_plugin
     if _default_package_plugin is None:
-        _default_package_plugin = DefaultDatasetForm()  # type: ignore
+        _default_package_plugin = cast(
+            plugins.IDatasetForm, DefaultDatasetForm())
 
 
 def register_group_plugins() -> None:
@@ -294,9 +295,11 @@ def set_default_group_plugin() -> None:
     global _group_controllers
     # Setup the fallback behaviour if one hasn't been defined.
     if _default_group_plugin is None:
-        _default_group_plugin = DefaultGroupForm()  # type: ignore
+        _default_group_plugin = cast(
+            plugins.IDatasetForm, DefaultGroupForm())
     if _default_organization_plugin is None:
-        _default_organization_plugin = DefaultOrganizationForm()  # type: ignore
+        _default_organization_plugin = cast(
+            plugins.IGroupForm, DefaultOrganizationForm())
     if 'group' not in _group_controllers:
         _group_controllers['group'] = 'group'
     if 'organization' not in _group_controllers:
@@ -357,7 +360,8 @@ class DefaultDatasetForm(object):
     def show_package_schema(self) -> Dict[str, Any]:
         return ckan.logic.schema.default_show_package_schema()
 
-    def setup_template_variables(self, context: Context, data_dict: Dict[str, Any]) -> None:
+    def setup_template_variables(self, context: Context,
+                                 data_dict: Dict[str, Any]) -> None:
         data_dict.update({'available_only': True})
 
         ## This is messy as auths take domain object not data_dict
@@ -471,7 +475,8 @@ class DefaultGroupForm(object):
     def group_form(self) -> str:
         return 'group/new_group_form.html'
 
-    def form_to_db_schema_options(self, options: Dict[str, Any]) -> Dict[str, Any]:
+    def form_to_db_schema_options(self,
+                                  options: Dict[str, Any]) -> Dict[str, Any]:
         ''' This allows us to select different schemas for different
         purpose eg via the web interface or via the api or creation vs
         updating. It is optional and if not available form_to_db_schema
@@ -504,7 +509,8 @@ class DefaultGroupForm(object):
         '''This is an interface to manipulate data from the database
         into a format suitable for the form (optional)'''
 
-    def db_to_form_schema_options(self, options: Dict[str, Any]) -> Dict[str, Any]:
+    def db_to_form_schema_options(self,
+                                  options: Dict[str, Any]) -> Dict[str, Any]:
         '''This allows the selection of different schemas for different
         purposes.  It is optional and if not available, ``db_to_form_schema``
         should be used.
@@ -538,7 +544,8 @@ class DefaultGroupForm(object):
         '''
         pass
 
-    def setup_template_variables(self, context: Context, data_dict: Dict[str, Any]) -> None:
+    def setup_template_variables(self, context: Context,
+                                 data_dict: Dict[str, Any]) -> None:
         c.is_sysadmin = ckan.authz.is_sysadmin(c.user)
 
         ## This is messy as auths take domain object not data_dict
@@ -564,7 +571,8 @@ class DefaultOrganizationForm(DefaultGroupForm):
     def group_form(self) -> str:
         return 'organization/new_organization_form.html'
 
-    def setup_template_variables(self, context: Context, data_dict: Dict[str, Any]) -> None:
+    def setup_template_variables(self, context: Context,
+                                 data_dict: Dict[str, Any]) -> None:
         pass
 
     def new_template(self) -> str:

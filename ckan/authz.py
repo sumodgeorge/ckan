@@ -6,7 +6,8 @@ import importlib
 
 from collections import defaultdict, OrderedDict
 from logging import getLogger
-from typing import Callable, Collection, Dict, KeysView, List, Optional, Union
+from typing import Callable, Collection, Dict, KeysView, List, Optional, Union,
+from types import ModuleType
 
 import six
 
@@ -24,7 +25,7 @@ from ckan.types import AuthResult, AuthFunction, DataDict, Context
 log = getLogger(__name__)
 
 
-def get_local_functions(module, include_private=False):
+def get_local_functions(module: ModuleType, include_private: bool = False):
     """Return list of (name, func) tuples.
 
     Filters out all non-callables and all the items that were

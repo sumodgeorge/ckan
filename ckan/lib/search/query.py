@@ -1,8 +1,8 @@
 # encoding: utf-8
 
-from ckan.types import Context
 import re
 import logging
+from typing import Any, Dict, List, NoReturn, Optional, Union, cast
 import six
 import pysolr
 
@@ -16,7 +16,8 @@ from ckan.common import config
 from ckan.lib.search.common import (
     make_connection, SearchError, SearchQueryError
 )
-from typing import Any, Dict, List, NoReturn, Optional, Union, cast
+from ckan.types import Context
+
 
 log = logging.getLogger(__name__)
 

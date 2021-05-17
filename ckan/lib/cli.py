@@ -1,17 +1,16 @@
 # encoding: utf-8
-# type: ignore
 
 from __future__ import print_function
 
 import sys
-from typing import Any
+from typing import Any, Optional, cast
 
 import click
-import paste.script # type: ignore
+import paste.script
 import routes
-from paste.registry import Registry # type: ignore
-from six.moves import input # type: ignore
-from six.moves.urllib.parse import urlparse # type: ignore
+from paste.registry import Registry
+from six.moves import input  # type: ignore
+from six.moves.urllib.parse import urlparse  # type: ignore
 
 from ckan.config.middleware import make_app
 from ckan.cli import load_config as _get_config
@@ -19,6 +18,7 @@ import ckan.logic as logic
 import ckan.model as model
 from ckan.common import config
 import ckan.lib.maintain as maintain
+
 # This is a test Flask request context to be used internally.
 # Do not use it!
 _cli_test_request_context: Any = None
@@ -30,7 +30,7 @@ _cli_test_request_context: Any = None
 
 
 @maintain.deprecated('Use @maintain.deprecated instead', since="2.9.0")
-def deprecation_warning(message=None):
+def deprecation_warning(message: Optional[str] = None):
     '''
     DEPRECATED
 
@@ -45,7 +45,7 @@ def deprecation_warning(message=None):
 
 
 @maintain.deprecated(since='2.9.0')
-def error(msg):
+def error(msg: str):
     '''
     DEPRECATED
 
@@ -59,7 +59,7 @@ def error(msg):
 
 @maintain.deprecated('Use model.parse_db_config directly instead',
                      since='2.9.0')
-def _parse_db_config(config_key=u'sqlalchemy.url'):
+def _parse_db_config(config_key: str = u'sqlalchemy.url'):  # type: ignore
     '''Deprecated'''
     db_config = model.parse_db_config(config_key)
     if not db_config:
@@ -72,7 +72,7 @@ def _parse_db_config(config_key=u'sqlalchemy.url'):
 ## Written by Trent Mick
 @maintain.deprecated('Instead you can probably use click.confirm()',
                      since='2.9.0')
-def query_yes_no(question, default="yes"):
+def query_yes_no(question: str, default: str = "yes"):
     """DEPRECATED
 
     Ask a yes/no question via input() and return their answer.
@@ -108,25 +108,25 @@ def query_yes_no(question, default="yes"):
 
 
 class MockTranslator(object):
-    def gettext(self, value):
+    def gettext(self, value: str):
         return value
 
-    def ugettext(self, value):
+    def ugettext(self, value: str):
         return value
 
-    def ungettext(self, singular, plural, n):
+    def ungettext(self, singular: str, plural: str, n: int):
         if n > 1:
             return plural
         return singular
 
 
-def load_config(config, load_site_user=True):
+def load_config(config: Any, load_site_user: bool = True):
     conf = _get_config(config)
     assert 'ckan' not in dir()  # otherwise loggers would be disabled
     # We have now loaded the config. Now we can import ckan for the
     # first time.
     from ckan.config.environment import load_environment
-    load_environment(conf)  # type: ignore
+    load_environment(conf)
 
     # Set this internal test request context with the configured environment so
     # it can be used when calling url_for from the CLI.
@@ -138,7 +138,7 @@ def load_config(config, load_site_user=True):
 
     registry = Registry()
     registry.prepare()
-    import pylons # type: ignore
+    import pylons
     registry.register(pylons.translator, MockTranslator())
 
     site_user = None
@@ -157,7 +157,7 @@ def load_config(config, load_site_user=True):
 
     ## give routes enough information to run url_for
     parsed = urlparse(
-        conf.get('ckan.site_url', 'http://0.0.0.0'))  # type: ignore
+        cast(str, conf.get('ckan.site_url', 'http://0.0.0.0')))
     request_config = routes.request_config()
     request_config.host = parsed.netloc + parsed.path
     request_config.protocol = parsed.scheme
@@ -167,7 +167,7 @@ def load_config(config, load_site_user=True):
 
 @maintain.deprecated('Instead use ckan.cli.cli.CkanCommand or extensions '
                      'should use IClick', since='2.9.0')
-def paster_click_group(summary):
+def paster_click_group(summary: str):
     '''DEPRECATED
 
     Return a paster command click.Group for paster subcommands
@@ -179,7 +179,7 @@ def paster_click_group(summary):
     '''
     class PasterClickGroup(click.Group):
         '''A click.Group that may be called like a paster command'''
-        def __call__(self, ignored_command):
+        def __call__(self, ignored_command: str):
             sys.argv.remove(ignored_command)
             return super(PasterClickGroup, self).__call__(
                 prog_name=u'paster ' + ignored_command,
@@ -193,10 +193,10 @@ def paster_click_group(summary):
         help='paster plugin (when run outside ckan directory)')
     @click_config_option
     @click.pass_context
-    def cli(ctx, plugin, config):
+    def cli(ctx: Any, plugin: str, config: Any):
         ctx.obj['config'] = config
 
-
+    # type_ignore_reason: custom attributes
     cli.summary = summary  # type: ignore
     cli.group_name = u'ckan'  # type: ignore
     return cli
@@ -227,5 +227,5 @@ class CkanCommand(paste.script.command.Command):
     default_verbosity = 1
     group_name = 'ckan'
 
-    def _load_config(self, load_site_user=True):
+    def _load_config(self, load_site_user: bool = True):
         self.site_user = load_config(self.options.config, load_site_user)

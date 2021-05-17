@@ -10,7 +10,7 @@ import six
 try:
     from http.cookies import SimpleCookie
 except ImportError:
-    from Cookie import SimpleCookie  # type: ignore
+    from Cookie import SimpleCookie
 
 from ckan.common import config
 from repoze.who.plugins import auth_tkt as repoze_auth_tkt
@@ -54,9 +54,11 @@ class CkanAuthTktCookiePlugin(repoze_auth_tkt.AuthTktCookiePlugin):
             cookie = SimpleCookie(str(v))
             morsel = list(cookie.values())[0]
             # SameSite was only added on Python 3.8
+            # type_ignore_reason: custom property
             morsel._reserved['samesite'] = 'SameSite'  # type: ignore
             # Keep old case as it's the one used in tests, it should make no
             # difference in the browser
+            # type_ignore_reason: custom property
             morsel._reserved['httponly'] = 'HttpOnly'  # type: ignore
             morsel._reserved['secure'] = 'Secure'  # type: ignore
 

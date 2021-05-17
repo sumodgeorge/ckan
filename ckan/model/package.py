@@ -193,7 +193,7 @@ class Package(core.StatefulObjectMixin,
 
     def add_tag_by_name(
             self, tag_name: str,
-            vocab: Optional["Vocabulary"]=None, autoflush: bool=True):
+            vocab: Optional["Vocabulary"] = None, autoflush: bool=True):
         """Add a tag with the given name to this package's tags.
 
         By default the given tag_name will be searched for among the free tags
@@ -582,7 +582,7 @@ class Package(core.StatefulObjectMixin,
 
     @property
     @maintain.deprecated(since="2.9.0")
-    def _extras_list(self) -> List['PackageExtra']:
+    def extras_list(self) -> List['PackageExtra']:
         '''DEPRECATED in 2.9
 
         Returns a list of the dataset's extras, as PackageExtra object
@@ -592,8 +592,6 @@ class Package(core.StatefulObjectMixin,
         return meta.Session.query(PackageExtra) \
             .filter_by(package_id=self.id) \
             .all()
-
-    extras_list = property(_extras_list)
 
 
 class PackageMember(domain_object.DomainObject):

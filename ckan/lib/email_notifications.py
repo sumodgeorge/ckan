@@ -6,16 +6,16 @@ new activities in your dashboard activity stream) and emailing them to the
 users.
 
 '''
-from ckan.types import Context
 import datetime
 import re
+from typing import Any, Dict, List, cast
 
 import ckan.model as model
 import ckan.logic as logic
 import ckan.lib.base as base
 
 from ckan.common import ungettext, config
-from typing import Any, Dict, List, cast
+from ckan.types import Context
 
 
 def string_to_timedelta(s: str) -> datetime.timedelta:
@@ -59,7 +59,8 @@ def string_to_timedelta(s: str) -> datetime.timedelta:
             break
 
     if not match:
-        raise logic.ValidationError({'message': 'Not a valid time: {0}'.format(s)})
+        raise logic.ValidationError({
+            'message': 'Not a valid time: {0}'.format(s)})
 
     gd = match.groupdict()
     days = int(gd.get('days', '0'))
@@ -74,7 +75,9 @@ def string_to_timedelta(s: str) -> datetime.timedelta:
     return delta
 
 
-def _notifications_for_activities(activities: List[Dict[str, Any]], user_dict: Dict[str, Any]) -> List[Dict[str, str]]:
+def _notifications_for_activities(
+        activities: List[Dict[str, Any]],
+        user_dict: Dict[str, Any]) -> List[Dict[str, str]]:
     '''Return one or more email notifications covering the given activities.
 
     This function handles grouping multiple activities into a single digest
@@ -117,7 +120,9 @@ def _notifications_for_activities(activities: List[Dict[str, Any]], user_dict: D
     return notifications
 
 
-def _notifications_from_dashboard_activity_list(user_dict: Dict[str, Any], since: datetime.datetime) -> List[Dict[str, str]]:
+def _notifications_from_dashboard_activity_list(
+        user_dict: Dict[str, Any],
+        since: datetime.datetime) -> List[Dict[str, str]]:
     '''Return any email notifications from the given user's dashboard activity
     list since `since`.
 
@@ -174,7 +179,8 @@ def get_notifications(
     return notifications
 
 
-def send_notification(user: Dict[str, Any], email_dict: Dict[str, Any]) -> None:
+def send_notification(user: Dict[str, Any],
+                      email_dict: Dict[str, Any]) -> None:
     '''Email `email_dict` to `user`.'''
     import ckan.lib.mailer
 
@@ -225,8 +231,8 @@ def get_and_send_notifications_for_user(user: Dict[str, Any]) -> None:
 
 def get_and_send_notifications_for_all_users() -> None:
     context = cast(
-        Context, {'model': model, 'session': model.Session, 'ignore_auth': True,
-                  'keep_email': True})
+        Context, {'model': model, 'session': model.Session,
+                  'ignore_auth': True, 'keep_email': True})
     users = logic.get_action('user_list')(context, {})
     for user in users:
         get_and_send_notifications_for_user(user)

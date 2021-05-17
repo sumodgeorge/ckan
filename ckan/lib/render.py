@@ -2,10 +2,11 @@
 
 import os
 import logging
+from typing import Any, Dict, Optional, Tuple
 
 from ckan.common import config
 from jinja2.exceptions import TemplateNotFound
-from typing import Any, Dict, Optional, Tuple
+
 log = logging.getLogger(__name__)
 
 _template_info_cache: Dict[str, Any] = {}

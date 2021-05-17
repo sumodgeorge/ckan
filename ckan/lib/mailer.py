@@ -6,6 +6,7 @@ import smtplib
 import socket
 import logging
 from time import time
+from typing import Any, Dict, Optional
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 from email.header import Header
@@ -21,7 +22,6 @@ import ckan.lib.helpers as h
 from ckan.lib.base import render
 
 from ckan.common import _
-from typing import Any, Dict, Optional
 
 log = logging.getLogger(__name__)
 
@@ -30,14 +30,11 @@ class MailerException(Exception):
     pass
 
 
-def _mail_recipient(recipient_name: str,
-                    recipient_email: str,
-                    sender_name: str,
-                    sender_url: str,
-                    subject: Any,
-                    body: Any,
-                    body_html: Optional[Any] = None,
-                    headers: Optional[Dict[str, Any]] = None) -> None:
+def _mail_recipient(
+        recipient_name: str, recipient_email: str, sender_name: str,
+        sender_url: str, subject: Any, body: Any,
+        body_html: Optional[Any] = None,
+        headers: Optional[Dict[str, Any]] = None) -> None:
 
     if not headers:
         headers = {}

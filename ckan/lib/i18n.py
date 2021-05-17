@@ -41,6 +41,7 @@ import json
 import logging
 import os
 import os.path
+from typing import Any, Dict, List, Optional, Set
 
 import six
 from babel import Locale
@@ -54,12 +55,11 @@ from ckan.common import config, is_flask_request, aslist
 from ckan.plugins import PluginImplementations
 from ckan.plugins.interfaces import ITranslation
 
-from typing import Any, Dict, List, Optional, Set
 from flask.wrappers import Request
 
 if six.PY2:
-    from pylons import i18n as pylons_i18n  # type: ignore
-    import pylons  # type: ignore
+    from pylons import i18n as pylons_i18n
+    import pylons
 
 
 log = logging.getLogger(__name__)
@@ -156,7 +156,7 @@ def _get_locales() -> List[str]:
     return ordered_list
 
 
-available_locales: Optional[List[Optional[Locale]]] = None
+available_locales: Optional[List[Locale]] = None
 locales: Optional[List[str]] = None
 locales_dict: Optional[Dict[str, Optional[Locale]]] = None
 _non_translated_locals: Optional[List[str]] = None
@@ -194,7 +194,7 @@ def get_locales_dict() -> Dict[str, Optional[Locale]]:
     return locales_dict
 
 
-def get_available_locales() -> List[Optional[Locale]]:
+def get_available_locales() -> List[Locale]:
     ''' Get a list of the available locales
     e.g.  [ Locale('en'), Locale('de'), ... ] '''
     global available_locales
@@ -207,13 +207,16 @@ def get_available_locales() -> List[Optional[Locale]]:
             # so e.g. `zn_CH` instead of `zn_Hans_CH` this is needed
             # to properly construct urls with url_for
             parsed_locale = Locale.parse(locale)
+            assert parsed_locale
+            # type_ignore_reason: custom property
             parsed_locale.short_name = locale  # type: ignore
 
             # Add the full identifier (eg `pt_BR`) to the locale classes,
             # as it does not offer a way of accessing it directly
             identifier = get_identifier_from_locale_class(
-                parsed_locale  # type: ignore
+                parsed_locale
             )
+            # type_ignore_reason: custom property
             parsed_locale.identifier = identifier  # type: ignore
             available_locales.append(parsed_locale)
     return available_locales

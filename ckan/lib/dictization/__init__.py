@@ -1,14 +1,15 @@
 # encoding: utf-8
 
-from ckan.types import Context
 import datetime
-from sqlalchemy.orm import class_mapper
-import sqlalchemy
-
-from six import text_type
-from ckan.model.core import State
 from typing import Any, Callable, Dict, Iterable, List
+
+import sqlalchemy
 from sqlalchemy import Table
+from sqlalchemy.orm import class_mapper
+from six import text_type
+
+from ckan.model.core import State
+from ckan.types import Context
 
 try:
     RowProxy = sqlalchemy.engine.result.RowProxy

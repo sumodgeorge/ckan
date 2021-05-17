@@ -4,8 +4,8 @@ import logging
 import os
 import tempfile
 from typing import Any, Dict, Optional
-import yaml
 
+import yaml
 from markupsafe import Markup
 from webassets import Environment
 from webassets.loaders import YAMLLoader
@@ -39,7 +39,7 @@ def create_library(name: str, path: str) -> None:
     # TODO: make PR into webassets with preferable solution
     # Issue: https://github.com/miracle2k/webassets/issues/519
     for name, bundle in bundles.items():
-        env._named_bundles.pop(name, None)  # type: ignore
+        env._named_bundles.pop(name, None)
         env.register(name, bundle)
 
     env.append_path(path)
@@ -58,8 +58,10 @@ def webassets_init() -> None:
     base_path = os.path.join(public_folder, u'base')
 
     env = Environment()
+    # type_ignore_reason: work with internals
     env.directory = static_path  # type: ignore
     env.debug = asbool(config.get(u'debug', False))
+    # type_ignore_reason: work with internals
     env.url = u'/webassets/'  # type: ignore
 
     add_public_path(base_path, u'/base/')

@@ -2,6 +2,7 @@
 
 import datetime
 import pytz
+from typing import Optional
 
 from flask_babel import (
     format_number,
@@ -11,7 +12,6 @@ from flask_babel import (
 )
 
 from ckan.common import _
-from typing import Optional
 
 
 def localised_nice_date(datetime_: datetime.datetime,

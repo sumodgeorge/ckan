@@ -20,6 +20,7 @@ prefixed names. Use the functions ``add_queue_name_prefix`` and
 from __future__ import print_function
 
 import logging
+from typing import Any, Callable, Dict, Iterable, List, Optional, cast
 from redis import Redis
 
 import rq
@@ -33,8 +34,6 @@ from ckan.common import config
 from ckan.config.environment import load_environment
 from ckan.model import meta
 import ckan.plugins as plugins
-from typing import Any, Callable, Dict, Iterable, List, Optional, cast
-
 
 log = logging.getLogger(__name__)
 
@@ -253,12 +252,13 @@ class Worker(rq.Worker):
             with the name of a single queue or a list of queue names.
             If not given then the default queue is used.
         '''
-        queue_names: Iterable[str] = ensure_list(  # type: ignore
+        queue_names = cast(Iterable[str], ensure_list(
             queues or [DEFAULT_QUEUE_NAME]
-        )
+        ))
+
         qs = [get_queue(q) for q in queue_names]
         rq.worker.logger.setLevel(logging.INFO)
-        super(Worker, self).__init__(qs, *args, **kwargs)  # type: ignore
+        super(Worker, self).__init__(qs, *args, **kwargs)
 
     def register_birth(self, *args: Any, **kwargs: Any) -> None:
         result = super(Worker, self).register_birth(*args, **kwargs)
@@ -280,7 +280,8 @@ class Worker(rq.Worker):
         # when they are used the next time.
         log.debug(u'Disposing database engine before fork')
         meta.Session.remove()
-        meta.engine.dispose()  # type: ignore
+        assert meta.engine
+        meta.engine.dispose()
 
         # The original implementation performs the actual fork
         queue = remove_queue_name_prefix(cast(str, job.origin))
@@ -320,7 +321,8 @@ class Worker(rq.Worker):
         except Exception:
             log.exception(u'Error while closing database session')
         try:
-            meta.engine.dispose()  # type: ignore
+            assert meta.engine
+            meta.engine.dispose()
         except Exception:
             log.exception(u'Error while disposing database engine')
         return result

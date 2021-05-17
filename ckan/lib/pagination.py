@@ -35,12 +35,12 @@ SUCH DAMAGE.
 '''
 import re
 from string import Template
+from typing import Any, Callable, Dict, Match, Optional, Sequence
 
 import dominate.tags as tags
 from markupsafe import Markup
 from six import text_type
 from six.moves import range  # type: ignore
-from typing import Any, Callable, Dict, Match, Optional, Sequence
 
 
 class BasePage(list):
@@ -636,7 +636,7 @@ class Page(BasePage):
             link_attr={},
         )
         params.update(kwargs)
-        return super(Page, self).pager(*args, **params)  # type: ignore
+        return super(Page, self).pager(*args, **params)
 
     # Put each page link into a <li> (for Bootstrap to style it)
 

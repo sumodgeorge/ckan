@@ -1,9 +1,8 @@
 # encoding: utf-8
 
-from ckan.common import config
-
 import requests
-from ckan.common import CKANRequest
+
+from ckan.common import config, CKANRequest
 
 
 def check_recaptcha(request: CKANRequest) -> None:

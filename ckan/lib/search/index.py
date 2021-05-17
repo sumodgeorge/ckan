@@ -1,15 +1,15 @@
 # encoding: utf-8
 
-from ckan.types import Context
 import socket
 import string
 import logging
 import collections
 import json
 import datetime
-from dateutil.parser import parse
-
 import re
+from dateutil.parser import parse
+from typing import Any, Dict, List, NoReturn, Optional, cast
+
 
 import six
 import pysolr
@@ -25,7 +25,7 @@ from ckan.plugins import (PluginImplementations,
 import ckan.logic as logic
 import ckan.lib.plugins as lib_plugins
 import ckan.lib.navl.dictization_functions
-from typing import Any, Dict, List, NoReturn, Optional, cast
+from ckan.types import Context
 
 log = logging.getLogger(__name__)
 
@@ -320,8 +320,9 @@ class PackageSearchIndex(SearchIndex):
             )
             raise SearchIndexError(msg)
         except socket.error as e:
+            assert conn
             err = 'Could not connect to Solr using {0}: {1}'.format(
-                conn.url, str(e))  # type: ignore
+                conn.url, str(e))
             log.error(err)
             raise SearchIndexError(err)
 
