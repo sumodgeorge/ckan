@@ -8,7 +8,8 @@ from typing import (Any, Callable, Dict, Iterable, List, Optional,
 import six
 
 from ckan.common import config, _
-from ckan.types import Context, FlattenDataDict, FlattenErrorDict, Schema
+from ckan.types import (
+    Context, FlattenDataDict, FlattenErrorDict, FlattenKey, Schema)
 
 
 class Missing(object):
@@ -87,16 +88,16 @@ class StopOnError(DictizationError):
     pass
 
 
-def flattened_order_key(key: Sequence[Any]) -> Tuple[Any, ...]:
+def flattened_order_key(key: Sequence[Any]) -> FlattenKey:
     '''order by key length first then values'''
 
     return tuple([len(key)] + list(key))
 
 
 def flatten_schema(schema: Dict[str, Any],
-                   flattened: Optional[Dict[Tuple[Any, ...], Any]] = None,
+                   flattened: Optional[Dict[FlattenKey, Any]] = None,
                    key: Optional[List[Any]] = None
-                   ) -> Dict[Tuple[Any, ...], Any]:
+                   ) -> Dict[FlattenKey, Any]:
     '''convert schema into flat dict, where the keys become tuples
 
     e.g.
@@ -128,15 +129,15 @@ def flatten_schema(schema: Dict[str, Any],
     return flattened
 
 
-def get_all_key_combinations(data: Dict[Tuple[Any, ...], Any],
-                             flattened_schema: Dict[Tuple[Any, ...], Any]
-                             ) -> Set[Tuple[Any, ...]]:
+def get_all_key_combinations(data: Dict[FlattenKey, Any],
+                             flattened_schema: Dict[FlattenKey, Any]
+                             ) -> Set[FlattenKey]:
     '''Compare the schema against the given data and get all valid tuples that
     match the schema ignoring the last value in the tuple.
 
     '''
     schema_prefixes = {key[:-1] for key in flattened_schema}
-    combinations: Set[Tuple[Any, ...]] = set([()])
+    combinations: Set[FlattenKey] = set([()])
 
     for key in sorted(data.keys(), key=flattened_order_key):
         # make sure the tuple key is a valid one in the schema
@@ -153,8 +154,8 @@ def get_all_key_combinations(data: Dict[Tuple[Any, ...], Any],
 
 
 def make_full_schema(
-        data: Dict[Tuple[Any, ...], Any], schema: Dict[str, Any]
-) -> Dict[Tuple[Any, ...], Any]:
+        data: Dict[FlattenKey, Any], schema: Dict[str, Any]
+) -> Dict[FlattenKey, Any]:
     '''make schema by getting all valid combinations and making sure that all
     keys are available'''
 
@@ -162,7 +163,7 @@ def make_full_schema(
 
     key_combinations = get_all_key_combinations(data, flattened_schema)
 
-    full_schema: Dict[Tuple[Any, ...], Any] = {}
+    full_schema: Dict[FlattenKey, Any] = {}
 
     for combination in key_combinations:
         sub_schema = schema
@@ -177,8 +178,7 @@ def make_full_schema(
 
 
 def augment_data(
-        data: Dict[Tuple[Any, ...], Any], schema: Schema
-) -> Dict[Tuple[Any, ...], Any]:
+        data: FlattenDataDict, schema: Schema) -> FlattenDataDict:
     '''Takes 'flattened' data, compares it with the schema, and returns it with
     any problems marked, as follows:
 
@@ -236,9 +236,9 @@ def augment_data(
     return new_data
 
 
-def convert(converter: Callable[..., Any], key: Tuple[Any, ...],
-            converted_data: Dict[Tuple[Any, ...], Any],
-            errors: Dict[Tuple[Any, ...], List[str]], context: Context
+def convert(converter: Callable[..., Any], key: FlattenKey,
+            converted_data: FlattenDataDict,
+            errors: FlattenErrorDict, context: Context
             ) -> None:
     try:
         nargs = converter.__code__.co_argcount
@@ -309,9 +309,8 @@ def validate(
 
 
 def _validate(
-        data: Dict[Tuple[Any, ...], Any], schema: Schema,
-        context: Context
-) -> Tuple[Dict[Tuple[Any, ...], Any], Dict[Tuple[Any, ...], List[Any]]]:
+        data: FlattenDataDict, schema: Schema,
+        context: Context) -> Tuple[FlattenDataDict, FlattenErrorDict]:
     '''validate a flattened dict against a schema'''
     converted_data = augment_data(data, schema)
     full_schema = make_full_schema(data, schema)
@@ -368,9 +367,9 @@ def _validate(
 
 
 def flatten_list(data: List[Union[Dict[str, Any], Any]],
-                 flattened: Optional[Dict[Tuple[Any, ...], Any]] = None,
+                 flattened: Optional[FlattenDataDict] = None,
                  old_key: Optional[List[Any]] = None
-                 ) -> Dict[Tuple[Any, ...], Any]:
+                 ) -> FlattenDataDict:
     '''flatten a list of dicts'''
 
     flattened = flattened or {}
@@ -386,9 +385,9 @@ def flatten_list(data: List[Union[Dict[str, Any], Any]],
 
 
 def flatten_dict(data: Dict[str, Any],
-                 flattened: Optional[Dict[Tuple[Any, ...], Any]] = None,
+                 flattened: Optional[FlattenDataDict] = None,
                  old_key: Optional[List[Any]] = None
-                 ) -> Dict[Tuple[Any, ...], Any]:
+                 ) -> FlattenDataDict:
     '''Flatten a dict'''
 
     flattened = flattened or {}
@@ -404,7 +403,7 @@ def flatten_dict(data: Dict[str, Any],
     return flattened
 
 
-def unflatten(data: Dict[Tuple[Any, ...], Any]) -> Dict[str, Any]:
+def unflatten(data: FlattenDataDict) -> Dict[str, Any]:
     '''Unflatten a simple dict whose keys are tuples.
 
     e.g.
@@ -473,7 +472,7 @@ class MissingNullEncoder(json.JSONEncoder):
 
 def check_dict(data_dict: Union[Dict[str, Any], Any],
                select_dict: Dict[str, Any],
-               parent_path: Tuple[Any, ...] = ()) -> List[Tuple]:
+               parent_path: FlattenKey = ()) -> List[Tuple]:
     """
     return list of key tuples from select_dict whose values don't match
     corresponding values in data_dict.
@@ -500,7 +499,7 @@ def check_dict(data_dict: Union[Dict[str, Any], Any],
 
 def check_list(data_list: Union[List[Any], Any],
                select_list: List[Any],
-               parent_path: Tuple[Any, ...] = ()) -> List[Tuple[Any, ...]]:
+               parent_path: FlattenKey = ()) -> List[FlattenKey]:
     """
     return list of key tuples from select_list whose values don't match
     corresponding values in data_list.
@@ -526,7 +525,7 @@ def check_list(data_list: Union[List[Any], Any],
 
 
 def resolve_string_key(data: Union[Dict[str, Any], List[Any]],
-                       string_key: str) -> Tuple[Any, Tuple[Any, ...]]:
+                       string_key: str) -> Tuple[Any, FlattenKey]:
     """
     return (child, parent_path) if string_key is found in data
     raise DataError on incompatible types or key not found.
@@ -579,7 +578,7 @@ def resolve_string_key(data: Union[Dict[str, Any], List[Any]],
 
 
 def check_string_key(data_dict: Dict[str, Any], string_key: str,
-                     value: Any) -> List[Tuple[Any, ...]]:
+                     value: Any) -> List[FlattenKey]:
     """
     return list of key tuples from string_key whose values don't match
     corresponding values in data_dict.
@@ -679,7 +678,7 @@ def _filter_glob_match(data: Union[List[Any], Dict[str, Any], Any],
 
 def update_merge_dict(data_dict: Dict[str, Any],
                       update_dict: Union[Dict[str, Any], Any],
-                      parent_path: Tuple[Any, ...] = ()) -> None:
+                      parent_path: FlattenKey = ()) -> None:
     """
     update data_dict keys and values in-place based on update_dict.
 
@@ -702,7 +701,7 @@ def update_merge_dict(data_dict: Dict[str, Any],
 
 def update_merge_list(data_list: List[Any],
                       update_list: Union[List[Any], Any],
-                      parent_path: Tuple[Any, ...] = ()) -> None:
+                      parent_path: FlattenKey = ()) -> None:
     """
     update data_list entries in-place based on update_list.
 

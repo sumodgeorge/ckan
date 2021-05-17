@@ -22,7 +22,7 @@ import ckan.plugins as p
 
 from ckan.common import _, c
 from ckan.types import (Action, ChainedAction,
-                        ChainedAuthFunction, DataDict, ErrorDict, Context,
+                        ChainedAuthFunction, DataDict, ErrorDict, Context, FlattenDataDict,
                         Schema, Validator)
 
 Decorated = TypeVar("Decorated")
@@ -212,7 +212,7 @@ def clean_dict(data_dict: Dict[str, Any]) -> Dict[str, Any]:
     return data_dict
 
 
-def tuplize_dict(data_dict: Dict[str, Any]) -> Dict[Tuple[Any, ...], Any]:
+def tuplize_dict(data_dict: Dict[str, Any]) -> FlattenDataDict:
     '''Takes a dict with keys of the form 'table__0__key' and converts them
     to a tuple like ('table', 0, 'key').
 
@@ -221,7 +221,7 @@ def tuplize_dict(data_dict: Dict[str, Any]) -> Dict[Tuple[Any, ...], Any]:
 
     May raise a DataError if the format of the key is incorrect.
     '''
-    tuplized_dict: Dict[Tuple[Any, ...], Any] = {}
+    tuplized_dict: FlattenDataDict = {}
     for k, value in six.iteritems(data_dict):
         key_list = cast(List[Union[str, int]], k.split('__'))
         for num, key in enumerate(key_list):
@@ -234,8 +234,7 @@ def tuplize_dict(data_dict: Dict[str, Any]) -> Dict[Tuple[Any, ...], Any]:
     return tuplized_dict
 
 
-def untuplize_dict(
-        tuplized_dict: Dict[Tuple[Any, ...], Any]) -> Dict[str, Any]:
+def untuplize_dict(tuplized_dict: FlattenDataDict) -> Dict[str, Any]:
 
     data_dict = {}
     for key, value in six.iteritems(tuplized_dict):
@@ -535,8 +534,9 @@ def get_or_bust(
     ...
 
 
-def get_or_bust(data_dict: Dict[str, Any],
-                keys: Union[str, Iterable[str]]) -> Union[Any, Tuple[Any]]:
+def get_or_bust(
+        data_dict: Dict[str, Any],
+        keys: Union[str, Iterable[str]]) -> Union[Any, Tuple[Any, ...]]:
     '''Return the value(s) from the given data_dict for the given key(s).
 
     Usage::
