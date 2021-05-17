@@ -1,15 +1,15 @@
 # encoding: utf-8
 
-from ckan.types import (
-    Context, Schema, TuplizedErrorDict, TuplizedKey, Validator)
 import json
-from typing import Any, Callable, Dict, cast
+from typing import Any, Callable, cast
 
 from six import string_types, text_type
 
 
 import ckan.plugins as p
 import ckan.lib.navl.dictization_functions as df
+from ckan.types import (
+    Context, FlattenDataDict, Schema, FlattenErrorDict, FlattenKey, Validator)
 
 get_validator = p.toolkit.get_validator
 
@@ -37,8 +37,8 @@ def rename(old: str, new: str) -> Validator:
     Rename a schema field from old to new.
     Should be used in __after or __before.
     '''
-    def rename_field(key: TuplizedKey, data: Dict[TuplizedKey, Any],
-                     errors: TuplizedErrorDict, context: Context):
+    def rename_field(key: FlattenKey, data: FlattenDataDict,
+                     errors: FlattenErrorDict, context: Context):
         index = max([int(k[1]) for k in data.keys()
                      if len(k) == 3 and k[0] == new] + [-1])
 
@@ -56,8 +56,8 @@ def rename(old: str, new: str) -> Validator:
     return rename_field
 
 
-def list_of_strings_or_lists(key: TuplizedKey, data: Dict[TuplizedKey, Any],
-                             errors: TuplizedErrorDict, context: Context):
+def list_of_strings_or_lists(key: FlattenKey, data: FlattenDataDict,
+                             errors: FlattenErrorDict, context: Context):
     value = data.get(key)
     if not isinstance(value, list):
         raise df.Invalid('Not a list')
@@ -66,8 +66,8 @@ def list_of_strings_or_lists(key: TuplizedKey, data: Dict[TuplizedKey, Any],
             raise df.Invalid('%s: %s' % ('Neither a string nor a list', x))
 
 
-def list_of_strings_or_string(key: TuplizedKey, data: Dict[TuplizedKey, Any],
-                              errors: TuplizedErrorDict, context: Context):
+def list_of_strings_or_string(key: FlattenKey, data: FlattenDataDict,
+                              errors: FlattenErrorDict, context: Context):
     value = data.get(key)
     if isinstance(value, string_types):
         return

@@ -32,7 +32,7 @@ import ckan.authz as authz
 import ckan.model
 
 from ckan.common import _, config
-from ckan.types import Context, DataDict, ErrorDict, Schema, TuplizedErrorDict
+from ckan.types import Context, DataDict, ErrorDict, Schema, FlattenErrorDict
 
 # FIXME this looks nasty and should be shared better
 from ckan.logic.action.update import _update_package_relationship
@@ -1161,7 +1161,7 @@ def user_invite(context: Context, data_dict: DataDict) -> Dict[str, Any]:
             string.ascii_lowercase + string.ascii_uppercase + string.digits)
             for _ in range(12))
         # Occasionally it won't meet the constraints, so check
-        validation_errors: TuplizedErrorDict = {}
+        validation_errors: FlattenErrorDict = {}
         ckan.logic.validators.user_password_validator(
             ('password', ), {('password', ): password},
             validation_errors, context)

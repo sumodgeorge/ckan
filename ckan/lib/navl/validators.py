@@ -1,29 +1,29 @@
 # encoding: utf-8
 
-from typing import Any, Callable, Dict, NoReturn
+from typing import Any, Callable, NoReturn
 import six
 from six import text_type
 
 import ckan.lib.navl.dictization_functions as df
 
 from ckan.common import _, json, config
-from ckan.types import Context, TuplizedErrorDict, TuplizedKey
+from ckan.types import Context, FlattenDataDict, FlattenErrorDict, FlattenKey
 
 missing = df.missing
 StopOnError = df.StopOnError
 Invalid = df.Invalid
 
 
-def keep_extras(key: TuplizedKey, data: Dict[TuplizedKey, Any],
-                errors: TuplizedErrorDict, context: Context) -> None:
+def keep_extras(key: FlattenKey, data: FlattenDataDict,
+                errors: FlattenErrorDict, context: Context) -> None:
 
     extras = data.pop(key, {})
     for extras_key, value in six.iteritems(extras):
         data[key[:-1] + (extras_key,)] = value
 
 
-def not_missing(key: TuplizedKey, data: Dict[TuplizedKey, Any],
-                errors: TuplizedErrorDict, context: Context) -> None:
+def not_missing(key: FlattenKey, data: FlattenDataDict,
+                errors: FlattenErrorDict, context: Context) -> None:
 
     value = data.get(key)
     if value is missing:
@@ -31,8 +31,8 @@ def not_missing(key: TuplizedKey, data: Dict[TuplizedKey, Any],
         raise StopOnError
 
 
-def not_empty(key: TuplizedKey, data: Dict[TuplizedKey, Any],
-              errors: TuplizedErrorDict, context: Context) -> None:
+def not_empty(key: FlattenKey, data: FlattenDataDict,
+              errors: FlattenErrorDict, context: Context) -> None:
 
     value = data.get(key)
     if not value or value is missing:
@@ -40,8 +40,8 @@ def not_empty(key: TuplizedKey, data: Dict[TuplizedKey, Any],
         raise StopOnError
 
 def if_empty_same_as(other_key: str) -> Callable[..., Any]:
-    def callable(key: TuplizedKey, data: Dict[TuplizedKey, Any],
-                 errors: TuplizedErrorDict, context: Context):
+    def callable(key: FlattenKey, data: FlattenDataDict,
+                 errors: FlattenErrorDict, context: Context):
         value = data.get(key)
         if not value or value is missing:
             data[key] = data[key[:-1] + (other_key,)]
@@ -51,8 +51,8 @@ def if_empty_same_as(other_key: str) -> Callable[..., Any]:
 
 def both_not_empty(other_key: str) -> Callable:
 
-    def callable(key: TuplizedKey, data: Dict[TuplizedKey, Any],
-                 errors: TuplizedErrorDict, context: Context):
+    def callable(key: FlattenKey, data: FlattenDataDict,
+                 errors: FlattenErrorDict, context: Context):
         value = data.get(key)
         other_value = data.get(key[:-1] + (other_key,))
         if (not value or value is missing and
@@ -63,8 +63,8 @@ def both_not_empty(other_key: str) -> Callable:
     return callable
 
 
-def empty(key: TuplizedKey, data: Dict[TuplizedKey, Any],
-          errors: TuplizedErrorDict, context: Context) -> None:
+def empty(key: FlattenKey, data: FlattenDataDict,
+          errors: FlattenErrorDict, context: Context) -> None:
 
     value = data.pop(key, None)
 
@@ -77,8 +77,8 @@ def empty(key: TuplizedKey, data: Dict[TuplizedKey, Any],
             'The input field %(name)s was not expected.') % {"name": key_name})
 
 
-def ignore(key: TuplizedKey, data: Dict[TuplizedKey, Any],
-           errors: TuplizedErrorDict, context: Context) -> NoReturn:
+def ignore(key: FlattenKey, data: FlattenDataDict,
+           errors: FlattenErrorDict, context: Context) -> NoReturn:
 
     value = data.pop(key, None)
     raise StopOnError
@@ -87,8 +87,8 @@ def default(default_value: Any) -> Callable:
     '''When key is missing or value is an empty string or None, replace it with
     a default value'''
 
-    def callable(key: TuplizedKey, data: Dict[TuplizedKey, Any],
-                 errors: TuplizedErrorDict, context: Context):
+    def callable(key: FlattenKey, data: FlattenDataDict,
+                 errors: FlattenErrorDict, context: Context):
 
         value = data.get(key)
         if value is None or value == '' or value is missing:
@@ -109,8 +109,8 @@ def configured_default(config_name: str,
     return default(default_value)
 
 
-def ignore_missing(key: TuplizedKey, data: Dict[TuplizedKey, Any],
-                   errors: TuplizedErrorDict, context: Context) -> None:
+def ignore_missing(key: FlattenKey, data: FlattenDataDict,
+                   errors: FlattenErrorDict, context: Context) -> None:
     '''If the key is missing from the data, ignore the rest of the key's
     schema.
 
@@ -132,8 +132,8 @@ def ignore_missing(key: TuplizedKey, data: Dict[TuplizedKey, Any],
         raise StopOnError
 
 
-def ignore_empty(key: TuplizedKey, data: Dict[TuplizedKey, Any],
-                 errors: TuplizedErrorDict, context: Context) -> None:
+def ignore_empty(key: FlattenKey, data: FlattenDataDict,
+                 errors: FlattenErrorDict, context: Context) -> None:
 
     value = data.get(key)
 

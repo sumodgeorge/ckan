@@ -8,7 +8,7 @@ from typing import (Any, Callable, Dict, Iterable, List, Optional,
 import six
 
 from ckan.common import config, _
-from ckan.types import Context, Schema, TuplizedKey
+from ckan.types import Context, FlattenDataDict, FlattenErrorDict, Schema
 
 
 class Missing(object):
@@ -196,7 +196,7 @@ def augment_data(
 
     keys_to_remove = []
     junk = {}
-    extras_keys: Dict[TuplizedKey, Any] = {}
+    extras_keys: FlattenDataDict = {}
     # fill junk and extras
     for key, value in new_data.items():
         if key in full_schema:
@@ -316,7 +316,7 @@ def _validate(
     converted_data = augment_data(data, schema)
     full_schema = make_full_schema(data, schema)
 
-    errors: Dict[TuplizedKey, List[str]] = dict(
+    errors: FlattenErrorDict = dict(
         (key, []) for key in full_schema)
 
     # before run

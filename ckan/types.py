@@ -30,11 +30,12 @@ Query = Query
 Config = Dict[str, Union[str, Mapping[str, str]]]
 CKANApp = Any
 
-TuplizedKey = Tuple[Any, ...]
-
 DataDict = Dict[str, Any]
 ErrorDict = Dict[str, Union[int, str, List[Union[str, Dict[str, Any]]]]]
-TuplizedErrorDict = Dict[Tuple[Any, ...], List[str]]
+
+FlattenKey = Tuple[Any, ...]
+FlattenDataDict = Dict[FlattenKey, Any]
+FlattenErrorDict = Dict[FlattenKey, List[str]]
 
 
 class Context(TypedDict, total=False):
@@ -120,9 +121,9 @@ class ContextValidator(Protocol):
 class DataValidator(Protocol):
     def __call__(
         self,
-        key: TuplizedKey,
-        data: Dict[TuplizedKey, Any],
-        errors: TuplizedErrorDict,
+        key: FlattenKey,
+        data: Dict[FlattenKey, Any],
+        errors: FlattenErrorDict,
         context: Context,
     ) -> None:
         ...

@@ -25,7 +25,8 @@ import ckan.authz as authz
 from ckan.model.core import State
 
 from ckan.common import _
-from ckan.types import TuplizedKey, Validator, Context, TuplizedErrorDict
+from ckan.types import (
+    FlattenDataDict, FlattenKey, Validator, Context, FlattenErrorDict)
 
 Invalid = df.Invalid
 StopOnError = df.StopOnError
@@ -33,8 +34,8 @@ Missing = df.Missing
 missing = df.missing
 
 
-def owner_org_validator(key: TuplizedKey, data: Dict[TuplizedKey, Any],
-                        errors: TuplizedErrorDict, context: Context) -> Any:
+def owner_org_validator(key: FlattenKey, data: FlattenDataDict,
+                        errors: FlattenErrorDict, context: Context) -> Any:
 
     value = data.get(key)
 
@@ -320,9 +321,8 @@ object_id_validators = {
     }
 
 
-def object_id_validator(key: TuplizedKey, activity_dict: Dict[TuplizedKey,
-                                                              Any],
-                        errors: TuplizedErrorDict, context: Context) -> Any:
+def object_id_validator(key: FlattenKey, activity_dict: FlattenDataDict,
+                        errors: FlattenErrorDict, context: Context) -> Any:
     '''Validate the 'object_id' value of an activity_dict.
 
     Uses the object_id_validators dict (above) to find and call an 'object_id'
@@ -380,8 +380,8 @@ def name_validator(value: Any, context: Context) -> Any:
     return value
 
 
-def package_name_validator(key: TuplizedKey, data: Dict[TuplizedKey, Any],
-                           errors: TuplizedErrorDict, context: Context) -> Any:
+def package_name_validator(key: FlattenKey, data: FlattenDataDict,
+                           errors: FlattenErrorDict, context: Context) -> Any:
     model = context['model']
     session = context['session']
     package = context.get('package')
@@ -415,8 +415,8 @@ def package_version_validator(value: Any, context: Context) -> Any:
     return value
 
 
-def duplicate_extras_key(key: TuplizedKey, data: Dict[TuplizedKey, Any],
-                         errors: TuplizedErrorDict, context: Context) -> Any:
+def duplicate_extras_key(key: FlattenKey, data: FlattenDataDict,
+                         errors: FlattenErrorDict, context: Context) -> Any:
 
     unflattened = df.unflatten(data)
     extras = unflattened.get('extras', [])
@@ -433,8 +433,8 @@ def duplicate_extras_key(key: TuplizedKey, data: Dict[TuplizedKey, Any],
         errors[key_] = [_('Duplicate key "%s"') % extras_keys[0]]
 
 
-def group_name_validator(key: TuplizedKey, data: Dict[TuplizedKey, Any],
-                         errors: TuplizedErrorDict, context: Context) -> Any:
+def group_name_validator(key: FlattenKey, data: FlattenDataDict,
+                         errors: FlattenErrorDict, context: Context) -> Any:
     model = context['model']
     session = context['session']
     group = context.get('group')
@@ -479,8 +479,8 @@ def tag_not_uppercase(value: Any, context: Context) -> Any:
     return value
 
 
-def tag_string_convert(key: TuplizedKey, data: Dict[TuplizedKey, Any],
-                       errors: TuplizedErrorDict, context: Context) -> Any:
+def tag_string_convert(key: FlattenKey, data: FlattenDataDict,
+                       errors: FlattenErrorDict, context: Context) -> Any:
     '''Takes a list of tags that is a comma-separated string (in data[key])
     and parses tag names. These are added to the data dict, enumerated. They
     are also validated.'''
@@ -502,14 +502,14 @@ def tag_string_convert(key: TuplizedKey, data: Dict[TuplizedKey, Any],
         tag_name_validator(tag, context)
 
 
-def ignore_not_admin(key: TuplizedKey, data: Dict[TuplizedKey, Any],
-                     errors: TuplizedErrorDict, context: Context) -> Any:
+def ignore_not_admin(key: FlattenKey, data: FlattenDataDict,
+                     errors: FlattenErrorDict, context: Context) -> Any:
     # Deprecated in favour of ignore_not_package_admin
     return ignore_not_package_admin(key, data, errors, context)
 
 
-def ignore_not_package_admin(key: TuplizedKey, data: Dict[TuplizedKey, Any],
-                             errors: TuplizedErrorDict,
+def ignore_not_package_admin(key: FlattenKey, data: FlattenDataDict,
+                             errors: FlattenErrorDict,
                              context: Context) -> Any:
     '''Ignore if the user is not allowed to administer the package specified.'''
 
@@ -541,8 +541,8 @@ def ignore_not_package_admin(key: TuplizedKey, data: Dict[TuplizedKey, Any],
     data.pop(key)
 
 
-def ignore_not_sysadmin(key: TuplizedKey, data: Dict[TuplizedKey, Any],
-                        errors: TuplizedErrorDict, context: Context) -> Any:
+def ignore_not_sysadmin(key: FlattenKey, data: FlattenDataDict,
+                        errors: FlattenErrorDict, context: Context) -> Any:
     '''Ignore the field if user not sysadmin or ignore_auth in context.'''
 
     user = context.get('user')
@@ -553,8 +553,8 @@ def ignore_not_sysadmin(key: TuplizedKey, data: Dict[TuplizedKey, Any],
     data.pop(key)
 
 
-def ignore_not_group_admin(key: TuplizedKey, data: Dict[TuplizedKey, Any],
-                           errors: TuplizedErrorDict, context: Context) -> Any:
+def ignore_not_group_admin(key: FlattenKey, data: FlattenDataDict,
+                           errors: FlattenErrorDict, context: Context) -> Any:
     '''Ignore if the user is not allowed to administer for the group specified.'''
 
     model = context['model']
@@ -578,8 +578,8 @@ def ignore_not_group_admin(key: TuplizedKey, data: Dict[TuplizedKey, Any],
     data.pop(key)
 
 
-def user_name_validator(key: TuplizedKey, data: Dict[TuplizedKey, Any],
-                        errors: TuplizedErrorDict, context: Context) -> Any:
+def user_name_validator(key: FlattenKey, data: FlattenDataDict,
+                        errors: FlattenErrorDict, context: Context) -> Any:
     '''Validate a new user name.
 
     Append an error message to ``errors[key]`` if a user named ``data[key]``
@@ -618,8 +618,8 @@ def user_name_validator(key: TuplizedKey, data: Dict[TuplizedKey, Any],
             return
 
 
-def user_both_passwords_entered(key: TuplizedKey, data: Dict[TuplizedKey, Any],
-                                errors: TuplizedErrorDict,
+def user_both_passwords_entered(key: FlattenKey, data: FlattenDataDict,
+                                errors: FlattenErrorDict,
                                 context: Context) -> Any:
 
     password1 = data.get(('password1',),None)
@@ -630,8 +630,8 @@ def user_both_passwords_entered(key: TuplizedKey, data: Dict[TuplizedKey, Any],
         errors[('password',)].append(_('Please enter both passwords'))
 
 
-def user_password_validator(key: TuplizedKey, data: Dict[TuplizedKey, Any],
-                            errors: TuplizedErrorDict,
+def user_password_validator(key: FlattenKey, data: FlattenDataDict,
+                            errors: FlattenErrorDict,
                             context: Context) -> Any:
     value = data[key]
 
@@ -646,8 +646,8 @@ def user_password_validator(key: TuplizedKey, data: Dict[TuplizedKey, Any],
                                        'longer'))
 
 
-def user_passwords_match(key: TuplizedKey, data: Dict[TuplizedKey, Any],
-                         errors: TuplizedErrorDict, context: Context) -> Any:
+def user_passwords_match(key: FlattenKey, data: FlattenDataDict,
+                         errors: FlattenErrorDict, context: Context) -> Any:
 
     password1 = data.get(('password1',),None)
     password2 = data.get(('password2',),None)
@@ -659,8 +659,8 @@ def user_passwords_match(key: TuplizedKey, data: Dict[TuplizedKey, Any],
         data[('password',)] = password1
 
 
-def user_password_not_empty(key: TuplizedKey, data: Dict[TuplizedKey, Any],
-                            errors: TuplizedErrorDict,
+def user_password_not_empty(key: FlattenKey, data: FlattenDataDict,
+                            errors: FlattenErrorDict,
                             context: Context) -> Any:
     '''Only check if password is present if the user is created via action API.
        If not, user_both_passwords_entered will handle the validation'''
@@ -725,8 +725,8 @@ def tag_in_vocabulary_validator(value: Any, context: Context) -> Any:
     return value
 
 
-def tag_not_in_vocabulary(key: TuplizedKey, tag_dict: Dict[TuplizedKey, Any],
-                          errors: TuplizedErrorDict, context: Context) -> Any:
+def tag_not_in_vocabulary(key: FlattenKey, tag_dict: FlattenDataDict,
+                          errors: FlattenErrorDict, context: Context) -> Any:
     tag_name = tag_dict[('name',)]
     if not tag_name:
         raise Invalid(_('No tag name'))
@@ -748,8 +748,8 @@ def tag_not_in_vocabulary(key: TuplizedKey, tag_dict: Dict[TuplizedKey, Any],
         return
 
 
-def url_validator(key: TuplizedKey, data: Dict[TuplizedKey, Any],
-                  errors: TuplizedErrorDict, context: Context) -> Any:
+def url_validator(key: FlattenKey, data: FlattenDataDict,
+                  errors: FlattenErrorDict, context: Context) -> Any:
     ''' Checks that the provided value (if it is present) is a valid URL '''
 
     url = data.get(key, None)
@@ -784,10 +784,9 @@ def role_exists(role: str, context: Context) -> Any:
     return role
 
 
-def datasets_with_no_organization_cannot_be_private(key: TuplizedKey,
-                                                    data: Dict[TuplizedKey,
-                                                               Any],
-                                                    errors: TuplizedErrorDict,
+def datasets_with_no_organization_cannot_be_private(key: FlattenKey,
+                                                    data: FlattenDataDict,
+                                                    errors: FlattenErrorDict,
                                                     context: Context) -> Any:
 
     dataset_id = data.get(('id',))
@@ -815,8 +814,8 @@ def datasets_with_no_organization_cannot_be_private(key: TuplizedKey,
                 _("Datasets with no organization can't be private."))
 
 
-def list_of_strings(key: TuplizedKey, data: Dict[TuplizedKey, Any],
-                    errors: TuplizedErrorDict, context: Context) -> Any:
+def list_of_strings(key: FlattenKey, data: FlattenDataDict,
+                    errors: FlattenErrorDict, context: Context) -> Any:
     value = data.get(key)
     if not isinstance(value, list):
         raise Invalid(_('Not a list'))
@@ -825,8 +824,8 @@ def list_of_strings(key: TuplizedKey, data: Dict[TuplizedKey, Any],
             raise Invalid('%s: %s' % (_('Not a string'), x))
 
 
-def if_empty_guess_format(key: TuplizedKey, data: Dict[TuplizedKey, Any],
-                          errors: TuplizedErrorDict, context: Context) -> Any:
+def if_empty_guess_format(key: FlattenKey, data: FlattenDataDict,
+                          errors: FlattenErrorDict, context: Context) -> Any:
     value = data[key]
     resource_id = data.get(key[:-1] + ('id',))
 
@@ -850,8 +849,8 @@ def clean_format(format: str):
     return h.unified_resource_format(format)
 
 
-def no_loops_in_hierarchy(key: TuplizedKey, data: Dict[TuplizedKey, Any],
-                          errors: TuplizedErrorDict, context: Context) -> Any:
+def no_loops_in_hierarchy(key: FlattenKey, data: FlattenDataDict,
+                          errors: FlattenErrorDict, context: Context) -> Any:
     '''Checks that the parent groups specified in the data would not cause
     a loop in the group hierarchy, and therefore cause the recursion up/down
     the hierarchy to get into an infinite loop.
@@ -870,10 +869,9 @@ def no_loops_in_hierarchy(key: TuplizedKey, data: Dict[TuplizedKey, Any],
                         'hierarchy'))
 
 
-def filter_fields_and_values_should_have_same_length(key: TuplizedKey,
-                                                     data: Dict[TuplizedKey,
-                                                                Any],
-                                                     errors: TuplizedErrorDict,
+def filter_fields_and_values_should_have_same_length(key: FlattenKey,
+                                                     data: FlattenDataDict,
+                                                     errors: FlattenErrorDict,
                                                      context: Context) -> Any:
     convert_to_list_if_string = converters.convert_to_list_if_string
     fields = convert_to_list_if_string(data.get(('filter_fields',), []))
@@ -885,9 +883,9 @@ def filter_fields_and_values_should_have_same_length(key: TuplizedKey,
         errors[('filter_values',)].append(msg)
 
 
-def filter_fields_and_values_exist_and_are_valid(key: TuplizedKey,
-                                                 data: Dict[TuplizedKey, Any],
-                                                 errors: TuplizedErrorDict,
+def filter_fields_and_values_exist_and_are_valid(key: FlattenKey,
+                                                 data: FlattenDataDict,
+                                                 errors: FlattenErrorDict,
                                                  context: Context) -> Any:
     convert_to_list_if_string = converters.convert_to_list_if_string
     fields = convert_to_list_if_string(data.get(('filter_fields',)))
@@ -907,9 +905,8 @@ def filter_fields_and_values_exist_and_are_valid(key: TuplizedKey,
     data[('filters',)] = dict(filters)
 
 
-def extra_key_not_in_root_schema(key: TuplizedKey, data: Dict[TuplizedKey,
-                                                              Any],
-                                 errors: TuplizedErrorDict,
+def extra_key_not_in_root_schema(key: FlattenKey, data: FlattenDataDict,
+                                 errors: FlattenErrorDict,
                                  context: Context) -> Any:
 
     for schema_key in context.get('schema_keys', []):
@@ -917,8 +914,8 @@ def extra_key_not_in_root_schema(key: TuplizedKey, data: Dict[TuplizedKey,
             raise Invalid(_('There is a schema field with the same name'))
 
 
-def empty_if_not_sysadmin(key: TuplizedKey, data: Dict[TuplizedKey, Any],
-                          errors: TuplizedErrorDict, context: Context) -> Any:
+def empty_if_not_sysadmin(key: FlattenKey, data: FlattenDataDict,
+                          errors: FlattenErrorDict, context: Context) -> Any:
     '''Only sysadmins may pass this value'''
     from ckan.lib.navl.validators import empty
 
@@ -961,8 +958,8 @@ def collect_prefix_validate(prefix: str, *validator_names: str) -> Validator:
     """
     validator_fns = [logic.get_validator(v) for v in validator_names]
 
-    def prefix_validator(key: TuplizedKey, data: Dict[TuplizedKey, Any],
-                         errors: TuplizedErrorDict, context: Context):
+    def prefix_validator(key: FlattenKey, data: FlattenDataDict,
+                         errors: FlattenErrorDict, context: Context):
         out = {}
         extras = data.get(('__extras',), {})
 
@@ -995,8 +992,8 @@ def dict_only(value: Any) -> Dict[Any, Any]:
     return value
 
 
-def email_is_unique(key: TuplizedKey, data: Dict[TuplizedKey, Any],
-                    errors: TuplizedErrorDict, context: Context) -> Any:
+def email_is_unique(key: FlattenKey, data: FlattenDataDict,
+                    errors: FlattenErrorDict, context: Context) -> Any:
     '''Validate email is unique'''
     model = context['model']
     session = context['session']

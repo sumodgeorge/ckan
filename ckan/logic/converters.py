@@ -1,7 +1,7 @@
 # encoding: utf-8
 
 import json
-from typing import Any, Dict
+from typing import Any
 
 import six
 from six import string_types, text_type
@@ -11,11 +11,12 @@ import ckan.lib.navl.dictization_functions as df
 import ckan.logic.validators as validators
 
 from ckan.common import _
-from ckan.types import Context, DataValidator, TuplizedErrorDict, TuplizedKey
+from ckan.types import (
+    Context, DataValidator, FlattenDataDict, FlattenErrorDict, FlattenKey)
 
 
-def convert_to_extras(key: TuplizedKey, data: Dict[TuplizedKey, Any],
-                      errors: TuplizedErrorDict, context: Context) -> Any:
+def convert_to_extras(key: FlattenKey, data: FlattenDataDict,
+                      errors: FlattenErrorDict, context: Context) -> Any:
 
     # Get the current extras index
     current_indexes = [k[1] for k in data.keys()
@@ -27,10 +28,10 @@ def convert_to_extras(key: TuplizedKey, data: Dict[TuplizedKey, Any],
     data[('extras', new_index, 'value')] = data[key]
 
 
-def convert_from_extras(key: TuplizedKey, data: Dict[TuplizedKey, Any],
-                        errors: TuplizedErrorDict, context: Context) -> Any:
+def convert_from_extras(key: FlattenKey, data: FlattenDataDict,
+                        errors: FlattenErrorDict, context: Context) -> Any:
 
-    def remove_from_extras(data: Dict[TuplizedKey, Any], key: TuplizedKey):
+    def remove_from_extras(data: FlattenDataDict, key: FlattenKey):
         to_remove = []
         for data_key, data_value in six.iteritems(data):
             if (data_key[0] == 'extras'
@@ -49,14 +50,14 @@ def convert_from_extras(key: TuplizedKey, data: Dict[TuplizedKey, Any],
         return
     remove_from_extras(data, data_key[1])
 
-def extras_unicode_convert(extras: Dict[Any, Any], context: Context):
+def extras_unicode_convert(extras: FlattenDataDict, context: Context):
     for extra in extras:
         extras[extra] = text_type(extras[extra])
     return extras
 
 
-def free_tags_only(key: TuplizedKey, data: Dict[TuplizedKey, Any],
-                   errors: TuplizedErrorDict, context: Context) -> Any:
+def free_tags_only(key: FlattenKey, data: FlattenDataDict,
+                   errors: FlattenErrorDict, context: Context) -> Any:
     tag_number = key[1]
     if not data.get(('tags', tag_number, 'vocabulary_id')):
         return
@@ -65,8 +66,8 @@ def free_tags_only(key: TuplizedKey, data: Dict[TuplizedKey, Any],
             del data[k]
 
 def convert_to_tags(vocab: Any) -> DataValidator:
-    def func(key: TuplizedKey, data: Dict[TuplizedKey, Any],
-             errors: TuplizedErrorDict, context: Context):
+    def func(key: FlattenKey, data: FlattenDataDict,
+             errors: FlattenErrorDict, context: Context):
         new_tags = data.get(key)
         if not new_tags:
             return
@@ -93,8 +94,8 @@ def convert_to_tags(vocab: Any) -> DataValidator:
     return func
 
 def convert_from_tags(vocab: Any) -> DataValidator:
-    def func(key: TuplizedKey, data: Dict[TuplizedKey, Any],
-             errors: TuplizedErrorDict, context: Context):
+    def func(key: FlattenKey, data: FlattenDataDict,
+             errors: FlattenErrorDict, context: Context):
         v = model.Vocabulary.get(vocab)
         if not v:
             raise df.Invalid(_('Tag vocabulary "%s" does not exist') % vocab)
