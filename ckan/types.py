@@ -38,6 +38,12 @@ FlattenErrorDict = Dict[FlattenKey, List[str]]
 
 
 class Context(TypedDict, total=False):
+    """
+    Mutable private dictionary passed along through many layers of code.
+    Used for all sorts of questionable parameter passing and global state sharing.
+    We're trying to *not* add to this dictionary and use normal parameters instead.
+    Bonus points for anything that can be removed from here.
+    """
     user: str
     model: Model
     session: AlchemySession
