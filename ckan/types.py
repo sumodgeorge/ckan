@@ -29,7 +29,9 @@ Model: TypeAlias = "model_"
 Config = Dict[str, Union[str, Mapping[str, str]]]
 CKANApp = Any
 
+# dictionary passed to actions
 DataDict = Dict[str, Any]
+# dictionary passed to the ValidationError
 ErrorDict = Dict[str, Union[int, str, List[Union[str, Dict[str, Any]]]]]
 
 FlattenKey = Tuple[Any, ...]
@@ -38,11 +40,12 @@ FlattenErrorDict = Dict[FlattenKey, List[str]]
 
 
 class Context(TypedDict, total=False):
-    """
-    Mutable private dictionary passed along through many layers of code.
-    Used for all sorts of questionable parameter passing and global state sharing.
-    We're trying to *not* add to this dictionary and use normal parameters instead.
-    Bonus points for anything that can be removed from here.
+    """Mutable private dictionary passed along through many layers of code.
+
+    Used for all sorts of questionable parameter passing and global state
+    sharing.  We're trying to *not* add to this dictionary and use normal
+    parameters instead.  Bonus points for anything that can be removed from
+    here.
     """
     user: str
     model: Model
@@ -109,21 +112,29 @@ class Context(TypedDict, total=False):
 
 
 class AuthResult(TypedDict, total=False):
+    """Result of any access check
+    """
     success: bool
     msg: Optional[str]
 
 
 class ValueValidator(Protocol):
+    """Simplest validator that accepts only validated value.
+    """
     def __call__(self, value: Any) -> Any:
         ...
 
 
 class ContextValidator(Protocol):
+    """Validator that accepts validation context alongside with the value.
+    """
     def __call__(self, value: Any, context: Context) -> Any:
         ...
 
 
 class DataValidator(Protocol):
+    """Complex validator that has access the whole validated dictionary.
+    """
     def __call__(
         self,
         key: FlattenKey,
@@ -137,7 +148,12 @@ class DataValidator(Protocol):
 Validator = Union[ValueValidator, ContextValidator, DataValidator]
 
 Schema = Dict[str, Union[Iterable[Validator], "Schema"]]
+
+# Function that accepts arbitary number of validators(decorated by
+# ckan.logic.schema.validator_args) and returns Schema dictionary
 ComplexSchemaFunc = Callable[..., Schema]
+# ComplexSchemaFunc+validator_args decorator = function that accepts no args
+# and returns Schema dictionary
 PlainSchemaFunc = Callable[[], Schema]
 
 AuthFunctionWithOptionalDataDict = Callable[
@@ -158,6 +174,9 @@ ChainedAction = Callable[[Action, Context, DataDict], Any]
 
 
 class PFeed(Protocol):
+    """Contract for IFeed.get_feed_class
+    """
+
     def __init__(
         self,
         feed_title: str,
@@ -182,6 +201,9 @@ class PFeed(Protocol):
 
 
 class PUploader(Protocol):
+    """Contract for IUploader.get_uploader
+    """
+
     def __init__(
         self, object_type: str, old_filename: Optional[str] = None
     ) -> None:
@@ -201,6 +223,9 @@ class PUploader(Protocol):
 
 
 class PResourceUploader(Protocol):
+    """Contract for IUploader.get_uploader
+    """
+
     mimetype: Optional[str]
     filesize: int
 
