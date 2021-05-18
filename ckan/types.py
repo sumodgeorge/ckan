@@ -10,14 +10,12 @@ from typing import (
     Mapping,
     Optional,
     Tuple,
-    Type,
     Union,
     TYPE_CHECKING,
 )
 
 from typing_extensions import Protocol, TypedDict, TypeAlias
 from sqlalchemy.orm.scoping import ScopedSession
-from sqlalchemy import Table
 from sqlalchemy.orm import Query
 
 if TYPE_CHECKING:
@@ -26,6 +24,7 @@ if TYPE_CHECKING:
 
 AlchemySession = ScopedSession
 Query = Query
+Model: TypeAlias = "model_"
 
 Config = Dict[str, Union[str, Mapping[str, str]]]
 CKANApp = Any
@@ -40,7 +39,7 @@ FlattenErrorDict = Dict[FlattenKey, List[str]]
 
 class Context(TypedDict, total=False):
     user: str
-    model: "Model"
+    model: Model
     session: AlchemySession
 
     __auth_user_obj_checked: bool
@@ -131,8 +130,6 @@ class DataValidator(Protocol):
 
 Validator = Union[ValueValidator, ContextValidator, DataValidator]
 
-NestedSchema = Dict[str, Iterable[Validator]]
-# Schema = Dict[str, Union[Iterable[Validator], "NestedSchema"]]
 Schema = Dict[str, Union[Iterable[Validator], "Schema"]]
 ComplexSchemaFunc = Callable[..., Schema]
 PlainSchemaFunc = Callable[[], Schema]
@@ -209,63 +206,3 @@ class PResourceUploader(Protocol):
 
     def upload(self, id: str, max_size: int = ...) -> None:
         ...
-
-
-class PModel(Protocol):
-    Session: AlchemySession
-    State: Type["model_.State"]
-    System: Type["model_.System"]
-    Package: Type["model_.Package"]
-    PackageMember: Type["model_.PackageMember"]
-    Tag: Type["model_.Tag"]
-    PackageTag: Type["model_.PackageTag"]
-    Member: Type["model_.Member"]
-    User: Type["model_.User"]
-    Group: Type["model_.Group"]
-    GroupExtra: Type["model_.GroupExtra"]
-    PackageExtra: Type["model_.PackageExtra"]
-    Resource: Type["model_.Resource"]
-    ResourceView: Type["model_.ResourceView"]
-    TrackingSummary: Type["model_.TrackingSummary"]
-    Rating: Type["model_.Rating"]
-    PackageRelationship: Type["model_.PackageRelationship"]
-    TaskStatus: Type["model_.TaskStatus"]
-    Vocabulary: Type["model_.Vocabulary"]
-    Activity: Type["model_.Activity"]
-    ActivityDetail: Type["model_.ActivityDetail"]
-    UserFollowingUser: Type["model_.UserFollowingUser"]
-    UserFollowingDataset: Type["model_.UserFollowingDataset"]
-    UserFollowingGroup: Type["model_.UserFollowingGroup"]
-    SystemInfo: Type["model_.SystemInfo"]
-    Dashboard: Type["model_.Dashboard"]
-    ApiToken: Type["model_.ApiToken"]
-
-    resource_table: Table
-    member_table: Table
-    tracking_raw_table: Table
-    tracking_summary_table: Table
-    resource_view_table: Table
-    package_extra_table: Table
-    group_extra_table: Table
-    group_table: Table
-    user_table: Table
-    package_tag_table: Table
-    tag_table: Table
-    package_member_table: Table
-    system_info_table: Table
-    term_translation_table: Table
-    activity_detail_table: Table
-    activity_table: Table
-    task_status_table: Table
-    package_relationship_table: Table
-
-    activity: Any
-    vocabulary: Any
-
-    MIN_RATING: int
-    MAX_RATING: int
-    repo: "model_.Repository"
-
-
-Model: TypeAlias = "model_"
-# Model: TypeAlias = PModel
