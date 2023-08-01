@@ -10,7 +10,7 @@ ipdb==0.13.7
 responses==0.13.1
 pycodestyle==2.5.0
 pip-tools==5.1.2
-Sphinx==1.8.5
+Sphinx==3.3.0
 sphinx-rtd-theme==0.4.3
 cookiecutter==1.7.2
 
